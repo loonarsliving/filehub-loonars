@@ -76,9 +76,8 @@ const FILES=[
   {id:"1WV5",title:"FORMAT KP_23MEI26.xlsx",mimeType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",fileSize:"176242",viewUrl:"https://drive.google.com/file/d/1WV5KL7od-V421Mrp5I8ywQR3DfwpIvDU/view",modifiedTime:"2026-05-23T05:23:02Z",owner:"loonarsliving@gmail.com",branch:"makassar",sub:"makassar-introvert"},
 ];
 
-// ── Komponen kecil ──
-function Logo({size=30,white=true}) {
-  return (
+function Logo({size=30,white=true}){
+  return(
     <div style={{display:"flex",alignItems:"center",gap:8}}>
       <div style={{width:size,height:size,background:white?"rgba(255,255,255,0.15)":"#edf3fb",borderRadius:size*0.22,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,fontSize:size*0.5,color:white?"#fff":"#0f2e50",fontFamily:"'Arial Black',sans-serif",border:white?"1.5px solid rgba(255,255,255,0.3)":"none",flexShrink:0}}>MH</div>
       <div style={{lineHeight:1.1}}>
@@ -89,23 +88,19 @@ function Logo({size=30,white=true}) {
   );
 }
 
-function FileIcon({mimeType,size=36}) {
+function FileIcon({mimeType,size=36}){
   const m=gm(mimeType);
   return <div style={{width:size,height:size,background:m.bg,borderRadius:size*0.22,display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*0.46,flexShrink:0}}>{m.icon}</div>;
 }
 
-function Badge({branchId,small}) {
+function Badge({branchId,small}){
   const b=gb(branchId);
   return <span style={{display:"inline-flex",alignItems:"center",gap:4,background:b.color+"18",color:b.color,border:`1px solid ${b.color}28`,borderRadius:6,padding:small?"2px 7px":"3px 10px",fontSize:small?10:12,fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}><span style={{width:6,height:6,borderRadius:"50%",background:b.color,display:"inline-block"}}/>{b.short}</span>;
 }
 
-// Bottom Sheet wrapper — semua modal pakai ini
-function Sheet({onClose,children}) {
-  return (
-    <div
-      onClick={onClose}
-      style={{position:"fixed",inset:0,background:"rgba(5,15,35,0.5)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center"}}
-    >
+function Sheet({onClose,children}){
+  return(
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(5,15,35,0.5)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
       <div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:520,maxHeight:"90vh",overflowY:"auto",paddingBottom:"env(safe-area-inset-bottom)"}}>
         <div style={{width:40,height:4,background:"#ddd",borderRadius:4,margin:"12px auto 0"}}/>
         {children}
@@ -114,29 +109,26 @@ function Sheet({onClose,children}) {
   );
 }
 
-// ── LOGIN ──
-function LoginPage({onLogin}) {
+function LoginPage({onLogin}){
   const [email,setEmail]=useState("");
   const [pass,setPass]=useState("");
   const [loading,setLoading]=useState(false);
   const [err,setErr]=useState("");
   const [show,setShow]=useState(false);
-
   const submit=async(e)=>{
     e.preventDefault();
     if(!email||!pass){setErr("Email dan password wajib diisi");return;}
     setLoading(true);setErr("");
-    try {
+    try{
       const data=await sb.query("users",{select:"*",filter:`email=eq.${encodeURIComponent(email)}&password_hash=eq.${encodeURIComponent(pass)}&is_active=eq.true`,limit:1});
       if(Array.isArray(data)&&data.length>0){
         await sb.update("users",{last_login:new Date().toISOString()},`id=eq.${data[0].id}`);
         onLogin(data[0]);
-      } else setErr("Email atau password salah");
-    } catch(e){setErr("Gagal terhubung ke server");}
+      }else setErr("Email atau password salah");
+    }catch(e){setErr("Gagal terhubung ke server");}
     setLoading(false);
   };
-
-  return (
+  return(
     <div style={{minHeight:"100dvh",background:"linear-gradient(135deg,#0a1e35,#0f2e50,#1a4a7a)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 20px"}}>
       <div style={{marginBottom:32,textAlign:"center"}}>
         <Logo size={44} white={true}/>
@@ -148,21 +140,17 @@ function LoginPage({onLogin}) {
         <form onSubmit={submit}>
           <div style={{marginBottom:14}}>
             <div style={{fontSize:11,fontWeight:700,color:"#5a6a7a",marginBottom:5,letterSpacing:0.5}}>EMAIL</div>
-            <input value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="email@loonars.com"
-              style={{width:"100%",padding:"13px 14px",borderRadius:10,border:`1.5px solid ${err?"#e74c3c":"#dde3ec"}`,fontSize:14,outline:"none",boxSizing:"border-box"}}/>
+            <input value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="email@loonars.com" style={{width:"100%",padding:"13px 14px",borderRadius:10,border:`1.5px solid ${err?"#e74c3c":"#dde3ec"}`,fontSize:14,outline:"none",boxSizing:"border-box"}}/>
           </div>
           <div style={{marginBottom:20}}>
             <div style={{fontSize:11,fontWeight:700,color:"#5a6a7a",marginBottom:5,letterSpacing:0.5}}>PASSWORD</div>
             <div style={{position:"relative"}}>
-              <input value={pass} onChange={e=>setPass(e.target.value)} type={show?"text":"password"} placeholder="••••••••"
-                style={{width:"100%",padding:"13px 44px 13px 14px",borderRadius:10,border:`1.5px solid ${err?"#e74c3c":"#dde3ec"}`,fontSize:14,outline:"none",boxSizing:"border-box"}}/>
+              <input value={pass} onChange={e=>setPass(e.target.value)} type={show?"text":"password"} placeholder="••••••••" style={{width:"100%",padding:"13px 44px 13px 14px",borderRadius:10,border:`1.5px solid ${err?"#e74c3c":"#dde3ec"}`,fontSize:14,outline:"none",boxSizing:"border-box"}}/>
               <button type="button" onClick={()=>setShow(v=>!v)} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:18,color:"#9aacbe"}}>{show?"🙈":"👁"}</button>
             </div>
           </div>
           {err&&<div style={{background:"#fdecea",border:"1px solid #fad4d4",borderRadius:8,padding:"10px 14px",fontSize:13,color:"#c0392b",marginBottom:16,fontWeight:600}}>⚠️ {err}</div>}
-          <button type="submit" disabled={loading} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",background:loading?"#7a9ab8":"linear-gradient(135deg,#0f2e50,#1e6091)",color:"#fff",fontWeight:700,fontSize:15,cursor:loading?"not-allowed":"pointer"}}>
-            {loading?"⏳ Memverifikasi...":"Masuk →"}
-          </button>
+          <button type="submit" disabled={loading} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",background:loading?"#7a9ab8":"linear-gradient(135deg,#0f2e50,#1e6091)",color:"#fff",fontWeight:700,fontSize:15,cursor:loading?"not-allowed":"pointer"}}>{loading?"⏳ Memverifikasi...":"Masuk →"}</button>
         </form>
         <div style={{textAlign:"center",marginTop:18,fontSize:12,color:"#9aacbe"}}>Lupa password? Hubungi Admin Master</div>
       </div>
@@ -171,8 +159,7 @@ function LoginPage({onLogin}) {
   );
 }
 
-// ── KELOLA USER ──
-function UsersPage({me,onBack,toast}) {
+function UsersPage({me,onBack,toast}){
   const [users,setUsers]=useState([]);
   const [loading,setLoading]=useState(true);
   const [showAdd,setShowAdd]=useState(false);
@@ -180,14 +167,12 @@ function UsersPage({me,onBack,toast}) {
   const [form,setForm]=useState({name:"",email:"",password:"",role:"admin",branch_id:"kendari"});
   const [saving,setSaving]=useState(false);
   const [formErr,setFormErr]=useState("");
-
   const load=async()=>{
     setLoading(true);
     try{const d=await sb.query("users",{select:"*",order:"created_at.asc"});if(Array.isArray(d))setUsers(d);}catch(e){}
     setLoading(false);
   };
   useEffect(()=>{load();},[]);
-
   const add=async(e)=>{
     e.preventDefault();
     if(!form.name||!form.email||!form.password){setFormErr("Semua field wajib diisi");return;}
@@ -199,20 +184,17 @@ function UsersPage({me,onBack,toast}) {
     }catch(e){setFormErr("Terjadi kesalahan");}
     setSaving(false);
   };
-
   const toggle=async(u)=>{
     await sb.update("users",{is_active:!u.is_active},`id=eq.${u.id}`);
     toast(u.is_active?`${u.name} dinonaktifkan`:`${u.name} diaktifkan`,u.is_active?"error":"success");
     load();
   };
-
   const del=async(u)=>{
     await sb.del("users",`id=eq.${u.id}`);
     toast(`${u.name} dihapus`,"error");
     setDelTarget(null);load();
   };
-
-  return (
+  return(
     <div style={{minHeight:"100dvh",background:"#eef2f7",display:"flex",flexDirection:"column",maxWidth:600,margin:"0 auto"}}>
       <header style={{background:"#0f2e50",padding:"0 16px",paddingTop:"env(safe-area-inset-top)",height:56,display:"flex",alignItems:"center",gap:12,flexShrink:0,boxShadow:"0 2px 12px rgba(0,0,0,0.2)"}}>
         <button onClick={onBack} style={{background:"rgba(255,255,255,0.1)",border:"none",color:"#fff",width:36,height:36,borderRadius:10,cursor:"pointer",fontSize:22,display:"flex",alignItems:"center",justifyContent:"center"}}>‹</button>
@@ -254,8 +236,6 @@ function UsersPage({me,onBack,toast}) {
           </div>
         )}
       </div>
-
-      {/* Sheet Tambah */}
       {showAdd&&(
         <Sheet onClose={()=>setShowAdd(false)}>
           <div style={{padding:"14px 20px 24px"}}>
@@ -265,8 +245,7 @@ function UsersPage({me,onBack,toast}) {
               {[{label:"NAMA LENGKAP",key:"name",type:"text",ph:"Budi Santoso"},{label:"EMAIL",key:"email",type:"email",ph:"email@loonars.com"},{label:"PASSWORD",key:"password",type:"text",ph:"Buat password"}].map(f=>(
                 <div key={f.key} style={{marginBottom:13}}>
                   <div style={{fontSize:11,fontWeight:700,color:"#5a6a7a",marginBottom:5,letterSpacing:0.5}}>{f.label}</div>
-                  <input value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} type={f.type} placeholder={f.ph}
-                    style={{width:"100%",padding:"12px 14px",borderRadius:10,border:"1.5px solid #dde3ec",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
+                  <input value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} type={f.type} placeholder={f.ph} style={{width:"100%",padding:"12px 14px",borderRadius:10,border:"1.5px solid #dde3ec",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
                 </div>
               ))}
               <div style={{marginBottom:13}}>
@@ -294,8 +273,6 @@ function UsersPage({me,onBack,toast}) {
           </div>
         </Sheet>
       )}
-
-      {/* Sheet Konfirmasi Hapus */}
       {delTarget&&(
         <Sheet onClose={()=>setDelTarget(null)}>
           <div style={{padding:"20px 20px 24px",textAlign:"center"}}>
@@ -313,8 +290,38 @@ function UsersPage({me,onBack,toast}) {
   );
 }
 
-// ── MAIN APP ──
-function MainApp({me,onLogout,toast}) {
+function UploadSheet({onClose,branch,sub}){
+  const [files,setFiles]=useState([]);
+  const ref=useRef();
+  const b=gb(branch==="all"?"makassar":branch);
+  const s=sub?gs(branch,sub):null;
+  const add=list=>{
+    const f=Array.from(list).map(x=>({name:x.name,size:(x.size/1024).toFixed(0)+" KB",done:false}));
+    setFiles(p=>[...p,...f]);
+    setTimeout(()=>setFiles(p=>p.map(x=>({...x,done:true}))),1300);
+  };
+  return(
+    <Sheet onClose={onClose}>
+      <div style={{padding:"14px 20px 24px"}}>
+        <div style={{fontWeight:700,fontSize:17,color:"#1a2b45"}}>Upload ke Google Drive</div>
+        <div style={{fontSize:12,color:"#7a8a9a",marginTop:3,marginBottom:16}}>📁 {s?s.name:b.name}</div>
+        <div onClick={()=>ref.current.click()} style={{border:"2px dashed #cdd5e0",borderRadius:14,padding:"28px 20px",textAlign:"center",cursor:"pointer",background:"#fafbfd"}}>
+          <input ref={ref} type="file" multiple style={{display:"none"}} onChange={e=>add(e.target.files)}/>
+          <div style={{fontSize:34,marginBottom:8}}>☁️</div>
+          <div style={{fontWeight:700,color:"#1a2b45",fontSize:15}}>Pilih File</div>
+          <div style={{color:"#9aacbe",fontSize:12,marginTop:4}}>Semua format · Ukuran besar OK</div>
+        </div>
+        {files.length>0&&<div style={{marginTop:12}}>{files.map((f,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid #f0f2f5"}}><div style={{width:28,height:28,background:"#eaf3fb",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>📄</div><div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:"#1a2b45",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{f.name}</div><div style={{fontSize:11,color:"#9aacbe"}}>{f.size}</div></div><span>{f.done?"✅":"⏳"}</span></div>)}</div>}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:16}}>
+          <button onClick={onClose} style={{padding:13,borderRadius:12,border:"1.5px solid #dde3ec",background:"#fff",cursor:"pointer",fontWeight:700,color:"#5a6a7a",fontSize:14}}>Batal</button>
+          <button onClick={onClose} style={{padding:13,borderRadius:12,border:"none",background:"#0f2e50",color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}}>⬆ Simpan</button>
+        </div>
+      </div>
+    </Sheet>
+  );
+}
+
+function MainApp({me,onLogout,toast}){
   const master=me.role==="master";
   const [branch,setBranch]=useState(master?"all":me.branch_id||"all");
   const [sub,setSub]=useState(null);
@@ -323,7 +330,6 @@ function MainApp({me,onLogout,toast}) {
   const [view,setView]=useState("list");
   const [starred,setStarred]=useState([]);
   const [preview,setPreview]=useState(null);
-  // Sheets
   const [sheetUpload,setSheetUpload]=useState(false);
   const [sheetNotif,setSheetNotif]=useState(false);
   const [sheetUser,setSheetUser]=useState(false);
@@ -339,12 +345,11 @@ function MainApp({me,onLogout,toast}) {
 
   const crumb=branch==="all"?"Semua File":sub?gs(branch,sub)?.name||gb(branch).name:gb(branch).name;
 
-  if(pageUsers) return <UsersPage me={me} onBack={()=>setPageUsers(false)} toast={toast}/>;
+  if(pageUsers)return <UsersPage me={me} onBack={()=>setPageUsers(false)} toast={toast}/>;
 
-  return (
-    <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:"#eef2f7",minHeight:"100dvh",display:"flex",flexDirection:"column",maxWidth:600,margin:"0 auto",position:"relative"}}>
+  return(
+    <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:"#eef2f7",minHeight:"100dvh",display:"flex",flexDirection:"column",maxWidth:600,margin:"0 auto"}}>
 
-      {/* HEADER */}
       <header style={{background:"#0f2e50",padding:"0 16px",paddingTop:"env(safe-area-inset-top)",display:"flex",alignItems:"center",gap:10,height:56,boxShadow:"0 2px 12px rgba(0,0,0,0.2)",flexShrink:0,position:"sticky",top:0,zIndex:50}}>
         <button onClick={()=>setSheetBranch(true)} style={{background:"rgba(255,255,255,0.1)",border:"none",color:"#fff",width:36,height:36,borderRadius:10,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>☰</button>
         <div style={{flex:1}}><Logo size={26} white={true}/></div>
@@ -353,7 +358,6 @@ function MainApp({me,onLogout,toast}) {
         <button onClick={()=>setSheetUser(true)} style={{width:34,height:34,borderRadius:"50%",background:me.role==="master"?"#f39c12":"#1e4878",border:"2px solid rgba(255,255,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:13,cursor:"pointer",color:"#fff",flexShrink:0}}>{me.name[0].toUpperCase()}</button>
       </header>
 
-      {/* Branch chips */}
       {master&&(
         <div style={{background:"#fff",borderBottom:"1px solid #e8edf4",padding:"10px 0 10px 16px",overflowX:"auto",display:"flex",gap:8,flexShrink:0,scrollbarWidth:"none"}}>
           {BRANCHES.map(b=>(
@@ -365,7 +369,6 @@ function MainApp({me,onLogout,toast}) {
         </div>
       )}
 
-      {/* Stats */}
       {master&&(
         <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8,padding:"12px 12px 0",flexShrink:0}}>
           {BRANCHES.filter(b=>b.id!=="all").map(b=>(
@@ -377,7 +380,6 @@ function MainApp({me,onLogout,toast}) {
         </div>
       )}
 
-      {/* Admin info */}
       {!master&&(
         <div style={{margin:"12px 12px 0",background:"#fff",borderRadius:12,padding:"12px 16px",border:`2px solid ${gb(me.branch_id||"all").color}30`}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -390,7 +392,6 @@ function MainApp({me,onLogout,toast}) {
         </div>
       )}
 
-      {/* Sub chips */}
       {master&&branch!=="all"&&gb(branch).subs.length>0&&(
         <div style={{display:"flex",gap:8,padding:"10px 16px 0",overflowX:"auto",scrollbarWidth:"none"}}>
           <button onClick={()=>setSub(null)} style={{padding:"5px 12px",borderRadius:16,border:"none",cursor:"pointer",flexShrink:0,background:!sub?"#0f2e50":"#eef2f7",color:!sub?"#fff":"#5a6a7a",fontSize:12,fontWeight:600}}>Semua</button>
@@ -400,7 +401,6 @@ function MainApp({me,onLogout,toast}) {
         </div>
       )}
 
-      {/* Toolbar */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px 8px",flexShrink:0}}>
         <div>
           <div style={{fontWeight:700,fontSize:16,color:"#1a2b45"}}>{crumb}</div>
@@ -420,7 +420,6 @@ function MainApp({me,onLogout,toast}) {
         </div>
       </div>
 
-      {/* File area */}
       <div style={{flex:1,overflowY:"auto",padding:"0 12px 90px"}}>
         {view==="list"?(
           <div style={{background:"#fff",borderRadius:14,border:"1px solid #e0e8f0",overflow:"hidden"}}>
@@ -462,7 +461,6 @@ function MainApp({me,onLogout,toast}) {
         )}
       </div>
 
-      {/* BOTTOM NAV */}
       <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:600,zIndex:40,pointerEvents:"none"}}>
         <div style={{background:"#fff",borderTop:"1px solid #e0e8f0",padding:"8px 16px",paddingBottom:"calc(8px + env(safe-area-inset-bottom))",display:"flex",justifyContent:"space-around",alignItems:"center",boxShadow:"0 -4px 20px rgba(0,0,0,0.08)",pointerEvents:"auto"}}>
           {[{id:"files",icon:"🗂️",label:"File"},{id:"starred",icon:"⭐",label:"Bintang"}].map(t=>(
@@ -490,22 +488,17 @@ function MainApp({me,onLogout,toast}) {
         </div>
       </div>
 
-      {/* ── SEMUA SHEET DI BAWAH — tidak ada yang block header ── */}
-
-      {/* Sheet: Search */}
       {sheetSearch&&(
         <Sheet onClose={()=>setSheetSearch(false)}>
           <div style={{padding:"14px 20px 24px"}}>
             <div style={{fontWeight:700,fontSize:16,color:"#0f2e50",marginBottom:14}}>🔍 Cari File</div>
-            <input value={search} onChange={e=>setSearch(e.target.value)} autoFocus placeholder="Nama file, cabang..."
-              style={{width:"100%",padding:"13px 14px",borderRadius:12,border:"1.5px solid #dde3ec",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
+            <input value={search} onChange={e=>setSearch(e.target.value)} autoFocus placeholder="Nama file, cabang..." style={{width:"100%",padding:"13px 14px",borderRadius:12,border:"1.5px solid #dde3ec",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
             {search&&<div style={{marginTop:12,fontSize:13,color:"#7a8a9a"}}>{files.length} hasil ditemukan</div>}
             <button onClick={()=>{setSearch("");setSheetSearch(false);}} style={{marginTop:14,width:"100%",padding:13,borderRadius:12,border:"none",background:"#eef2f7",cursor:"pointer",fontWeight:700,color:"#5a6a7a",fontSize:14}}>Tutup</button>
           </div>
         </Sheet>
       )}
 
-      {/* Sheet: Notif */}
       {sheetNotif&&(
         <Sheet onClose={()=>setSheetNotif(false)}>
           <div style={{padding:"14px 20px 24px"}}>
@@ -516,7 +509,6 @@ function MainApp({me,onLogout,toast}) {
         </Sheet>
       )}
 
-      {/* Sheet: User Menu */}
       {sheetUser&&(
         <Sheet onClose={()=>setSheetUser(false)}>
           <div style={{padding:"14px 20px 24px"}}>
@@ -534,7 +526,6 @@ function MainApp({me,onLogout,toast}) {
         </Sheet>
       )}
 
-      {/* Sheet: Branch */}
       {sheetBranch&&(
         <Sheet onClose={()=>setSheetBranch(false)}>
           <div style={{padding:"14px 20px 24px"}}>
@@ -560,10 +551,8 @@ function MainApp({me,onLogout,toast}) {
         </Sheet>
       )}
 
-      {/* Sheet: Upload */}
       {sheetUpload&&<UploadSheet onClose={()=>setSheetUpload(false)} branch={branch} sub={sub}/>}
 
-      {/* Sheet: Preview */}
       {preview&&(
         <Sheet onClose={()=>setPreview(null)}>
           <div style={{padding:"14px 20px 24px"}}>
@@ -593,59 +582,19 @@ function MainApp({me,onLogout,toast}) {
   );
 }
 
-// ── UPLOAD SHEET ──
-function UploadSheet({onClose,branch,sub}) {
-  const [files,setFiles]=useState([]);
-  const ref=useRef();
-  const b=gb(branch==="all"?"makassar":branch);
-  const s=sub?gs(branch,sub):null;
-  const add=list=>{
-    const f=Array.from(list).map(x=>({name:x.name,size:(x.size/1024).toFixed(0)+" KB",done:false}));
-    setFiles(p=>[...p,...f]);
-    setTimeout(()=>setFiles(p=>p.map(x=>({...x,done:true}))),1300);
-  };
-  return (
-    <Sheet onClose={onClose}>
-      <div style={{padding:"14px 20px 24px"}}>
-        <div style={{fontWeight:700,fontSize:17,color:"#1a2b45"}}>Upload ke Google Drive</div>
-        <div style={{fontSize:12,color:"#7a8a9a",marginTop:3,marginBottom:16}}>📁 {s?s.name:b.name}</div>
-        <div onClick={()=>ref.current.click()} style={{border:"2px dashed #cdd5e0",borderRadius:14,padding:"28px 20px",textAlign:"center",cursor:"pointer",background:"#fafbfd"}}>
-          <input ref={ref} type="file" multiple style={{display:"none"}} onChange={e=>add(e.target.files)}/>
-          <div style={{fontSize:34,marginBottom:8}}>☁️</div>
-          <div style={{fontWeight:700,color:"#1a2b45",fontSize:15}}>Pilih File</div>
-          <div style={{color:"#9aacbe",fontSize:12,marginTop:4}}>Semua format · Ukuran besar OK</div>
-        </div>
-        {files.length>0&&<div style={{marginTop:12}}>{files.map((f,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid #f0f2f5"}}><div style={{width:28,height:28,background:"#eaf3fb",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>📄</div><div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:"#1a2b45",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{f.name}</div><div style={{fontSize:11,color:"#9aacbe"}}>{f.size}</div></div><span>{f.done?"✅":"⏳"}</span></div>)}</div>}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:16}}>
-          <button onClick={onClose} style={{padding:13,borderRadius:12,border:"1.5px solid #dde3ec",background:"#fff",cursor:"pointer",fontWeight:700,color:"#5a6a7a",fontSize:14}}>Batal</button>
-          <button onClick={onClose} style={{padding:13,borderRadius:12,border:"none",background:"#0f2e50",color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}}>⬆ Simpan</button>
-        </div>
-      </div>
-    </Sheet>
-  );
-}
-
-// ── ROOT ──
-export default function App() {
+export default function App(){
   const [me,setMe]=useState(null);
   const [toastMsg,setToastMsg]=useState(null);
-
   useEffect(()=>{
     const s=localStorage.getItem("fh_user");
     if(s){try{setMe(JSON.parse(s));}catch(e){}}
   },[]);
-
   const login=u=>{localStorage.setItem("fh_user",JSON.stringify(u));setMe(u);};
   const logout=()=>{localStorage.removeItem("fh_user");setMe(null);};
   const toast=(msg,type="success")=>{setToastMsg({msg,type});setTimeout(()=>setToastMsg(null),3000);};
-
-  return (
+  return(
     <>
-      {toastMsg&&(
-        <div style={{position:"fixed",top:70,left:"50%",transform:"translateX(-50%)",background:toastMsg.type==="success"?"#1e8449":"#c0392b",color:"#fff",padding:"12px 20px",borderRadius:12,fontSize:13,fontWeight:700,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",zIndex:9999,whiteSpace:"nowrap"}}>
-          {toastMsg.type==="success"?"✅":"❌"} {toastMsg.msg}
-        </div>
-      )}
+      {toastMsg&&<div style={{position:"fixed",top:70,left:"50%",transform:"translateX(-50%)",background:toastMsg.type==="success"?"#1e8449":"#c0392b",color:"#fff",padding:"12px 20px",borderRadius:12,fontSize:13,fontWeight:700,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",zIndex:9999,whiteSpace:"nowrap"}}>{toastMsg.type==="success"?"✅":"❌"} {toastMsg.msg}</div>}
       {!me?<LoginPage onLogin={login}/>:<MainApp me={me} onLogout={logout} toast={toast}/>}
     </>
   );
