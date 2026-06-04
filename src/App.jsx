@@ -327,7 +327,8 @@ function UploadSheet({onClose,branch,sub,toast}){
   const loginGoogle=()=>{
     const params=new URLSearchParams({
       client_id:GOOGLE_CLIENT_ID,
-      redirect_uri:window.location.origin,
+      redirect_uri:https://filemanager.haluoleo.id
+,
       response_type:"token",
       scope:DRIVE_SCOPE,
       prompt:"consent"
