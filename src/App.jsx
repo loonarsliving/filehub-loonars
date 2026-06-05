@@ -4,7 +4,14 @@ const SUPABASE_URL = "https://gluoioiimapyhchdasfl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsdW9pb2lpbWFweWhjaGRhc2ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNDQ3MjAsImV4cCI6MjA5NTYyMDcyMH0.dHVB0jJBMjUunJKSsqbaM3MGCAq-ZRSWQEqvEyUjIyk";
 const GOOGLE_CLIENT_ID = "1063696986470-a9mm0hcnd1b85gqbslv48qjcvjsupdku.apps.googleusercontent.com";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
-const DRIVE_FOLDERS = { all:"root",kendari:"root",makassar:"1gQFycP9Y5IUQr_al7Vn51HvSU7eWCA9f",yogyakarta:"1P0MqjX2jYv3t7BYPJAt-3cJg5_1e2x_5",bogor:"root",loonarsbody:"root" };
+const DRIVE_FOLDERS = {
+  all:"root",
+  kendari:"1x9dwjlCLePxtMEisbeskRYpstaV0LaCP",
+  makassar:"1gQFycP9Y5IUQr_al7Vn51HvSU7eWCA9f",
+  yogyakarta:"1P0MqjX2jYv3t7BYPJAt-3cJg5_1e2x_5",
+  bogor:"1suYzJsMXGkawnmenqwYN9nktC6ZySTmy",
+  loonarsbody:"14SCV2MuCEbL9wq1nx3o_pxhYvi2IO6mc",
+};;
 
 const sb={
   async query(t,o={}){let u=`${SUPABASE_URL}/rest/v1/${t}?`;if(o.select)u+=`select=${o.select}&`;if(o.filter)u+=`${o.filter}&`;if(o.order)u+=`order=${o.order}&`;if(o.limit)u+=`limit=${o.limit}&`;const r=await fetch(u,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});return r.json();},
