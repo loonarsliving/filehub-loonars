@@ -8,7 +8,57 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="FileHub Loonars" />
     <title>FileHub — Mahakarya Haluoleo</title>
-    <script src="https://accounts.google.com/gsi/client" async></script>
+    Sudah benar settingnya! `https://filemanager.haluoleo.id` sudah ada di kedua field.
+
+Masalahnya bukan di sini. Google Identity Services (GIS) yang kita pakai butuh **origin yang exact match** saat runtime. Kemungkinan masalahnya di kode — GIS mengirim origin yang berbeda.
+
+Saya fix langsung di kode. Cari bagian `useGoogleToken` di `App.jsx`, ganti seluruh function itu dengan ini:
+
+```js
+function useGoogleToken(onToken) {
+  useEffect(()=>{
+    const saved = tokenStore.get();
+    if(saved){ onToken(saved); return; }
+    const script = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
+    const init = () => {
+      if(!window.google?.accounts?.oauth2) return;
+      window._gisClient = window.google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: DRIVE_SCOPE,
+        callback: (resp) => {
+          if(resp.access_token){
+            const exp = Date.now() + ((resp.expires_in||3600) * 1000) - 60000;
+            tokenStore.save(resp.access_token, exp);
+            onToken(resp.access_token);
+          }
+        },
+        error_callback: (err) => {
+          console.error("GIS error:", err);
+        }
+      });
+    };
+    if(window.google?.accounts?.oauth2){ init(); }
+    else {
+      window.onGISLoaded = init;
+      const iv = setInterval(()=>{ if(window.google?.accounts?.oauth2){ clearInterval(iv); init(); }}, 300);
+      return ()=>clearInterval(iv);
+    }
+  },[]);
+  const requestToken=()=>{
+    if(window._gisClient) window._gisClient.requestAccessToken({prompt:"consent"});
+    else setTimeout(()=>window._gisClient?.requestAccessToken({prompt:"consent"}),1000);
+  };
+  return requestToken;
+}
+```
+
+Dan update `index.html` — tambah `onload` di script GIS:
+
+```html
+<script src="https://accounts.google.com/gsi/client" async onload="window.onGISLoaded&&window.onGISLoaded()"></script>
+```
+
+Setelah commit, tunggu 5 menit (Google cache settings) lalu coba lagi! 🚀
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
       body { background: #eef2f7; overscroll-behavior: none; }
