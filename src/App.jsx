@@ -4,22 +4,16 @@ const SUPABASE_URL = "https://gluoioiimapyhchdasfl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsdW9pb2lpbWFweWhjaGRhc2ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNDQ3MjAsImV4cCI6MjA5NTYyMDcyMH0.dHVB0jJBMjUunJKSsqbaM3MGCAq-ZRSWQEqvEyUjIyk";
 const GOOGLE_CLIENT_ID = "1063696986470-a9mm0hcnd1b85gqbslv48qjcvjsupdku.apps.googleusercontent.com";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
+const DRIVE_FOLDERS = { all:"root",kendari:"root",makassar:"1gQFycP9Y5IUQr_al7Vn51HvSU7eWCA9f",yogyakarta:"1P0MqjX2jYv3t7BYPJAt-3cJg5_1e2x_5",bogor:"root",loonarsbody:"root" };
 
-const DRIVE_FOLDERS = {
-  all:"root", kendari:"root",
-  makassar:"1gQFycP9Y5IUQr_al7Vn51HvSU7eWCA9f",
-  yogyakarta:"1P0MqjX2jYv3t7BYPJAt-3cJg5_1e2x_5",
-  bogor:"root", loonarsbody:"root",
+const sb={
+  async query(t,o={}){let u=`${SUPABASE_URL}/rest/v1/${t}?`;if(o.select)u+=`select=${o.select}&`;if(o.filter)u+=`${o.filter}&`;if(o.order)u+=`order=${o.order}&`;if(o.limit)u+=`limit=${o.limit}&`;const r=await fetch(u,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});return r.json();},
+  async insert(t,d){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}`,{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(d)});return r.json();},
+  async update(t,d,f){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}?${f}`,{method:"PATCH",headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(d)});return r.json();},
+  async del(t,f){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}?${f}`,{method:"DELETE",headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});return r.ok;}
 };
 
-const sb = {
-  async query(table,opts={}){let url=`${SUPABASE_URL}/rest/v1/${table}?`;if(opts.select)url+=`select=${opts.select}&`;if(opts.filter)url+=`${opts.filter}&`;if(opts.order)url+=`order=${opts.order}&`;if(opts.limit)url+=`limit=${opts.limit}&`;const r=await fetch(url,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});return r.json();},
-  async insert(table,data){const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(data)});return r.json();},
-  async update(table,data,filter){const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`,{method:"PATCH",headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(data)});return r.json();},
-  async del(table,filter){const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`,{method:"DELETE",headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});return r.ok;}
-};
-
-const driveApi = {
+const driveApi={
   async listFiles(folderId,token){
     const q=folderId==="root"?`'root' in parents and trashed=false`:`'${folderId}' in parents and trashed=false`;
     const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,size,webViewLink,modifiedTime,owners)&pageSize=100`,{headers:{Authorization:`Bearer ${token}`}});
@@ -35,9 +29,8 @@ const driveApi = {
   }
 };
 
-// Token store dengan expiry
 const tokenStore={
-  save(t,exp){try{localStorage.setItem("g_tok",t);localStorage.setItem("g_exp",exp);}catch(e){}},
+  save(t,e){try{localStorage.setItem("g_tok",t);localStorage.setItem("g_exp",e);}catch(e){}},
   get(){try{const t=localStorage.getItem("g_tok"),e=parseInt(localStorage.getItem("g_exp")||"0");if(t&&Date.now()<e)return t;this.clear();return null;}catch(e){return null;}},
   clear(){try{localStorage.removeItem("g_tok");localStorage.removeItem("g_exp");}catch(e){}}
 };
@@ -63,47 +56,39 @@ function FileIcon({mimeType,size=36}){const m=gm(mimeType);return <div style={{w
 function Badge({branchId,small}){const b=gb(branchId);return <span style={{display:"inline-flex",alignItems:"center",gap:4,background:b.color+"18",color:b.color,border:`1px solid ${b.color}28`,borderRadius:6,padding:small?"2px 7px":"3px 10px",fontSize:small?10:12,fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}><span style={{width:6,height:6,borderRadius:"50%",background:b.color,display:"inline-block"}}/>{b.short}</span>;}
 function Sheet({onClose,children}){return(<div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(5,15,35,0.5)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center"}}><div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:520,maxHeight:"90vh",overflowY:"auto",paddingBottom:"env(safe-area-inset-bottom)"}}><div style={{width:40,height:4,background:"#ddd",borderRadius:4,margin:"12px auto 0"}}/>{children}</div></div>);}
 
-// ── Google Identity Services Login ──
-function useGoogleToken(onToken) {
+function useGoogleToken(onToken){
   useEffect(()=>{
-    // Cek token tersimpan dulu
-    const saved = tokenStore.get();
-    if(saved){ onToken(saved); return; }
-
-    const initGIS = () => {
-      if(!window.google?.accounts?.oauth2) return;
-      window._gisClient = window.google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope: DRIVE_SCOPE,
-        callback: (resp) => {
+    const saved=tokenStore.get();
+    if(saved){onToken(saved);return;}
+    const init=()=>{
+      if(!window.google?.accounts?.oauth2)return;
+      window._gisClient=window.google.accounts.oauth2.initTokenClient({
+        client_id:GOOGLE_CLIENT_ID,
+        scope:DRIVE_SCOPE,
+        callback:(resp)=>{
           if(resp.access_token){
-            const exp = Date.now() + (resp.expires_in * 1000) - 60000;
-            tokenStore.save(resp.access_token, exp);
+            const exp=Date.now()+((resp.expires_in||3600)*1000)-60000;
+            tokenStore.save(resp.access_token,exp);
             onToken(resp.access_token);
           }
-        }
+        },
+        error_callback:(err)=>{console.error("GIS error:",err);}
       });
     };
-
-    // Tunggu GIS script load
-    if(window.google?.accounts?.oauth2){ initGIS(); }
-    else {
-      const interval = setInterval(()=>{
-        if(window.google?.accounts?.oauth2){ clearInterval(interval); initGIS(); }
-      }, 200);
-      return () => clearInterval(interval);
+    if(window.google?.accounts?.oauth2){init();}
+    else{
+      window.onGISLoaded=init;
+      const iv=setInterval(()=>{if(window.google?.accounts?.oauth2){clearInterval(iv);init();}},300);
+      return()=>clearInterval(iv);
     }
-  }, []);
-
-  const requestToken = () => {
-    if(window._gisClient) window._gisClient.requestAccessToken();
-    else alert("Google masih loading, coba lagi sebentar");
+  },[]);
+  const requestToken=()=>{
+    if(window._gisClient)window._gisClient.requestAccessToken({prompt:"select_account"});
+    else setTimeout(()=>window._gisClient?.requestAccessToken({prompt:"select_account"}),1000);
   };
-
   return requestToken;
 }
 
-// ── LOGIN PAGE ──
 function LoginPage({onLogin}){
   const [email,setEmail]=useState("");
   const [pass,setPass]=useState("");
@@ -139,7 +124,6 @@ function LoginPage({onLogin}){
   );
 }
 
-// ── USERS PAGE ──
 function UsersPage({me,onBack,toast}){
   const [users,setUsers]=useState([]);
   const [loading,setLoading]=useState(true);
@@ -192,7 +176,6 @@ function UsersPage({me,onBack,toast}){
   );
 }
 
-// ── UPLOAD SHEET ──
 function UploadSheet({onClose,branch,sub,toast,gToken,requestToken,onRefresh}){
   const [files,setFiles]=useState([]);
   const [uploading,setUploading]=useState(false);
@@ -200,9 +183,7 @@ function UploadSheet({onClose,branch,sub,toast,gToken,requestToken,onRefresh}){
   const b=gb(branch==="all"?"makassar":branch);
   const s=sub?gs(branch,sub):null;
   const folderId=DRIVE_FOLDERS[branch]||"root";
-
   const addFiles=list=>setFiles(Array.from(list).map(f=>({file:f,name:f.name,size:(f.size/1024).toFixed(0)+" KB",status:"ready"})));
-
   const doUpload=async()=>{
     if(!gToken){toast("Login Google dulu!","error");return;}
     if(!files.length){toast("Pilih file dulu!","error");return;}
@@ -219,43 +200,30 @@ function UploadSheet({onClose,branch,sub,toast,gToken,requestToken,onRefresh}){
     }
     setUploading(false);
     const done=updated.filter(f=>f.status==="done").length;
-    if(done>0){toast(`${done} file berhasil diupload ke Drive! ✅`);onRefresh();onClose();}
+    if(done>0){toast(`${done} file berhasil diupload! ✅`);onRefresh();onClose();}
   };
-
   return(
     <Sheet onClose={onClose}>
       <div style={{padding:"14px 20px 24px"}}>
         <div style={{fontWeight:700,fontSize:17,color:"#1a2b45"}}>Upload ke Google Drive</div>
-        <div style={{fontSize:12,color:"#7a8a9a",marginTop:3,marginBottom:16}}>
-          📁 {s?s.name:b.name} &nbsp;·&nbsp;
-          {gToken?<span style={{color:"#2ecc71",fontWeight:700}}>● Google Terhubung</span>:<span style={{color:"#e67e22",fontWeight:700}}>● Perlu Login Google</span>}
-        </div>
-
-        {!gToken&&(
-          <button onClick={requestToken} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",background:"#fff",cursor:"pointer",fontWeight:700,fontSize:15,color:"#0f2e50",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10,boxShadow:"0 2px 12px rgba(0,0,0,0.1)"}}>
-            <span style={{fontSize:22}}>🔑</span> Login dengan Google
-          </button>
-        )}
-
+        <div style={{fontSize:12,color:"#7a8a9a",marginTop:3,marginBottom:16}}>📁 {s?s.name:b.name} &nbsp;·&nbsp; {gToken?<span style={{color:"#2ecc71",fontWeight:700}}>● Terhubung</span>:<span style={{color:"#e67e22",fontWeight:700}}>● Perlu Login</span>}</div>
+        {!gToken&&<button onClick={requestToken} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",background:"#0f2e50",cursor:"pointer",fontWeight:700,fontSize:15,color:"#fff",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}><span style={{fontSize:20}}>🔑</span> Login dengan Google</button>}
         <div onClick={()=>ref.current.click()} style={{border:"2px dashed #cdd5e0",borderRadius:14,padding:"24px 20px",textAlign:"center",cursor:"pointer",background:"#fafbfd",marginBottom:14}}>
           <input ref={ref} type="file" multiple style={{display:"none"}} onChange={e=>addFiles(e.target.files)}/>
           <div style={{fontSize:32,marginBottom:8}}>☁️</div>
           <div style={{fontWeight:700,color:"#1a2b45",fontSize:15}}>Pilih File</div>
           <div style={{color:"#9aacbe",fontSize:12,marginTop:4}}>Semua format · Ukuran besar OK</div>
         </div>
-
         {files.length>0&&<div style={{marginBottom:14}}>{files.map((f,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid #f0f2f5"}}><div style={{width:28,height:28,background:"#eaf3fb",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>📄</div><div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:"#1a2b45",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{f.name}</div><div style={{fontSize:11,color:"#9aacbe"}}>{f.size}</div></div><span>{f.status==="ready"?"⏸️":f.status==="uploading"?"⏳":f.status==="done"?"✅":"❌"}</span></div>)}</div>}
-
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
           <button onClick={onClose} style={{padding:13,borderRadius:12,border:"1.5px solid #dde3ec",background:"#fff",cursor:"pointer",fontWeight:700,color:"#5a6a7a",fontSize:14}}>Batal</button>
-          <button onClick={doUpload} disabled={uploading||!gToken||!files.length} style={{padding:13,borderRadius:12,border:"none",background:uploading||!gToken||!files.length?"#b0c0d0":"#0f2e50",color:"#fff",cursor:uploading?"not-allowed":"pointer",fontWeight:700,fontSize:14}}>{uploading?"⏳ Mengupload...":"⬆ Upload ke Drive"}</button>
+          <button onClick={doUpload} disabled={uploading||!gToken||!files.length} style={{padding:13,borderRadius:12,border:"none",background:uploading||!gToken||!files.length?"#b0c0d0":"#0f2e50",color:"#fff",cursor:uploading?"not-allowed":"pointer",fontWeight:700,fontSize:14}}>{uploading?"⏳ Mengupload...":"⬆ Upload"}</button>
         </div>
       </div>
     </Sheet>
   );
 }
 
-// ── MAIN APP ──
 function MainApp({me,onLogout,toast}){
   const master=me.role==="master";
   const [branch,setBranch]=useState(master?"all":me.branch_id||"all");
@@ -277,8 +245,7 @@ function MainApp({me,onLogout,toast}){
   const [pendingReqs,setPendingReqs]=useState([]);
   const [activeReq,setActiveReq]=useState(null);
 
-  // GIS Token hook
-  const requestToken = useGoogleToken((token)=>{
+  const requestToken=useGoogleToken((token)=>{
     setGToken(token);
     loadAllFiles(token);
     toast("Google Drive terhubung! ✅");
@@ -294,7 +261,7 @@ function MainApp({me,onLogout,toast}){
         if(fid&&fid!=="root"){
           const files=await driveApi.listFiles(fid,token);
           results[br.id]=files.map(f=>({...f,branch:br.id}));
-        } else results[br.id]=[];
+        }else results[br.id]=[];
       }
       setDriveFiles(results);
     }catch(e){console.error(e);}
@@ -306,7 +273,6 @@ function MainApp({me,onLogout,toast}){
   };
 
   useEffect(()=>{
-    // Auto-load token dari localStorage
     const saved=tokenStore.get();
     if(saved){setGToken(saved);loadAllFiles(saved);}
     loadRequests();
@@ -316,28 +282,26 @@ function MainApp({me,onLogout,toast}){
 
   const allFiles=Object.values(driveFiles).flat();
   const countFor=bid=>allFiles.filter(f=>f.branch===bid).length;
-
   const filtered=allFiles.filter(f=>{
     if(tab==="starred")return starred.includes(f.id);
     const mb=sub?f.sub===sub:branch!=="all"?f.branch===branch:true;
     const ms=master?true:f.branch===me.branch_id;
     return mb&&ms&&(f.name||"").toLowerCase().includes(search.toLowerCase());
   });
-
   const crumb=branch==="all"?"Semua File":sub?gs(branch,sub)?.name||gb(branch).name:gb(branch).name;
 
   const approveReq=async()=>{
     if(!activeReq)return;
     await sb.update("access_requests",{status:"approved",reviewed_at:new Date().toISOString()},`id=eq.${activeReq.id}`);
     await sb.insert("activity_log",{branch_id:"all",action:"approve",file_name:activeReq.file_name});
-    toast(`Akses disetujui ✅`);
+    toast("Akses disetujui ✅");
     setPendingReqs(p=>p.filter(r=>r.id!==activeReq.id));
     setActiveReq(null);
   };
   const rejectReq=async()=>{
     if(!activeReq)return;
     await sb.update("access_requests",{status:"rejected",reviewed_at:new Date().toISOString()},`id=eq.${activeReq.id}`);
-    toast(`Akses ditolak`,"error");
+    toast("Akses ditolak","error");
     setPendingReqs(p=>p.filter(r=>r.id!==activeReq.id));
     setActiveReq(null);
   };
@@ -346,14 +310,11 @@ function MainApp({me,onLogout,toast}){
 
   return(
     <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:"#eef2f7",minHeight:"100dvh",display:"flex",flexDirection:"column",maxWidth:600,margin:"0 auto"}}>
-
       <header style={{background:"#0f2e50",padding:"0 16px",paddingTop:"env(safe-area-inset-top)",display:"flex",alignItems:"center",gap:10,height:56,boxShadow:"0 2px 12px rgba(0,0,0,0.2)",flexShrink:0,position:"sticky",top:0,zIndex:50}}>
         <button onClick={()=>setSheetBranch(true)} style={{background:"rgba(255,255,255,0.1)",border:"none",color:"#fff",width:36,height:36,borderRadius:10,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>☰</button>
         <div style={{flex:1}}><Logo size={26} white={true}/></div>
         <button onClick={()=>setSheetSearch(true)} style={{background:"rgba(255,255,255,0.1)",border:"none",color:"#fff",width:36,height:36,borderRadius:10,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>🔍</button>
-        <button onClick={()=>setSheetNotif(true)} style={{position:"relative",background:"rgba(255,255,255,0.1)",border:"none",color:"#fff",width:36,height:36,borderRadius:10,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          🔔{pendingReqs.length>0&&<span style={{position:"absolute",top:4,right:4,width:8,height:8,background:"#e74c3c",borderRadius:"50%",border:"1.5px solid #0f2e50"}}/>}
-        </button>
+        <button onClick={()=>setSheetNotif(true)} style={{position:"relative",background:"rgba(255,255,255,0.1)",border:"none",color:"#fff",width:36,height:36,borderRadius:10,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>🔔{pendingReqs.length>0&&<span style={{position:"absolute",top:4,right:4,width:8,height:8,background:"#e74c3c",borderRadius:"50%",border:"1.5px solid #0f2e50"}}/>}</button>
         <button onClick={()=>setSheetUser(true)} style={{width:34,height:34,borderRadius:"50%",background:me.role==="master"?"#f39c12":"#1e4878",border:"2px solid rgba(255,255,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:13,cursor:"pointer",color:"#fff",flexShrink:0}}>{me.name[0].toUpperCase()}</button>
       </header>
 
@@ -370,18 +331,16 @@ function MainApp({me,onLogout,toast}){
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px 8px",flexShrink:0}}>
         <div><div style={{fontWeight:700,fontSize:16,color:"#1a2b45"}}>{crumb}</div><div style={{fontSize:12,color:"#7a8a9a",marginTop:1}}>{loadingFiles?"Memuat dari Drive…":filtered.length+" file"}</div></div>
         <div style={{display:"flex",gap:8}}>
-          <button onClick={()=>gToken&&loadAllFiles(gToken)} title="Refresh" style={{background:"#eef2f7",border:"none",borderRadius:8,padding:"5px 10px",cursor:"pointer",fontSize:16,color:"#0f2e50"}}>↻</button>
+          <button onClick={()=>gToken&&loadAllFiles(gToken)} style={{background:"#eef2f7",border:"none",borderRadius:8,padding:"5px 10px",cursor:"pointer",fontSize:16,color:"#0f2e50"}}>↻</button>
           <div style={{display:"flex",background:"#eef2f7",borderRadius:8,padding:3,gap:2}}>{[{id:"files",icon:"🗂️"},{id:"starred",icon:"⭐"}].map(t=><button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"5px 10px",borderRadius:6,border:"none",cursor:"pointer",background:tab===t.id?"#fff":"transparent",color:tab===t.id?"#0f2e50":"#7a8a9a",fontSize:14,boxShadow:tab===t.id?"0 1px 4px rgba(0,0,0,0.1)":"none"}}>{t.icon}</button>)}</div>
           <div style={{display:"flex",background:"#eef2f7",borderRadius:8,padding:3,gap:2}}>{["list","grid"].map(m=><button key={m} onClick={()=>setView(m)} style={{padding:"5px 10px",borderRadius:6,border:"none",cursor:"pointer",background:view===m?"#fff":"transparent",color:view===m?"#0f2e50":"#7a8a9a",fontSize:14,boxShadow:view===m?"0 1px 4px rgba(0,0,0,0.1)":"none"}}>{m==="list"?"☰":"⊞"}</button>)}</div>
         </div>
       </div>
 
       <div style={{flex:1,overflowY:"auto",padding:"0 12px 90px"}}>
-        {loadingFiles?(
-          <div style={{padding:48,textAlign:"center",color:"#9aacbe"}}><div style={{fontSize:36,marginBottom:10}}>⏳</div><div style={{fontWeight:600}}>Memuat dari Google Drive...</div></div>
-        ):!gToken?(
-          <div style={{padding:48,textAlign:"center",color:"#9aacbe"}}><div style={{fontSize:36,marginBottom:10}}>🔐</div><div style={{fontWeight:600,marginBottom:6}}>Hubungkan Google Drive</div><div style={{fontSize:13,marginBottom:20}}>untuk melihat dan upload file</div><button onClick={requestToken} style={{padding:"12px 28px",borderRadius:12,border:"none",background:"#0f2e50",color:"#fff",fontWeight:700,fontSize:14,cursor:"pointer"}}>🔑 Login Google</button></div>
-        ):view==="list"?(
+        {loadingFiles?<div style={{padding:48,textAlign:"center",color:"#9aacbe"}}><div style={{fontSize:36,marginBottom:10}}>⏳</div><div style={{fontWeight:600}}>Memuat dari Google Drive...</div></div>
+        :!gToken?<div style={{padding:48,textAlign:"center",color:"#9aacbe"}}><div style={{fontSize:36,marginBottom:10}}>🔐</div><div style={{fontWeight:600,marginBottom:6}}>Hubungkan Google Drive</div><div style={{fontSize:13,marginBottom:20}}>untuk melihat dan upload file</div><button onClick={requestToken} style={{padding:"12px 28px",borderRadius:12,border:"none",background:"#0f2e50",color:"#fff",fontWeight:700,fontSize:14,cursor:"pointer"}}>🔑 Login Google</button></div>
+        :view==="list"?(
           <div style={{background:"#fff",borderRadius:14,border:"1px solid #e0e8f0",overflow:"hidden"}}>
             {filtered.map((f,i)=><div key={f.id} onClick={()=>setPreview(f)} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 14px",borderBottom:i<filtered.length-1?"1px solid #f0f3f8":"none",cursor:"pointer"}}><FileIcon mimeType={f.mimeType} size={40}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,color:"#1a2b45",fontSize:13,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{f.name}</div><div style={{display:"flex",gap:8,alignItems:"center",marginTop:5,flexWrap:"wrap"}}><Badge branchId={f.branch} small/><span style={{fontSize:11,color:"#9aacbe"}}>{fs(f.size)}</span><span style={{fontSize:11,color:"#b0c0cc"}}>· {fd(f.modifiedTime)}</span></div></div><div style={{display:"flex",gap:4,alignItems:"center"}}><button onClick={e=>{e.stopPropagation();setStarred(p=>p.includes(f.id)?p.filter(x=>x!==f.id):[...p,f.id]);}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,opacity:starred.includes(f.id)?1:0.2,padding:4}}>⭐</button><span style={{color:"#c0ccd8",fontSize:20}}>›</span></div></div>)}
             {filtered.length===0&&<div style={{padding:48,textAlign:"center",color:"#9aacbe"}}><div style={{fontSize:36,marginBottom:10}}>📂</div><div style={{fontWeight:600}}>Belum ada file di cabang ini</div></div>}
@@ -404,9 +363,13 @@ function MainApp({me,onLogout,toast}){
 
       {sheetSearch&&<Sheet onClose={()=>setSheetSearch(false)}><div style={{padding:"14px 20px 24px"}}><div style={{fontWeight:700,fontSize:16,color:"#0f2e50",marginBottom:14}}>🔍 Cari File</div><input value={search} onChange={e=>setSearch(e.target.value)} autoFocus placeholder="Nama file..." style={{width:"100%",padding:"13px 14px",borderRadius:12,border:"1.5px solid #dde3ec",fontSize:14,outline:"none",boxSizing:"border-box"}}/>{search&&<div style={{marginTop:12,fontSize:13,color:"#7a8a9a"}}>{filtered.length} hasil</div>}<button onClick={()=>{setSearch("");setSheetSearch(false);}} style={{marginTop:14,width:"100%",padding:13,borderRadius:12,border:"none",background:"#eef2f7",cursor:"pointer",fontWeight:700,color:"#5a6a7a",fontSize:14}}>Tutup</button></div></Sheet>}
 
-      {sheetNotif&&<Sheet onClose={()=>setSheetNotif(false)}><div style={{padding:"14px 20px 24px"}}><div style={{fontWeight:700,fontSize:16,color:"#0f2e50",marginBottom:16}}>🔔 Notifikasi {pendingReqs.length>0&&<span style={{background:"#e74c3c",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:12,marginLeft:8}}>{pendingReqs.length}</span>}</div>{pendingReqs.length===0?<div style={{textAlign:"center",padding:"24px 0",color:"#9aacbe",fontSize:14}}>Tidak ada notifikasi baru</div>:pendingReqs.map(r=><div key={r.id} onClick={()=>{setActiveReq(r);setSheetNotif(false);}} style={{background:"#fff8e6",borderRadius:12,padding:"12px 14px",marginBottom:10,cursor:"pointer",border:"1px solid #fde8a0"}}><div style={{fontWeight:700,color:"#7d4e00",fontSize:13}}>🔐 Permintaan Akses File</div><div style={{fontSize:12,color:"#a0700a",marginTop:4}}>{r.file_name}</div><div style={{fontSize:11,color:"#c0a060",marginTop:4}}>Dari: {r.requester_branch} · {fd(r.created_at)}</div></div>)}<button onClick={()=>setSheetNotif(false)} style={{width:"100%",padding:13,borderRadius:12,border:"none",background:"#eef2f7",cursor:"pointer",fontWeight:700,color:"#5a6a7a",fontSize:14,marginTop:8}}>Tutup</button></div></Sheet>}
+      {sheetNotif&&<Sheet onClose={()=>setSheetNotif(false)}><div style={{padding:"14px 20px 24px"}}><div style={{fontWeight:700,fontSize:16,color:"#0f2e50",marginBottom:16}}>🔔 Notifikasi {pendingReqs.length>0&&<span style={{background:"#e74c3c",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:12,marginLeft:8}}>{pendingReqs.length}</span>}</div>{pendingReqs.length===0?<div style={{textAlign:"center",padding:"24px 0",color:"#9aacbe",fontSize:14}}>Tidak ada notifikasi baru</div>:pendingReqs.map(r=><div key={r.id} onClick={()=>{setActiveReq(r);setSheetNotif(false);}} style={{background:"#fff8e6",borderRadius:12,padding:"12px 14px",marginBottom:10,cursor:"pointer",border:"1px solid #fde8a0"}}><div style={{fontWeight:700,color:"#7d4e00",fontSize:13}}>🔐 Permintaan Akses</div><div style={{fontSize:12,color:"#a0700a",marginTop:4}}>{r.file_name}</div><div style={{fontSize:11,color:"#c0a060",marginTop:4}}>Dari: {r.requester_branch} · {fd(r.created_at)}</div></div>)}<button onClick={()=>setSheetNotif(false)} style={{width:"100%",padding:13,borderRadius:12,border:"none",background:"#eef2f7",cursor:"pointer",fontWeight:700,color:"#5a6a7a",fontSize:14,marginTop:8}}>Tutup</button></div></Sheet>}
 
-      {sheetUser&&<Sheet onClose={()=>setSheetUser(false)}><div style={{padding:"14px 20px 24px"}}><div style={{display:"flex",alignItems:"center",gap:14,paddingBottom:16,borderBottom:"1px solid #eef0f4",marginBottom:14}}><div style={{width:50,height:50,borderRadius:"50%",background:me.role==="master"?"#f39c12":"#1e4878",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:20}}>{me.name[0].toUpperCase()}</div><div><div style={{fontWeight:700,fontSize:16,color:"#1a2b45"}}>{me.name}</div><div style={{fontSize:13,color:"#7a8a9a",marginTop:2}}>{me.email}</div><span style={{background:me.role==="master"?"#fff8e6":"#eaf3fb",color:me.role==="master"?"#7d4e00":"#1a5276",fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:10,display:"inline-block",marginTop:6}}>{me.role==="master"?"👑 Master":"🔑 Admin"}</span></div></div>
+      {sheetUser&&<Sheet onClose={()=>setSheetUser(false)}><div style={{padding:"14px 20px 24px"}}>
+        <div style={{display:"flex",alignItems:"center",gap:14,paddingBottom:16,borderBottom:"1px solid #eef0f4",marginBottom:14}}>
+          <div style={{width:50,height:50,borderRadius:"50%",background:me.role==="master"?"#f39c12":"#1e4878",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:20}}>{me.name[0].toUpperCase()}</div>
+          <div><div style={{fontWeight:700,fontSize:16,color:"#1a2b45"}}>{me.name}</div><div style={{fontSize:13,color:"#7a8a9a",marginTop:2}}>{me.email}</div><span style={{background:me.role==="master"?"#fff8e6":"#eaf3fb",color:me.role==="master"?"#7d4e00":"#1a5276",fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:10,display:"inline-block",marginTop:6}}>{me.role==="master"?"👑 Master":"🔑 Admin"}</span></div>
+        </div>
         {gToken?<div style={{background:"#eafaf1",borderRadius:10,padding:"10px 14px",marginBottom:12,fontSize:12,color:"#1e8449",fontWeight:600,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span>✅ Google Drive Terhubung</span><button onClick={()=>{tokenStore.clear();setGToken(null);setDriveFiles({});toast("Google disconnect","error");setSheetUser(false);}} style={{fontSize:11,color:"#e74c3c",background:"none",border:"none",cursor:"pointer",fontWeight:700}}>Disconnect</button></div>:<button onClick={()=>{setSheetUser(false);requestToken();}} style={{width:"100%",padding:"12px 16px",borderRadius:12,border:"none",background:"#f0f4fa",cursor:"pointer",textAlign:"left",fontSize:14,color:"#0f2e50",fontWeight:600,marginBottom:10}}>🔑 Hubungkan Google Drive</button>}
         {master&&<button onClick={()=>{setSheetUser(false);setPageUsers(true);}} style={{width:"100%",padding:"14px 16px",borderRadius:12,border:"none",background:"#f0f4fa",cursor:"pointer",textAlign:"left",fontSize:15,color:"#0f2e50",fontWeight:600,marginBottom:10,display:"flex",alignItems:"center",gap:10}}>👥 Kelola User</button>}
         <button onClick={()=>{setSheetUser(false);onLogout();}} style={{width:"100%",padding:"14px 16px",borderRadius:12,border:"none",background:"#fdecea",cursor:"pointer",textAlign:"left",fontSize:15,color:"#c0392b",fontWeight:600,display:"flex",alignItems:"center",gap:10}}>🚪 Keluar</button>
