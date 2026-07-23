@@ -216,6 +216,13 @@ html, body {
   background: rgba(5, 2, 2, 0.92);
   backdrop-filter: blur(4px);
 }
+/* [hidden] needs to beat the class rule above on specificity, otherwise the
+   overlay stays visually flex-displayed (and blocks clicks under it) even
+   while its `hidden` attribute is set -- the JS toggles that attribute, not
+   a class, to show/hide this overlay. */
+.login-overlay[hidden] {
+  display: none;
+}
 
 .login-form {
   width: min(320px, 86vw);
