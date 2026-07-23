@@ -205,3 +205,70 @@ html, body {
 .log-line.user { color: #ffdede; }
 .log-line.ultron { color: var(--red-glow); text-shadow: 0 0 4px var(--red); }
 .log-line.sys { color: var(--red-dim); font-style: italic; }
+
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 2, 2, 0.92);
+  backdrop-filter: blur(4px);
+}
+
+.login-form {
+  width: min(320px, 86vw);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px 26px;
+  border: 1px solid var(--red-dim);
+  box-shadow: 0 0 24px rgba(255, 43, 43, 0.25);
+  background: rgba(20, 0, 0, 0.6);
+}
+
+.login-form h1 {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--red-glow);
+  text-shadow: 0 0 8px var(--red);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.login-form input {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 12px;
+  background: var(--bg-deep);
+  border: 1px solid var(--red-dim);
+  color: var(--text);
+  user-select: text;
+}
+.login-form input:focus {
+  outline: none;
+  border-color: var(--red);
+}
+
+.login-form button {
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 10px 12px;
+  background: var(--red-dim);
+  border: 1px solid var(--red);
+  color: var(--text);
+  cursor: pointer;
+}
+.login-form button:hover {
+  background: var(--red);
+  color: #1a0505;
+}
+
+.login-error {
+  font-size: 12px;
+  color: var(--red-glow);
+  min-height: 14px;
+  text-align: center;
+}

@@ -11,12 +11,32 @@ Antarmuka suara bergaya Ultron (Iron Man) — bicara ke browser, browser bicara 
 
 ## Struktur
 - `src/voice.js` — abstraksi STT/TTS dengan provider `elevenlabs` (aktif) dan `webspeech` (fallback tanpa API key, tinggal ganti `ACTIVE_PROVIDER` kalau mau pakai itu lagi)
-- `src/brain.js` — logika jawaban Ultron. Saat ini masih respons sederhana, gampang diganti panggilan ke LLM/backend sungguhan
-- `src/main.js` — state machine UI + visualizer
+- `src/brain.js` — logika jawaban Ultron. Sapaan/identitas dijawab lokal; selebihnya diteruskan ke `api/brain.js` (Claude + akses ke MK Connect)
+- `src/mkhsistem.js` — sesi login ke MK Connect lewat Supabase Auth-nya langsung (lihat bagian "Jembatan ke MK Connect" di bawah)
+- `src/main.js` — state machine UI + visualizer, termasuk gerbang login MK Connect sebelum Ultron aktif
 - `src/audio-manager.js` — Audio Experience Engine: pemutar cue branding (`online`, `listening`, `thinking`, `success`, `notification`, `error`, `shutdown`). Reusable — tambah cue baru lewat `AudioManager.registerCue(nama, path)`, tidak perlu ubah kode lain
 - `public/audio/` — file mp3 cue branding (lihat `AUDIO.md` cara generate)
 - `scripts/generate-audio-assets.mjs` — generator sekali-jalan cue branding lewat ElevenLabs Sound Effects API (fallback Freesound)
 - `api/tts.js`, `api/stt.js` — Vercel Functions yang jadi proxy ke ElevenLabs
+- `api/brain.js` — Vercel Function: proxy ke Claude (Anthropic Messages API) dengan tool-calling ke jembatan suara MK Connect
+
+## Jembatan ke MK Connect (Mkhsistem)
+
+Ultron bisa menjawab dan bertindak atas data MK Connect (absensi, memo, pengumuman, karyawan, notifikasi, CRM, dll) lewat suara. Alurnya:
+
+1. Saat diaktifkan, Ultron meminta login (email/password akun Super Admin MK Connect) lewat `src/mkhsistem.js` — login langsung ke project Supabase yang sama dengan MK Connect, sesi tersimpan di browser sehingga login cukup sekali.
+2. Setiap giliran bicara yang bukan sapaan dikirim ke `api/brain.js`, bersama token sesi tadi.
+3. `api/brain.js` mengambil daftar tool dari endpoint `/api/ai/voice-bridge` milik MK Connect, lalu menjalankan Claude dengan tool-calling: Claude memutuskan tool mana yang perlu dipanggil untuk menjawab, `api/brain.js` memanggil MK Connect, hasilnya dikirim balik ke Claude sampai jawaban akhir siap dibacakan.
+4. MK Connect sendiri yang menegakkan otorisasi (endpoint itu dibatasi khusus Super Admin, lewat RLS + pengecekan role) — lihat `app/api/ai/voice-bridge/route.ts` di repo Mkhsistem.
+
+### Env var tambahan (Vercel → Project Settings → Environment Variables)
+
+- `VITE_MKHSISTEM_SUPABASE_URL`, `VITE_MKHSISTEM_SUPABASE_ANON_KEY` — sama seperti `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` di project Mkhsistem. Dipakai di browser, bukan rahasia (RLS yang menjaga data).
+- `ANTHROPIC_API_KEY` — API key Anthropic, dipakai `api/brain.js` di server saja.
+- `ANTHROPIC_MODEL` — opsional, default `claude-haiku-4-5-20251001`.
+- `MKHSISTEM_BRIDGE_URL` — URL endpoint voice bridge di deployment Mkhsistem, mis. `https://mkconnect.vercel.app/api/ai/voice-bridge`.
+
+Di sisi Mkhsistem, set `VOICE_BRIDGE_ALLOWED_ORIGIN` ke origin deployment Ultron ini (mis. `https://ultron.vercel.app`) supaya CORS mengizinkannya.
 
 ## Audio branding
 

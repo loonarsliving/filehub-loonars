@@ -4,6 +4,7 @@ import { getResponse } from "./brain.js";
 import { getAudioContext } from "./audio-context.js";
 import { AudioManager } from "./audio-manager.js";
 import { USER_NAME, HONORIFIC } from "./config.js";
+import { isConfigured as isMkhsistemConfigured, getSession, login } from "./mkhsistem.js";
 
 const ONLINE_LINE = `Ultron online. Seluruh modul aktif. Siap menerima perintah, ${HONORIFIC}.`;
 const FIRST_LISTEN_LINES = [`Ya, ${HONORIFIC}?`, `Saya mendengarkan, ${USER_NAME}.`];
@@ -14,6 +15,11 @@ const logEl = document.getElementById("log");
 const clockEl = document.getElementById("clock");
 const canvas = document.getElementById("wave");
 const ctx = canvas.getContext("2d");
+const loginOverlay = document.getElementById("loginOverlay");
+const loginForm = document.getElementById("loginForm");
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginError = document.getElementById("loginError");
 
 // Ambang batas deteksi suara (voice activity). RMS 0..1 dari sinyal mic.
 // Mungkin perlu disetel ulang tergantung sensitivitas mic/lingkungan.
@@ -89,17 +95,73 @@ function escapeHtml(str) {
 
 // --- power on/off ---
 
-function activate() {
+async function activate() {
   active = true;
   unlockAudioPlayback();
   setState("processing", "MENGAKTIFKAN...");
   log("sys", "Ultron diaktifkan.");
+
+  if (isMkhsistemConfigured() && !(await ensureMkhsistemSession())) {
+    active = false;
+    setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+    return;
+  }
+
   if (!booted) {
     booted = true;
     runBootSequence();
   } else {
     startHandsFree({ announce: false });
   }
+}
+
+/** Memastikan ada sesi login MK Connect aktif, menampilkan form login bila belum. Resolve false bila dibatalkan (Esc). */
+async function ensureMkhsistemSession() {
+  try {
+    const session = await getSession();
+    if (session) return true;
+  } catch (err) {
+    console.error("Gagal memeriksa sesi MK Connect:", err);
+  }
+  log("sys", "Perlu login ke MK Connect untuk mengaktifkan Ultron.");
+  return showLoginOverlay();
+}
+
+function showLoginOverlay() {
+  return new Promise((resolve) => {
+    loginOverlay.hidden = false;
+    loginError.textContent = "";
+    loginEmail.focus();
+
+    function cleanup() {
+      loginForm.removeEventListener("submit", onSubmit);
+      document.removeEventListener("keydown", onKeydown);
+      loginOverlay.hidden = true;
+      loginPassword.value = "";
+    }
+
+    async function onSubmit(e) {
+      e.preventDefault();
+      loginError.textContent = "";
+      try {
+        await login(loginEmail.value.trim(), loginPassword.value);
+        cleanup();
+        resolve(true);
+      } catch (err) {
+        loginError.textContent = err.message || "Gagal masuk. Periksa email/password.";
+      }
+    }
+
+    function onKeydown(e) {
+      if (e.key === "Escape") {
+        cleanup();
+        resolve(false);
+      }
+    }
+
+    loginForm.addEventListener("submit", onSubmit);
+    document.addEventListener("keydown", onKeydown);
+  });
 }
 
 async function runBootSequence() {
@@ -231,7 +293,7 @@ function beginRecordingSession() {
   });
 }
 
-function handleFinalTranscript(text) {
+async function handleFinalTranscript(text) {
   stopWaveAnim();
   if (!text) {
     if (active) beginRecordingSession();
@@ -242,7 +304,8 @@ function handleFinalTranscript(text) {
   setState("processing", "MEMPROSES...");
   AudioManager.playThinking();
 
-  const reply = getResponse(text);
+  const reply = await getResponse(text);
+  if (!active) return; // dinonaktifkan selagi menunggu jawaban
   respond(reply);
 }
 
