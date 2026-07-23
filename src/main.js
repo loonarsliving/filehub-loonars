@@ -3,9 +3,10 @@ import { isSTTSupported, startListening, speak, stopSpeaking } from "./voice.js"
 import { getResponse } from "./brain.js";
 import { getAudioContext } from "./audio-context.js";
 import { AudioManager } from "./audio-manager.js";
+import { USER_NAME, HONORIFIC } from "./config.js";
 
-const ONLINE_LINE = "MK Connect AI online. Seluruh modul aktif. Siap menerima perintah.";
-const FIRST_LISTEN_LINES = ["Ya?", "Saya mendengarkan."];
+const ONLINE_LINE = `Ultron online. Seluruh modul aktif. Siap menerima perintah, ${HONORIFIC}.`;
+const FIRST_LISTEN_LINES = [`Ya, ${HONORIFIC}?`, `Saya mendengarkan, ${USER_NAME}.`];
 
 const core = document.getElementById("core");
 const statusEl = document.getElementById("status");

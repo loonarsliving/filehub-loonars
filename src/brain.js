@@ -1,6 +1,8 @@
 // Logika respons Ultron. Sengaja dipisah dari main.js supaya nanti mudah
 // diganti dengan panggilan ke backend/LLM sungguhan.
 
+import { HONORIFIC } from "./config.js";
+
 const GREETINGS = ["halo", "hai", "hey", "hi"];
 const ONLINE_KEYWORDS = ["online", "aktif", "hidup"];
 
@@ -24,7 +26,7 @@ export function getResponse(userText) {
 
   if (isGreeting || asksOnline) {
     return {
-      text: `Selamat ${timeOfDayGreeting()}, Tuan. Saya online dan siap melayani.`,
+      text: `Selamat ${timeOfDayGreeting()}, ${HONORIFIC}. Saya online dan siap melayani.`,
       announceOnline: true,
     };
   }

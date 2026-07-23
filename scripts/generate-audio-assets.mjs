@@ -20,7 +20,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const AUDIO_DIR = path.join(__dirname, "..", "audio");
+const AUDIO_DIR = path.join(__dirname, "..", "public", "audio");
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const FREESOUND_API_KEY = process.env.FREESOUND_API_KEY;
