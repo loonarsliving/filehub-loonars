@@ -1,6 +1,7 @@
 import "./style.css";
 import { isSTTSupported, startListening, speak, stopSpeaking } from "./voice.js";
 import { getResponse } from "./brain.js";
+import { playBootSequence } from "./sfx.js";
 
 const core = document.getElementById("core");
 const statusEl = document.getElementById("status");
@@ -10,6 +11,7 @@ const canvas = document.getElementById("wave");
 const ctx = canvas.getContext("2d");
 
 let state = "idle"; // idle | listening | processing | speaking
+let booted = false;
 let stopListeningFn = null;
 let audioCtx = null;
 let analyser = null;
@@ -22,11 +24,19 @@ setInterval(tickClock, 1000);
 drawIdleWave();
 
 core.addEventListener("click", () => {
-  if (state === "idle") {
-    beginListening();
-  } else if (state === "listening") {
-    endListening();
+  if (state !== "idle") {
+    if (state === "listening") endListening();
+    return;
   }
+  if (!booted) {
+    booted = true;
+    const bootMs = playBootSequence();
+    setState("processing", "MENGAKTIFKAN...");
+    log("sys", "Ultron diaktifkan.");
+    setTimeout(beginListening, bootMs);
+    return;
+  }
+  beginListening();
 });
 core.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") core.click();
