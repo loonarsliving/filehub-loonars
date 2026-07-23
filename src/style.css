@@ -1,0 +1,207 @@
+@font-face {
+  font-family: "ui-mono";
+  src: local("Consolas"), local("Menlo"), local("Monaco");
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+:root {
+  --red: #ff2b2b;
+  --red-dim: #7a0d0d;
+  --red-glow: #ff4d4d;
+  --bg: #050202;
+  --bg-deep: #000000;
+  --text: #ffb3b3;
+}
+
+html, body {
+  height: 100%;
+  background: radial-gradient(ellipse at center, #1a0505 0%, var(--bg-deep) 75%);
+  color: var(--text);
+  font-family: "ui-mono", "Courier New", monospace;
+  overflow: hidden;
+}
+
+.scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 0, 0, 0.025) 0px,
+    rgba(255, 0, 0, 0.025) 1px,
+    transparent 2px,
+    transparent 3px
+  );
+  mix-blend-mode: screen;
+}
+
+.corner {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--red-dim);
+  z-index: 40;
+  opacity: 0.7;
+}
+.corner-tl { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+.corner-tr { top: 14px; right: 14px; border-left: none; border-bottom: none; }
+.corner-bl { bottom: 14px; left: 14px; border-right: none; border-top: none; }
+.corner-br { bottom: 14px; right: 14px; border-left: none; border-top: none; }
+
+.hud-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 22px 40px;
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--red-glow);
+  text-shadow: 0 0 8px var(--red);
+  z-index: 30;
+}
+
+.stage {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+}
+
+.core-wrap {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--red-dim);
+}
+.ring-outer {
+  inset: 0;
+  border-style: dashed;
+  animation: spin 18s linear infinite;
+}
+.ring-mid {
+  inset: 30px;
+  border-color: var(--red);
+  opacity: 0.5;
+  animation: spin 12s linear infinite reverse;
+}
+.ring-inner {
+  inset: 60px;
+  border-style: dotted;
+  animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#wave {
+  position: absolute;
+  inset: 40px;
+  width: calc(100% - 80px);
+  height: calc(100% - 80px);
+  border-radius: 50%;
+}
+
+.core-glow {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--red-glow) 0%, var(--red) 40%, transparent 70%);
+  filter: blur(6px);
+  opacity: 0.55;
+  animation: pulse 2.6s ease-in-out infinite;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.core-eye {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 20px 6px var(--red-glow), 0 0 60px 20px var(--red);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50% { transform: scale(1.12); opacity: 0.7; }
+}
+
+.core-wrap.listening .core-glow { opacity: 0.9; }
+.core-wrap.listening .core-eye { transform: scale(1.15); }
+.core-wrap.processing .ring-mid { animation-duration: 2s; }
+.core-wrap.processing .core-glow { animation-duration: 0.6s; }
+.core-wrap.speaking .core-eye {
+  box-shadow: 0 0 30px 10px var(--red-glow), 0 0 90px 30px var(--red);
+}
+
+.status-line {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--red-glow);
+  text-shadow: 0 0 6px var(--red);
+  min-height: 18px;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.console {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 140px;
+  z-index: 20;
+  background: linear-gradient(to top, rgba(20, 0, 0, 0.75), transparent);
+  padding: 16px 60px 20px;
+  overflow: hidden;
+}
+
+.console-inner {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
+  font-size: 13px;
+  scrollbar-width: none;
+}
+.console-inner::-webkit-scrollbar { display: none; }
+
+.log-line {
+  opacity: 0.9;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+.log-line .tag {
+  color: var(--red-glow);
+  font-weight: bold;
+  margin-right: 6px;
+}
+.log-line.user { color: #ffdede; }
+.log-line.ultron { color: var(--red-glow); text-shadow: 0 0 4px var(--red); }
+.log-line.sys { color: var(--red-dim); font-style: italic; }
