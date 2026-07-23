@@ -2,13 +2,7 @@
 // Semua disintesis lewat Web Audio API (oscillator + noise), tanpa file
 // audio eksternal, jadi tidak ada masalah lisensi/hak cipta.
 
-let ctx = null;
-
-function getCtx() {
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-  if (ctx.state === "suspended") ctx.resume();
-  return ctx;
-}
+import { getAudioContext } from "./audio-context.js";
 
 function noiseBuffer(ac, duration) {
   const buffer = ac.createBuffer(1, ac.sampleRate * duration, ac.sampleRate);
@@ -86,7 +80,7 @@ function playConfirmChime(ac, t) {
  * autoplay policy browser.
  */
 export function playBootSequence() {
-  const ac = getCtx();
+  const ac = getAudioContext();
   const t = ac.currentTime;
   playThump(ac, t);
   playSurge(ac, t + 0.03);

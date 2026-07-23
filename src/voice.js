@@ -3,9 +3,11 @@
 // supaya API key tidak pernah terekspos ke browser).
 // Provider "webspeech" tetap tersedia sebagai fallback tanpa API key.
 
+import { getAudioContext } from "./audio-context.js";
+
 const ACTIVE_PROVIDER = "elevenlabs";
 
-let currentAudio = null;
+let currentSource = null;
 
 const providers = {
   webspeech: {
@@ -106,17 +108,34 @@ const providers = {
       };
     },
     speak(text, { onStart, onEnd, onError } = {}) {
-      const url = `/api/tts?text=${encodeURIComponent(text)}`;
-      const audio = new Audio(url);
-      currentAudio = audio;
-      audio.onplay = () => onStart?.();
-      audio.onended = () => onEnd?.();
-      audio.onerror = () => onError?.(new Error("Gagal memuat/memutar audio TTS."));
-      audio.play().catch((err) => onError?.(err));
+      (async () => {
+        try {
+          const ac = getAudioContext();
+          const url = `/api/tts?text=${encodeURIComponent(text)}`;
+          const res = await fetch(url);
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.error || `TTS gagal (${res.status})`);
+          }
+          const arrayBuffer = await res.arrayBuffer();
+          const audioBuffer = await ac.decodeAudioData(arrayBuffer);
+
+          currentSource?.stop?.();
+          const source = ac.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(ac.destination);
+          source.onended = () => onEnd?.();
+          currentSource = source;
+          onStart?.();
+          source.start();
+        } catch (err) {
+          onError?.(err);
+        }
+      })();
     },
     stopSpeaking() {
-      currentAudio?.pause();
-      currentAudio = null;
+      currentSource?.stop?.();
+      currentSource = null;
     },
   },
 };

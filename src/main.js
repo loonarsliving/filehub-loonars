@@ -2,6 +2,7 @@ import "./style.css";
 import { isSTTSupported, startListening, speak, stopSpeaking } from "./voice.js";
 import { getResponse } from "./brain.js";
 import { playBootSequence } from "./sfx.js";
+import { getAudioContext } from "./audio-context.js";
 
 const core = document.getElementById("core");
 const statusEl = document.getElementById("status");
@@ -44,12 +45,10 @@ core.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") core.click();
 });
 
-// Buka izin autoplay audio HTML di browser ketat (Safari/iOS) lewat gesture klik pertama.
+// Buka (resume) AudioContext bersama lewat gesture klik pertama, supaya
+// playback TTS lewat Web Audio API nanti tidak diblokir kebijakan autoplay.
 function unlockAudioPlayback() {
-  const silence =
-    "data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgID/+xDECgPCwAAAAAAAAAAAAAAAAAAAAAAAA=";
-  const a = new Audio(silence);
-  a.play().catch(() => {});
+  getAudioContext();
 }
 
 function tickClock() {
