@@ -31,6 +31,7 @@ core.addEventListener("click", () => {
   }
   if (!booted) {
     booted = true;
+    unlockAudioPlayback();
     const bootMs = playBootSequence();
     setState("processing", "MENGAKTIFKAN...");
     log("sys", "Ultron diaktifkan.");
@@ -42,6 +43,14 @@ core.addEventListener("click", () => {
 core.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") core.click();
 });
+
+// Buka izin autoplay audio HTML di browser ketat (Safari/iOS) lewat gesture klik pertama.
+function unlockAudioPlayback() {
+  const silence =
+    "data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgID/+xDECgPCwAAAAAAAAAAAAAAAAAAAAAAAA=";
+  const a = new Audio(silence);
+  a.play().catch(() => {});
+}
 
 function tickClock() {
   clockEl.textContent = new Date().toLocaleTimeString("id-ID", { hour12: false });
@@ -139,8 +148,11 @@ function respond(reply) {
       setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
       drawIdleWave();
     },
-    onError: () => {
+    onError: (e) => {
       stopWaveAnim();
+      const msg = e?.message || e?.target?.error?.message || e?.error?.message || String(e);
+      log("sys", "Gagal memutar suara: " + msg);
+      console.error("TTS error:", e);
       setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
       drawIdleWave();
     },
