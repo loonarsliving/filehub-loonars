@@ -1,8 +1,9 @@
 // Logika respons Ultron. Sapaan/identitas dijawab lokal (cepat, tanpa round
-// trip). Semua yang lain diteruskan ke api/brain.js, yang menjalankan Claude
-// dengan akses tool ke MK Connect lewat jembatan suara (lihat mkhsistem.js).
+// trip). Semua yang lain dikirim langsung ke endpoint /api/ai/voice-assistant
+// milik Mkhsistem (lihat mkhsistem.js untuk sesi login) -- otaknya (Gemini)
+// dan API key-nya hidup di server Mkhsistem, bukan di Ultron.
 
-import { HONORIFIC } from "./config.js";
+import { HONORIFIC, MKHSISTEM_VOICE_ASSISTANT_URL } from "./config.js";
 import { getAccessToken } from "./mkhsistem.js";
 
 const GREETINGS = ["halo", "hai", "hey", "hi"];
@@ -57,27 +58,34 @@ export async function getResponse(userText) {
     return { text: "Aku tidak menangkap apa pun. Ulangi." };
   }
 
+  if (!MKHSISTEM_VOICE_ASSISTANT_URL) {
+    return { text: `Aku belum disambungkan ke MK Connect, ${HONORIFIC}. Set dulu VITE_MKHSISTEM_VOICE_ASSISTANT_URL.` };
+  }
+
   let token = null;
   try {
     token = await getAccessToken();
   } catch (err) {
     console.error("Gagal mengambil sesi MK Connect:", err);
   }
+  if (!token) {
+    return { text: `Aku belum login ke MK Connect, ${HONORIFIC}. Aktifkan ulang untuk login.` };
+  }
 
   try {
-    const res = await fetch("/api/brain", {
+    const res = await fetch(MKHSISTEM_VOICE_ASSISTANT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userText, history: conversationHistory, mkhsistemToken: token }),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ message: userText, history: conversationHistory }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || `Brain API gagal (${res.status})`);
+    if (!res.ok) throw new Error(data.error || `Voice assistant gagal (${res.status})`);
 
     pushHistory("user", userText);
     pushHistory("assistant", data.text);
     return { text: data.text };
   } catch (err) {
-    console.error("Brain API error:", err);
+    console.error("Voice assistant error:", err);
     return { text: `Maaf, ${HONORIFIC}. Aku gagal menghubungi otak utamaku barusan.` };
   }
 }
