@@ -14,7 +14,6 @@ const ctx = canvas.getContext("2d");
 let state = "idle"; // idle | listening | processing | speaking
 let booted = false;
 let stopListeningFn = null;
-let audioCtx = null;
 let analyser = null;
 let micSource = null;
 let micStream = null;
@@ -162,10 +161,10 @@ function respond({ text, announceOnline }) {
 // --- mic level visualization while listening ---
 
 async function startMicAnalyser() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const ac = getAudioContext();
   micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  micSource = audioCtx.createMediaStreamSource(micStream);
-  analyser = audioCtx.createAnalyser();
+  micSource = ac.createMediaStreamSource(micStream);
+  analyser = ac.createAnalyser();
   analyser.fftSize = 256;
   micSource.connect(analyser);
   drawListeningWave();
@@ -174,8 +173,7 @@ async function startMicAnalyser() {
 function stopMicAnalyser() {
   stopWaveAnim();
   micStream?.getTracks().forEach((t) => t.stop());
-  audioCtx?.close().catch(() => {});
-  audioCtx = null;
+  micSource?.disconnect();
   analyser = null;
   micSource = null;
   micStream = null;
