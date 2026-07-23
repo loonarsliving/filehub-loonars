@@ -2,6 +2,7 @@
 
 Antarmuka suara bergaya Ultron (Iron Man) — bicara ke browser, browser bicara balik.
 
+
 ## Fitur
 - Speech-to-text & text-to-speech lewat **ElevenLabs** (Scribe untuk STT, model turbo multilingual untuk TTS) — akurasi Bahasa Indonesia jauh lebih baik daripada Web Speech API bawaan browser
 - API key ElevenLabs hanya hidup di server (Vercel env var) lewat proxy `api/tts.js` dan `api/stt.js` — tidak pernah terkirim ke browser
