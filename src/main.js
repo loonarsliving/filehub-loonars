@@ -11,13 +11,23 @@ const clockEl = document.getElementById("clock");
 const canvas = document.getElementById("wave");
 const ctx = canvas.getContext("2d");
 
+// Ambang batas deteksi suara (voice activity). RMS 0..1 dari sinyal mic.
+// Mungkin perlu disetel ulang tergantung sensitivitas mic/lingkungan.
+const SPEECH_THRESHOLD = 0.035;
+const SILENCE_MS = 1100; // diam sekian ms setelah bicara -> anggap selesai
+const MIN_SPEECH_MS = 250; // minimal durasi bicara sebelum silence-timeout dihitung
+
 let state = "idle"; // idle | listening | processing | speaking
+let active = false; // mode hands-free sedang menyala?
 let booted = false;
 let stopListeningFn = null;
 let analyser = null;
 let micSource = null;
 let micStream = null;
-let rafId = null;
+let rafId = null; // animasi waveform
+let monitorId = null; // loop VAD/barge-in
+let speechStartedAt = null;
+let lastSpeechAt = null;
 
 setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
 tickClock();
@@ -25,27 +35,16 @@ setInterval(tickClock, 1000);
 drawIdleWave();
 
 core.addEventListener("click", () => {
-  if (state !== "idle") {
-    if (state === "listening") endListening();
-    return;
+  if (active) {
+    deactivate();
+  } else {
+    activate();
   }
-  if (!booted) {
-    booted = true;
-    unlockAudioPlayback();
-    const bootMs = playBootSequence();
-    setState("processing", "MENGAKTIFKAN...");
-    log("sys", "Ultron diaktifkan.");
-    setTimeout(beginListening, bootMs);
-    return;
-  }
-  beginListening();
 });
 core.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") core.click();
 });
 
-// Buka (resume) AudioContext bersama lewat gesture klik pertama, supaya
-// playback TTS lewat Web Audio API nanti tidak diblokir kebijakan autoplay.
 function unlockAudioPlayback() {
   getAudioContext();
 }
@@ -75,21 +74,85 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-async function beginListening() {
+// --- power on/off ---
+
+function activate() {
+  active = true;
+  if (!booted) {
+    booted = true;
+    unlockAudioPlayback();
+    const bootMs = playBootSequence();
+    setState("processing", "MENGAKTIFKAN...");
+    log("sys", "Ultron diaktifkan.");
+    setTimeout(startHandsFree, bootMs);
+  } else {
+    startHandsFree();
+  }
+}
+
+async function startHandsFree() {
   if (!isSTTSupported()) {
-    log("sys", "Browser ini tidak mendukung speech recognition. Coba pakai Chrome.");
+    log("sys", "Browser ini tidak mendukung mode ini. Coba pakai Chrome.");
+    active = false;
+    setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     return;
   }
   try {
-    await startMicAnalyser();
+    await acquireMic();
   } catch (err) {
     log("sys", "Tidak bisa mengakses mikrofon: " + err.message);
+    active = false;
+    setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     return;
   }
+  startMonitorLoop();
+  beginRecordingSession();
+}
 
+function deactivate() {
+  active = false;
+  stopListeningFn?.();
+  stopListeningFn = null;
+  stopSpeaking();
+  stopMonitorLoop();
+  stopWaveAnim();
+  releaseMic();
+  setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+  drawIdleWave();
+  log("sys", "Ultron nonaktif.");
+}
+
+// --- mic lifecycle ---
+
+async function acquireMic() {
+  if (micStream) return;
+  const ac = getAudioContext();
+  micStream = await navigator.mediaDevices.getUserMedia({
+    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+  });
+  micSource = ac.createMediaStreamSource(micStream);
+  analyser = ac.createAnalyser();
+  analyser.fftSize = 1024;
+  micSource.connect(analyser);
+}
+
+function releaseMic() {
+  micStream?.getTracks().forEach((t) => t.stop());
+  micSource?.disconnect();
+  analyser = null;
+  micSource = null;
+  micStream = null;
+}
+
+// --- percakapan: satu sesi rekam per giliran bicara ---
+
+function beginRecordingSession() {
   setState("listening", "MENDENGARKAN...");
-  let lastInterim = "";
+  speechStartedAt = null;
+  lastSpeechAt = null;
+  drawListeningWave();
 
+  let lastInterim = "";
   stopListeningFn = startListening({
     stream: micStream,
     lang: "id-ID",
@@ -102,30 +165,26 @@ async function beginListening() {
     },
     onEnd: () => {
       if (state === "listening") {
-        // recognizer stopped without a final result
         if (lastInterim) handleFinalTranscript(lastInterim);
+        else if (active) beginRecordingSession();
         else {
-          stopMicAnalyser();
           setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
         }
       }
     },
     onError: (e) => {
-      stopMicAnalyser();
       log("sys", "Error pengenalan suara: " + (e.error || e.message || "tidak diketahui"));
-      setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+      if (active) beginRecordingSession();
+      else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     },
   });
 }
 
-function endListening() {
-  stopListeningFn?.();
-}
-
 function handleFinalTranscript(text) {
-  stopMicAnalyser();
+  stopWaveAnim();
   if (!text) {
-    setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+    if (active) beginRecordingSession();
+    else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     return;
   }
   log("user", text);
@@ -144,40 +203,71 @@ function respond({ text, announceOnline }) {
     lang: "id-ID",
     onEnd: () => {
       stopWaveAnim();
-      setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
-      drawIdleWave();
+      if (active) beginRecordingSession();
+      else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     },
     onError: (e) => {
       stopWaveAnim();
       const msg = e?.message || e?.target?.error?.message || e?.error?.message || String(e);
       log("sys", "Gagal memutar suara: " + msg);
       console.error("TTS error:", e);
-      setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
-      drawIdleWave();
+      if (active) beginRecordingSession();
+      else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     },
   });
 }
 
-// --- mic level visualization while listening ---
+// --- voice activity detection: auto-stop saat diam, barge-in saat bicara ---
 
-async function startMicAnalyser() {
-  const ac = getAudioContext();
-  micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  micSource = ac.createMediaStreamSource(micStream);
-  analyser = ac.createAnalyser();
-  analyser.fftSize = 256;
-  micSource.connect(analyser);
-  drawListeningWave();
+function startMonitorLoop() {
+  const data = new Uint8Array(analyser.fftSize);
+
+  const loop = () => {
+    if (!active || !analyser) return;
+
+    analyser.getByteTimeDomainData(data);
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+      const v = (data[i] - 128) / 128;
+      sum += v * v;
+    }
+    const rms = Math.sqrt(sum / data.length);
+    const talking = rms > SPEECH_THRESHOLD;
+    const now = performance.now();
+
+    if (state === "listening") {
+      if (talking) {
+        if (!speechStartedAt) speechStartedAt = now;
+        lastSpeechAt = now;
+      } else if (
+        speechStartedAt &&
+        now - speechStartedAt > MIN_SPEECH_MS &&
+        now - lastSpeechAt > SILENCE_MS
+      ) {
+        speechStartedAt = null;
+        stopListeningFn?.();
+      }
+    } else if (state === "speaking" && talking) {
+      log("sys", "Ultron dihentikan — mendengarkan kamu.");
+      stopSpeaking();
+      stopWaveAnim();
+      beginRecordingSession();
+    }
+
+    monitorId = requestAnimationFrame(loop);
+  };
+
+  monitorId = requestAnimationFrame(loop);
 }
 
-function stopMicAnalyser() {
-  stopWaveAnim();
-  micStream?.getTracks().forEach((t) => t.stop());
-  micSource?.disconnect();
-  analyser = null;
-  micSource = null;
-  micStream = null;
+function stopMonitorLoop() {
+  if (monitorId) cancelAnimationFrame(monitorId);
+  monitorId = null;
+  speechStartedAt = null;
+  lastSpeechAt = null;
 }
+
+// --- waveform visualization ---
 
 function stopWaveAnim() {
   if (rafId) cancelAnimationFrame(rafId);
