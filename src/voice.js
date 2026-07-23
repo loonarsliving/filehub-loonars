@@ -106,32 +106,13 @@ const providers = {
       };
     },
     speak(text, { onStart, onEnd, onError } = {}) {
-      (async () => {
-        try {
-          const res = await fetch("/api/tts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text }),
-          });
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            throw new Error(data.error || `TTS gagal (${res.status})`);
-          }
-          const blob = await res.blob();
-          const url = URL.createObjectURL(blob);
-          const audio = new Audio(url);
-          currentAudio = audio;
-          audio.onplay = () => onStart?.();
-          audio.onended = () => {
-            onEnd?.();
-            URL.revokeObjectURL(url);
-          };
-          audio.onerror = (e) => onError?.(e);
-          await audio.play();
-        } catch (err) {
-          onError?.(err);
-        }
-      })();
+      const url = `/api/tts?text=${encodeURIComponent(text)}`;
+      const audio = new Audio(url);
+      currentAudio = audio;
+      audio.onplay = () => onStart?.();
+      audio.onended = () => onEnd?.();
+      audio.onerror = () => onError?.(new Error("Gagal memuat/memutar audio TTS."));
+      audio.play().catch((err) => onError?.(err));
     },
     stopSpeaking() {
       currentAudio?.pause();
