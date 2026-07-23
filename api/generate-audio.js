@@ -80,15 +80,19 @@ export default async function handler(req, res) {
     return;
   }
 
-  const results = await Promise.allSettled(CUES.map((cue) => generateOne(apiKey, cue)));
+  const only = req.query.names ? String(req.query.names).split(",") : null;
+  const targets = only ? CUES.filter((c) => only.includes(c.name)) : CUES;
 
+  // Sequential, bukan paralel -- akun ElevenLabs punya batas concurrent request.
   const files = {};
   const errors = {};
-  results.forEach((r, i) => {
-    const name = CUES[i].name;
-    if (r.status === "fulfilled") files[name] = r.value;
-    else errors[name] = r.reason?.message || String(r.reason);
-  });
+  for (const cue of targets) {
+    try {
+      files[cue.name] = await generateOne(apiKey, cue);
+    } catch (err) {
+      errors[cue.name] = err.message;
+    }
+  }
 
   res.status(200).json({ files, errors });
 }
