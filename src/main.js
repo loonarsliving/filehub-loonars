@@ -1,8 +1,11 @@
 import "./style.css";
 import { isSTTSupported, startListening, speak, stopSpeaking } from "./voice.js";
 import { getResponse } from "./brain.js";
-import { playBootSequence, playOnlineChime } from "./sfx.js";
 import { getAudioContext } from "./audio-context.js";
+import { AudioManager } from "./audio-manager.js";
+
+const ONLINE_LINE = "MK Connect AI online. Seluruh modul aktif. Siap menerima perintah.";
+const FIRST_LISTEN_LINES = ["Ya?", "Saya mendengarkan."];
 
 const core = document.getElementById("core");
 const statusEl = document.getElementById("status");
@@ -87,19 +90,25 @@ function escapeHtml(str) {
 
 function activate() {
   active = true;
+  unlockAudioPlayback();
+  setState("processing", "MENGAKTIFKAN...");
+  log("sys", "Ultron diaktifkan.");
   if (!booted) {
     booted = true;
-    unlockAudioPlayback();
-    const bootMs = playBootSequence();
-    setState("processing", "MENGAKTIFKAN...");
-    log("sys", "Ultron diaktifkan.");
-    setTimeout(startHandsFree, bootMs);
+    runBootSequence();
   } else {
-    startHandsFree();
+    startHandsFree({ announce: false });
   }
 }
 
-async function startHandsFree() {
+async function runBootSequence() {
+  setState("speaking", "MENGAKTIFKAN...");
+  await AudioManager.playOnline();
+  await speakBranding(ONLINE_LINE);
+  await startHandsFree({ announce: true });
+}
+
+async function startHandsFree({ announce }) {
   if (!isSTTSupported()) {
     log("sys", "Browser ini tidak mendukung mode ini. Coba pakai Chrome.");
     active = false;
@@ -110,12 +119,40 @@ async function startHandsFree() {
     await acquireMic();
   } catch (err) {
     log("sys", "Tidak bisa mengakses mikrofon: " + err.message);
+    AudioManager.playError();
     active = false;
     setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     return;
   }
+
+  if (announce) {
+    await AudioManager.playListening();
+    const line = FIRST_LISTEN_LINES[Math.floor(Math.random() * FIRST_LISTEN_LINES.length)];
+    await speakBranding(line);
+  }
+
   startMonitorLoop();
   beginRecordingSession();
+}
+
+/** Ucapkan satu baris branding (boot/first-listen), lalu resolve saat selesai. */
+function speakBranding(text) {
+  return new Promise((resolve) => {
+    log("ultron", text);
+    drawSpeakingWave();
+    speak(text, {
+      lang: "id-ID",
+      onEnd: () => {
+        stopWaveAnim();
+        resolve();
+      },
+      onError: (e) => {
+        stopWaveAnim();
+        console.error("TTS error (branding):", e);
+        resolve();
+      },
+    });
+  });
 }
 
 function deactivate() {
@@ -125,10 +162,13 @@ function deactivate() {
   stopSpeaking();
   stopMonitorLoop();
   stopWaveAnim();
-  releaseMic();
-  setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
-  drawIdleWave();
-  log("sys", "Ultron nonaktif.");
+  setState("processing", "MENONAKTIFKAN...");
+  AudioManager.playShutdown().then(() => {
+    releaseMic();
+    setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+    drawIdleWave();
+    log("sys", "Ultron nonaktif.");
+  });
 }
 
 // --- mic lifecycle ---
@@ -183,6 +223,7 @@ function beginRecordingSession() {
     },
     onError: (e) => {
       log("sys", "Error pengenalan suara: " + (e.error || e.message || "tidak diketahui"));
+      AudioManager.playError();
       if (active) beginRecordingSession();
       else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     },
@@ -198,6 +239,7 @@ function handleFinalTranscript(text) {
   }
   log("user", text);
   setState("processing", "MEMPROSES...");
+  AudioManager.playThinking();
 
   const reply = getResponse(text);
   respond(reply);
@@ -208,7 +250,10 @@ function respond({ text, announceOnline }) {
   speakingStartedAt = performance.now();
   bargeInStartedAt = null;
   log("ultron", text);
-  if (announceOnline) playOnlineChime();
+  // Cue dan ucapan boleh sedikit tumpang tindih (tidak menunggu cue selesai
+  // dulu) supaya tidak menambah delay sebelum Ultron mulai bicara.
+  if (announceOnline) AudioManager.playOnline();
+  else AudioManager.playSuccess();
   drawSpeakingWave();
   speak(text, {
     lang: "id-ID",
@@ -222,6 +267,7 @@ function respond({ text, announceOnline }) {
       const msg = e?.message || e?.target?.error?.message || e?.error?.message || String(e);
       log("sys", "Gagal memutar suara: " + msg);
       console.error("TTS error:", e);
+      AudioManager.playError();
       if (active) beginRecordingSession();
       else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     },
