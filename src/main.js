@@ -17,6 +17,13 @@ const SPEECH_THRESHOLD = 0.035;
 const SILENCE_MS = 1100; // diam sekian ms setelah bicara -> anggap selesai
 const MIN_SPEECH_MS = 250; // minimal durasi bicara sebelum silence-timeout dihitung
 
+// Barge-in (interupsi saat Ultron bicara) dibuat jauh lebih ketat dari VAD
+// biasa, supaya mic yang menangkap balik suara Ultron sendiri dari speaker
+// (echo/feedback) tidak salah dikira user bicara.
+const BARGE_IN_THRESHOLD = 0.11; // ambang jauh lebih tinggi dari SPEECH_THRESHOLD
+const BARGE_IN_SUSTAIN_MS = 400; // harus keras terus-menerus sekian ms, bukan sekali lonjakan
+const BARGE_IN_GRACE_MS = 400; // abaikan sesaat di awal bicara (pop/klik audio paling keras di situ)
+
 let state = "idle"; // idle | listening | processing | speaking
 let active = false; // mode hands-free sedang menyala?
 let booted = false;
@@ -28,6 +35,8 @@ let rafId = null; // animasi waveform
 let monitorId = null; // loop VAD/barge-in
 let speechStartedAt = null;
 let lastSpeechAt = null;
+let speakingStartedAt = null;
+let bargeInStartedAt = null;
 
 setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
 tickClock();
@@ -196,6 +205,8 @@ function handleFinalTranscript(text) {
 
 function respond({ text, announceOnline }) {
   setState("speaking", "MERESPONS...");
+  speakingStartedAt = performance.now();
+  bargeInStartedAt = null;
   log("ultron", text);
   if (announceOnline) playOnlineChime();
   drawSpeakingWave();
@@ -232,10 +243,10 @@ function startMonitorLoop() {
       sum += v * v;
     }
     const rms = Math.sqrt(sum / data.length);
-    const talking = rms > SPEECH_THRESHOLD;
     const now = performance.now();
 
     if (state === "listening") {
+      const talking = rms > SPEECH_THRESHOLD;
       if (talking) {
         if (!speechStartedAt) speechStartedAt = now;
         lastSpeechAt = now;
@@ -247,11 +258,22 @@ function startMonitorLoop() {
         speechStartedAt = null;
         stopListeningFn?.();
       }
-    } else if (state === "speaking" && talking) {
-      log("sys", "Ultron dihentikan — mendengarkan kamu.");
-      stopSpeaking();
-      stopWaveAnim();
-      beginRecordingSession();
+    } else if (state === "speaking") {
+      const withinGrace = speakingStartedAt && now - speakingStartedAt < BARGE_IN_GRACE_MS;
+      const loud = rms > BARGE_IN_THRESHOLD;
+
+      if (withinGrace || !loud) {
+        bargeInStartedAt = null;
+      } else {
+        if (!bargeInStartedAt) bargeInStartedAt = now;
+        if (now - bargeInStartedAt > BARGE_IN_SUSTAIN_MS) {
+          log("sys", "Ultron dihentikan — mendengarkan kamu.");
+          stopSpeaking();
+          stopWaveAnim();
+          bargeInStartedAt = null;
+          beginRecordingSession();
+        }
+      }
     }
 
     monitorId = requestAnimationFrame(loop);
