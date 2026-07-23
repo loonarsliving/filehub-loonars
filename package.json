@@ -9,6 +9,9 @@
     "preview": "vite preview",
     "generate-audio": "node scripts/generate-audio-assets.mjs"
   },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  },
   "devDependencies": {
     "vite": "^5.4.1"
   }

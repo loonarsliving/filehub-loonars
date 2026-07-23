@@ -40,6 +40,16 @@
       <div class="console-inner" id="log"></div>
     </section>
 
+    <div class="login-overlay" id="loginOverlay" hidden>
+      <form class="login-form" id="loginForm">
+        <h1>SAMBUNGKAN KE MK CONNECT</h1>
+        <input type="email" id="loginEmail" placeholder="Email" autocomplete="username" required />
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required />
+        <button type="submit">MASUK</button>
+        <p class="login-error" id="loginError"></p>
+      </form>
+    </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
