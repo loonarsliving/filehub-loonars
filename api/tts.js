@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   const vid = voiceId || process.env.ELEVENLABS_VOICE_ID || "pNInz6obpgDQGcFmaJgB";
 
   const upstream = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${vid}/stream?output_format=mp3_22050_32`,
+    `https://api.elevenlabs.io/v1/text-to-speech/${vid}/stream?output_format=mp3_44100_128`,
     {
       method: "POST",
       headers: {
@@ -31,8 +31,13 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         text,
-        model_id: "eleven_flash_v2_5",
-        voice_settings: { stability: 0.45, similarity_boost: 0.8 },
+        model_id: "eleven_multilingual_v2",
+        voice_settings: {
+          stability: 0.55,
+          similarity_boost: 0.85,
+          style: 0.15,
+          use_speaker_boost: true,
+        },
       }),
     }
   );

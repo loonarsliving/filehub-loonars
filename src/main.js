@@ -1,7 +1,7 @@
 import "./style.css";
 import { isSTTSupported, startListening, speak, stopSpeaking } from "./voice.js";
 import { getResponse } from "./brain.js";
-import { playBootSequence } from "./sfx.js";
+import { playBootSequence, playOnlineChime } from "./sfx.js";
 import { getAudioContext } from "./audio-context.js";
 
 const core = document.getElementById("core");
@@ -136,11 +136,12 @@ function handleFinalTranscript(text) {
   respond(reply);
 }
 
-function respond(reply) {
+function respond({ text, announceOnline }) {
   setState("speaking", "MERESPONS...");
-  log("ultron", reply);
+  log("ultron", text);
+  if (announceOnline) playOnlineChime();
   drawSpeakingWave();
-  speak(reply, {
+  speak(text, {
     lang: "id-ID",
     onEnd: () => {
       stopWaveAnim();

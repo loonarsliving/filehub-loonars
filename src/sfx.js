@@ -74,6 +74,23 @@ function playConfirmChime(ac, t) {
   });
 }
 
+/** Chime pendek saat Ultron mengumumkan dirinya online — arpeggio naik ceria. */
+export function playOnlineChime() {
+  const ac = getAudioContext();
+  const t = ac.currentTime;
+  const notes = [392.0, 493.88, 587.33, 783.99]; // G4 - B4 - D5 - G5
+  notes.forEach((freq, i) => {
+    const start = t + i * 0.09;
+    const osc = ac.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    const gain = envGain(ac, 0.01, 0.22, 0.3, start);
+    osc.connect(gain).connect(ac.destination);
+    osc.start(start);
+    osc.stop(start + 0.35);
+  });
+}
+
 /**
  * Mainkan urutan power-up lengkap. Harus dipanggil dari dalam
  * event handler klik/tap (gesture pengguna) supaya tidak diblokir
