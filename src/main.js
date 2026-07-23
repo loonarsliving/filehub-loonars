@@ -16,6 +16,7 @@ let stopListeningFn = null;
 let audioCtx = null;
 let analyser = null;
 let micSource = null;
+let micStream = null;
 let rafId = null;
 
 setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
@@ -83,6 +84,8 @@ async function beginListening() {
   let lastInterim = "";
 
   stopListeningFn = startListening({
+    stream: micStream,
+    lang: "id-ID",
     onInterim: (text) => {
       lastInterim = text;
       statusEl.textContent = `MENDENGARKAN: ${text}`;
@@ -121,10 +124,8 @@ function handleFinalTranscript(text) {
   log("user", text);
   setState("processing", "MEMPROSES...");
 
-  setTimeout(() => {
-    const reply = getResponse(text);
-    respond(reply);
-  }, 500);
+  const reply = getResponse(text);
+  respond(reply);
 }
 
 function respond(reply) {
@@ -150,8 +151,8 @@ function respond(reply) {
 
 async function startMicAnalyser() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  micSource = audioCtx.createMediaStreamSource(stream);
+  micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  micSource = audioCtx.createMediaStreamSource(micStream);
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 256;
   micSource.connect(analyser);
@@ -160,11 +161,12 @@ async function startMicAnalyser() {
 
 function stopMicAnalyser() {
   stopWaveAnim();
-  micSource?.mediaStream?.getTracks().forEach((t) => t.stop());
+  micStream?.getTracks().forEach((t) => t.stop());
   audioCtx?.close().catch(() => {});
   audioCtx = null;
   analyser = null;
   micSource = null;
+  micStream = null;
 }
 
 function stopWaveAnim() {
