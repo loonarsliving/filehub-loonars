@@ -20,20 +20,54 @@
 
     <header class="hud-header">
       <span class="hud-tag">U.L.T.R.O.N</span>
+      <span class="hud-tag hud-tag-center" id="statusChip">OFFLINE</span>
       <span class="hud-tag hud-tag-right" id="clock">00:00:00</span>
     </header>
+
+    <!-- Panel telemetri kiri: status sistem (sebagian nilai nyata, sebagian
+         estetika HUD ala Iron Man). -->
+    <aside class="telemetry telemetry-left" aria-hidden="true">
+      <div class="tele-title">SISTEM</div>
+      <div class="tele-row"><span class="tele-label">INTEGRITAS</span><span class="tele-val" id="tIntegrity">100%</span></div>
+      <div class="tele-row"><span class="tele-label">DAYA INTI</span><span class="tele-bar"><i class="tele-fill tele-fill-power" id="tPower"></i></span></div>
+      <div class="tele-row"><span class="tele-label">SUHU INTI</span><span class="tele-val" id="tCore">36.6°</span></div>
+      <div class="tele-row"><span class="tele-label">MODUL</span><span class="tele-val" id="tModules">13 / 13</span></div>
+    </aside>
+
+    <!-- Panel telemetri kanan: sinyal & performa (mic, latensi, uptime nyata). -->
+    <aside class="telemetry telemetry-right" aria-hidden="true">
+      <div class="tele-title">SINYAL</div>
+      <div class="tele-row"><span class="tele-label">MIC</span><span class="tele-bar"><i class="tele-fill tele-fill-mic" id="tMic"></i></span></div>
+      <div class="tele-row"><span class="tele-label">LATENSI</span><span class="tele-val" id="tLatency">—</span></div>
+      <div class="tele-row"><span class="tele-label">UPTIME</span><span class="tele-val" id="tUptime">00:00</span></div>
+      <div class="tele-row"><span class="tele-label">SUARA</span><span class="tele-val">ELEVENLABS</span></div>
+    </aside>
 
     <main class="stage">
       <div class="core-wrap" id="core" tabindex="0" role="button" aria-label="Aktifkan Ultron">
         <div class="ring ring-outer"></div>
         <div class="ring ring-mid"></div>
         <div class="ring ring-inner"></div>
+        <div class="sweep"></div>
+        <div class="reactor">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
         <canvas id="wave" width="360" height="360"></canvas>
         <div class="core-glow"></div>
         <div class="core-eye"></div>
       </div>
 
       <div class="status-line" id="status">SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN</div>
+      <div class="subtitle" id="subtitle"></div>
+
+      <div class="hints" id="hints">
+        <span class="hint-chip">"Jam berapa sekarang?"</span>
+        <span class="hint-chip">"Hitung 128 kali 7"</span>
+        <span class="hint-chip">"Set timer 5 menit"</span>
+        <span class="hint-chip">"10 kilometer ke mil"</span>
+        <span class="hint-chip">"Ceritakan lelucon"</span>
+        <span class="hint-chip">"Catat beli kopi"</span>
+      </div>
     </main>
 
     <section class="console" id="console">

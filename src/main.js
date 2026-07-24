@@ -1,6 +1,7 @@
 import "./style.css";
 import { isSTTSupported, startListening, speak, stopSpeaking } from "./voice.js";
 import { getResponse, getMorningDigestIfDue } from "./brain.js";
+import { onSkillAnnounce } from "./skills.js";
 import { getAudioContext } from "./audio-context.js";
 import { AudioManager } from "./audio-manager.js";
 import { USER_NAME, HONORIFIC } from "./config.js";
@@ -11,6 +12,8 @@ const FIRST_LISTEN_LINES = [`Ya, ${HONORIFIC}?`, `Saya mendengarkan, ${USER_NAME
 
 const core = document.getElementById("core");
 const statusEl = document.getElementById("status");
+const statusChip = document.getElementById("statusChip");
+const subtitleEl = document.getElementById("subtitle");
 const logEl = document.getElementById("log");
 const clockEl = document.getElementById("clock");
 const canvas = document.getElementById("wave");
@@ -20,6 +23,15 @@ const loginForm = document.getElementById("loginForm");
 const loginEmail = document.getElementById("loginEmail");
 const loginPassword = document.getElementById("loginPassword");
 const loginError = document.getElementById("loginError");
+
+// Elemen telemetri HUD (sebagian nilai nyata: mic, latensi, uptime).
+const tCore = document.getElementById("tCore");
+const tMic = document.getElementById("tMic");
+const tLatency = document.getElementById("tLatency");
+const tUptime = document.getElementById("tUptime");
+
+// Label ringkas per-state untuk chip status di header.
+const CHIP_LABELS = { idle: "SIAGA", listening: "MENDENGARKAN", processing: "MEMPROSES", speaking: "MERESPONS" };
 
 // Ambang batas deteksi suara (voice activity). RMS 0..1 dari sinyal mic.
 // Mungkin perlu disetel ulang tergantung sensitivitas mic/lingkungan.
@@ -47,11 +59,18 @@ let speechStartedAt = null;
 let lastSpeechAt = null;
 let speakingStartedAt = null;
 let bargeInStartedAt = null;
+let activatedAt = null; // untuk uptime telemetri
+let lastLatencyMs = null; // waktu jawaban terakhir (skill lokal ~0ms, Gemini lebih lama)
+let coreTemp = 36.6; // suhu inti (estetika HUD, random walk)
 
 setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
 tickClock();
 setInterval(tickClock, 1000);
+setInterval(updateTelemetry, 500);
 drawIdleWave();
+
+// Timer/pengingat yang selesai (dari skills.js) diumumkan lewat sini.
+onSkillAnnounce(announceReminder);
 
 core.addEventListener("click", () => {
   if (active) {
@@ -77,6 +96,39 @@ function setState(next, statusText) {
   core.classList.remove("listening", "processing", "speaking");
   if (next !== "idle") core.classList.add(next);
   if (statusText) statusEl.textContent = statusText;
+
+  document.body.classList.toggle("active", active);
+  const label = next === "idle" && !active ? "OFFLINE" : CHIP_LABELS[next];
+  statusChip.textContent = label;
+  statusChip.className = `hud-tag hud-tag-center${next !== "idle" ? " chip-" + next : ""}`;
+}
+
+/** Tampilkan/hapus subtitle besar (ucapan Ultron yang sedang berlangsung). */
+function setSubtitle(text) {
+  subtitleEl.textContent = text || "";
+  subtitleEl.classList.toggle("show", Boolean(text));
+}
+
+/** Perbarui panel telemetri. Uptime & latensi nyata; suhu inti estetika HUD. */
+function updateTelemetry() {
+  if (activatedAt) {
+    const secs = Math.floor((Date.now() - activatedAt) / 1000);
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    tUptime.textContent = h ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+  } else {
+    tUptime.textContent = "00:00";
+  }
+
+  // Random walk kecil supaya angka terasa hidup, tetap di rentang wajar.
+  coreTemp += (Math.random() - 0.5) * 0.2;
+  coreTemp = Math.max(36.0, Math.min(37.6, coreTemp));
+  tCore.textContent = `${coreTemp.toFixed(1)}°`;
+
+  if (lastLatencyMs != null) tLatency.textContent = `${lastLatencyMs} ms`;
+  if (!active) tMic.style.width = "0%";
 }
 
 function log(role, text) {
@@ -97,6 +149,7 @@ function escapeHtml(str) {
 
 async function activate() {
   active = true;
+  activatedAt = Date.now();
   unlockAudioPlayback();
   setState("processing", "MENGAKTIFKAN...");
   log("sys", "Ultron diaktifkan.");
@@ -213,6 +266,7 @@ async function startHandsFree({ announce }) {
 function speakBranding(text) {
   return new Promise((resolve) => {
     log("ultron", text);
+    setSubtitle(text);
     drawSpeakingWave();
     speak(text, {
       lang: "id-ID",
@@ -231,6 +285,8 @@ function speakBranding(text) {
 
 function deactivate() {
   active = false;
+  activatedAt = null;
+  setSubtitle("");
   stopListeningFn?.();
   stopListeningFn = null;
   stopSpeaking();
@@ -242,6 +298,38 @@ function deactivate() {
     setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     drawIdleWave();
     log("sys", "Ultron nonaktif.");
+  });
+}
+
+/**
+ * Umumkan pengingat/timer yang selesai (dipicu skills.js). Interupsi lembut:
+ * hentikan rekaman/ucapan yang sedang jalan, mainkan cue notifikasi, bacakan
+ * pesannya, lalu kembali mendengarkan bila Ultron masih aktif.
+ */
+function announceReminder(text) {
+  if (!text) return;
+  stopListeningFn?.();
+  stopListeningFn = null;
+  stopSpeaking();
+  stopWaveAnim();
+  log("sys", "Pengingat berbunyi.");
+  setState("speaking", "PENGINGAT...");
+  AudioManager.playNotification();
+  setSubtitle(text);
+  log("ultron", text);
+  drawSpeakingWave();
+  speak(text, {
+    lang: "id-ID",
+    onEnd: () => {
+      stopWaveAnim();
+      if (active) beginRecordingSession();
+      else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+    },
+    onError: () => {
+      stopWaveAnim();
+      if (active) beginRecordingSession();
+      else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+    },
   });
 }
 
@@ -271,6 +359,7 @@ function releaseMic() {
 
 function beginRecordingSession() {
   setState("listening", "MENDENGARKAN...");
+  setSubtitle("");
   speechStartedAt = null;
   lastSpeechAt = null;
   drawListeningWave();
@@ -315,7 +404,9 @@ async function handleFinalTranscript(text) {
   setState("processing", "MEMPROSES...");
   AudioManager.playThinking();
 
+  const t0 = performance.now();
   const reply = await getResponse(text);
+  lastLatencyMs = Math.round(performance.now() - t0);
   if (!active) return; // dinonaktifkan selagi menunggu jawaban
   respond(reply);
 }
@@ -325,6 +416,7 @@ function respond({ text, announceOnline }) {
   speakingStartedAt = performance.now();
   bargeInStartedAt = null;
   log("ultron", text);
+  setSubtitle(text);
   // Cue dan ucapan boleh sedikit tumpang tindih (tidak menunggu cue selesai
   // dulu) supaya tidak menambah delay sebelum Ultron mulai bicara.
   if (announceOnline) AudioManager.playOnline();
@@ -365,6 +457,9 @@ function startMonitorLoop() {
     }
     const rms = Math.sqrt(sum / data.length);
     const now = performance.now();
+
+    // Meteran mic telemetri (nyata) -- skala supaya bicara normal mengisi bar.
+    if (tMic) tMic.style.width = `${Math.min(100, Math.round(rms * 350))}%`;
 
     if (state === "listening") {
       const talking = rms > SPEECH_THRESHOLD;

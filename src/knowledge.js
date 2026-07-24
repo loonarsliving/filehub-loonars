@@ -51,12 +51,32 @@ export const KNOWLEDGE_BASE = [
   {
     keywords: ["apa yang bisa kamu lakukan", "kemampuan kamu", "kamu bisa apa", "fitur kamu apa"],
     answer:
-      "Aku bisa menjawab data MK Connect secara real-time seperti absensi, memo, pengumuman, karyawan, audit media sosial, sampai hasil analisis AI di KontenAI, langsung lewat suara. Untuk pertanyaan umum seperti soal asisten virtual, aku jawab langsung dari pengetahuanku sendiri tanpa perlu membebani otak utama.",
+      "Banyak yang bisa aku tangani sendiri tanpa memanggil otak utama: memberi tahu jam dan tanggal, berhitung, mengonversi satuan, memasang timer atau pengingat, melempar koin atau dadu, memilih angka acak, menyimpan catatan, sampai menceritakan lelucon. Untuk data MK Connect yang bisa berubah seperti absensi, memo, pengumuman, karyawan, audit media sosial, dan analisis KontenAI, aku baru memanggil otak utamaku yang tersambung langsung ke databasenya.",
   },
   {
-    keywords: ["kenapa kamu tidak selalu pakai gemini", "kenapa tidak panggil gemini", "hemat token"],
+    keywords: ["kenapa kamu tidak selalu pakai gemini", "kenapa tidak panggil gemini", "hemat token", "kenapa tidak selalu panggil ai", "kenapa tidak selalu pakai ai"],
     answer:
-      "Supaya lebih hemat dan cepat. Pertanyaan yang jawabannya tetap dan tidak butuh data terbaru dari database, seperti soal konsep asisten virtual atau identitasku sendiri, aku jawab langsung dari pengetahuan lokal. Aku baru memanggil otak utama kalau memang butuh data MK Connect yang bisa berubah sewaktu-waktu.",
+      "Supaya lebih hemat dan cepat. Pertanyaan yang jawabannya bisa aku hitung atau ketahui sendiri di perangkat, seperti waktu, aritmetika, konversi, atau konsep umum, aku jawab langsung tanpa panggilan API sama sekali. Aku baru memanggil otak utama kalau memang butuh data MK Connect yang bisa berubah sewaktu-waktu.",
+  },
+  {
+    keywords: ["apa itu kecerdasan buatan", "apa itu ai", "kecerdasan buatan itu apa", "artificial intelligence"],
+    answer:
+      "Kecerdasan buatan, atau AI, adalah kemampuan mesin untuk melakukan hal-hal yang biasanya butuh kecerdasan manusia, seperti memahami bahasa, mengenali pola, mengambil keputusan, dan belajar dari data. Asisten suara sepertiku adalah salah satu penerapan AI yang paling umum sehari-hari.",
+  },
+  {
+    keywords: ["apa itu machine learning", "pembelajaran mesin", "machine learning itu apa"],
+    answer:
+      "Machine learning, atau pembelajaran mesin, adalah cabang kecerdasan buatan di mana sistem belajar mengenali pola dari data, bukan diprogram aturannya satu per satu. Semakin banyak contoh yang dilihat, semakin baik prediksi atau keputusannya.",
+  },
+  {
+    keywords: ["apa itu speech to text", "apa itu text to speech", "stt dan tts", "pengenalan suara"],
+    answer:
+      "Speech-to-text mengubah ucapan jadi teks, sementara text-to-speech mengubah teks jadi suara. Aku memakai keduanya: suaramu aku ubah jadi teks untuk aku pahami, lalu jawabanku aku ubah kembali jadi suara lewat ElevenLabs.",
+  },
+  {
+    keywords: ["apa itu mk connect", "apa itu mkconnect", "mk connect itu apa", "mkhsistem"],
+    answer:
+      "MK Connect adalah sistem tempat otak utamaku tinggal. Di sanalah data perusahaan seperti absensi, memo, pengumuman, karyawan, sampai analisis media sosial dan KontenAI berada. Aku bertindak sebagai antarmuka suara ke sistem itu.",
   },
 ];
 

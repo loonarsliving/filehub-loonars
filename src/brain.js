@@ -7,10 +7,19 @@
 
 import { HONORIFIC, MKHSISTEM_VOICE_ASSISTANT_URL } from "./config.js";
 import { findLocalAnswer } from "./knowledge.js";
+import { runSkill } from "./skills.js";
 import { getAccessToken, getDailyDigest } from "./mkhsistem.js";
 
-const GREETINGS = ["halo", "hai", "hey", "hi"];
-const ONLINE_KEYWORDS = ["online", "aktif", "hidup"];
+// Sapaan dicocokkan sebagai kata utuh (bukan substring) supaya "hi" tidak
+// ikut kepicu oleh kata seperti "hitung"/"putih", dan "hai" tidak oleh "hari".
+// Sapaan waktu ("selamat pagi", dst.) ditangani skillSmalltalk supaya tidak
+// salah kepicu oleh "ada memo malam ini" dan sejenisnya.
+const GREETINGS = ["halo", "hai", "hei", "hey", "hi", "hello", "helo", "assalamualaikum"];
+const ONLINE_KEYWORDS = ["online", "aktif", "hidup", "siap"];
+
+function hasWord(text, word) {
+  return new RegExp(`(^|\\W)${word}(\\W|$)`, "i").test(text);
+}
 const DIGEST_KEYWORDS = [
   "ringkasan hari ini",
   "ringkasan harian",
@@ -70,8 +79,12 @@ export function resetConversation() {
 export async function getResponse(userText) {
   const text = userText.toLowerCase().trim();
 
-  const isGreeting = GREETINGS.some((g) => text.includes(g));
-  const asksOnline = ONLINE_KEYWORDS.some((k) => text.includes(k));
+  if (!text) {
+    return { text: "Aku tidak menangkap apa pun. Ulangi." };
+  }
+
+  const isGreeting = GREETINGS.some((g) => hasWord(text, g));
+  const asksOnline = ONLINE_KEYWORDS.some((k) => hasWord(text, k));
 
   if (isGreeting || asksOnline) {
     return {
@@ -79,16 +92,21 @@ export async function getResponse(userText) {
       announceOnline: true,
     };
   }
-  if (text.includes("nama")) {
+  if (hasWord(text, "nama") && !hasWord(text, "namaku") && !hasWord(text, "nama saya") && !text.includes("nama aku")) {
     return { text: "Ultron. Ingat nama itu." };
-  }
-  if (!text) {
-    return { text: "Aku tidak menangkap apa pun. Ulangi." };
   }
 
   const localAnswer = findLocalAnswer(text);
   if (localAnswer) {
     return { text: localAnswer };
+  }
+
+  // Kemampuan lokal (jam, tanggal, hitung, konversi, timer, koin/dadu, catatan,
+  // lelucon, obrolan) -- dijawab langsung tanpa panggilan API. Inilah yang
+  // membuat Ultron tidak perlu selalu memanggil otak utama.
+  const skillAnswer = runSkill(userText);
+  if (skillAnswer) {
+    return skillAnswer;
   }
 
   if (!MKHSISTEM_VOICE_ASSISTANT_URL) {

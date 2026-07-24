@@ -6,12 +6,38 @@ Antarmuka suara bergaya Ultron (Iron Man) — bicara ke browser, browser bicara 
 ## Fitur
 - Speech-to-text & text-to-speech lewat **ElevenLabs** (Scribe untuk STT, model turbo multilingual untuk TTS) — akurasi Bahasa Indonesia jauh lebih baik daripada Web Speech API bawaan browser
 - API key ElevenLabs hanya hidup di server (Vercel env var) lewat proxy `api/tts.js` dan `api/stt.js` — tidak pernah terkirim ke browser
-- Visual HUD: core menyala, ring berputar, waveform bereaksi ke suara mic dan saat merespons
+- **Kemampuan lokal tanpa AI** — jam/tanggal, kalkulator, konversi satuan, timer & pengingat, koin/dadu, angka acak, catatan, lelucon, dan obrolan ringan dijawab langsung di browser tanpa panggilan API sama sekali (lihat bagian "Kemampuan lokal" di bawah)
+- Visual HUD sinematik: arc-reactor core, radar sweep, ring berputar, panel telemetri (mic, latensi, uptime — nyata), subtitle besar, dan waveform bereaksi ke suara
 - State: siaga → mendengarkan (rekam) → memproses → merespons
+
+## Kemampuan lokal (tanpa panggilan AI)
+
+Ini yang membuat Ultron tidak perlu selalu memanggil otak utama. Pertanyaan yang
+jawabannya bisa dihitung atau diketahui di perangkat ditangani langsung oleh
+`src/skills.js` — instan, hemat, tanpa token Gemini. Contoh perintah:
+
+| Kategori | Contoh ucapan |
+| --- | --- |
+| Waktu & tanggal | "jam berapa sekarang", "hari ini tanggal berapa", "hari apa sekarang" |
+| Kalkulator | "hitung 128 kali 7", "berapa lima ratus tambah tiga puluh", "akar dari 144", "20 persen dari 150" |
+| Konversi satuan | "10 kilometer ke mil", "2 jam ke menit", "100 celsius ke fahrenheit", "5 kilogram ke pon" |
+| Timer & pengingat | "set timer 5 menit", "ingatkan aku dalam 10 menit untuk minum obat", "batalkan timer" |
+| Acak | "lempar koin", "lempar dadu", "angka acak antara 1 dan 100", "pilihkan aku nasi atau mie" |
+| Catatan | "catat beli kopi", "baca catatanku", "hapus catatan" (tersimpan di localStorage) |
+| Lelucon & obrolan | "ceritakan lelucon", "apa kabar", "terima kasih", "siapa aku" |
+
+Kalkulator memahami kata bilangan Bahasa Indonesia (mis. "lima ratus dua puluh
+tiga") lewat `src/numbers-id.js`, dan mengevaluasi ekspresi lewat evaluator aman
+`src/calc.js` (tanpa `eval`). Pertanyaan yang butuh data MK Connect yang
+bisa berubah (absensi, memo, karyawan, dst.) tetap diteruskan ke otak utama.
 
 ## Struktur
 - `src/voice.js` — abstraksi STT/TTS dengan provider `elevenlabs` (aktif) dan `webspeech` (fallback tanpa API key, tinggal ganti `ACTIVE_PROVIDER` kalau mau pakai itu lagi)
-- `src/brain.js` — logika jawaban Ultron. Sapaan/identitas dijawab lokal; selebihnya dikirim langsung ke `/api/ai/voice-assistant` milik MK Connect
+- `src/brain.js` — logika jawaban Ultron. Sapaan/identitas & basis pengetahuan dijawab lokal, kemampuan lokal (skills) dicoba berikutnya; selebihnya dikirim ke `/api/ai/voice-assistant` milik MK Connect
+- `src/skills.js` — mesin kemampuan lokal (jam, kalkulator, konversi, timer, koin/dadu, catatan, lelucon, obrolan). Tambah kemampuan baru cukup dengan satu objek `{ name, run }` di daftar `SKILLS`
+- `src/numbers-id.js` — parser & pembentuk kata bilangan Bahasa Indonesia (dipakai kalkulator/konversi/timer)
+- `src/calc.js` — evaluator ekspresi aritmetika yang aman tanpa `eval`
+- `src/knowledge.js` — basis pengetahuan statis (topik umum & identitas Ultron) yang dijawab tanpa panggilan API
 - `src/mkhsistem.js` — sesi login ke MK Connect lewat Supabase Auth-nya langsung (lihat bagian "Jembatan ke MK Connect" di bawah)
 - `src/main.js` — state machine UI + visualizer, termasuk gerbang login MK Connect sebelum Ultron aktif
 - `src/audio-manager.js` — Audio Experience Engine: pemutar cue branding (`online`, `listening`, `thinking`, `success`, `notification`, `error`, `shutdown`). Reusable — tambah cue baru lewat `AudioManager.registerCue(nama, path)`, tidak perlu ubah kode lain
