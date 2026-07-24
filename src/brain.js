@@ -7,13 +7,31 @@
 
 import { HONORIFIC, MKHSISTEM_VOICE_ASSISTANT_URL } from "./config.js";
 import { findLocalAnswer } from "./knowledge.js";
-import { getAccessToken } from "./mkhsistem.js";
+import { getAccessToken, getDailyDigest } from "./mkhsistem.js";
 
 const GREETINGS = ["halo", "hai", "hey", "hi"];
 const ONLINE_KEYWORDS = ["online", "aktif", "hidup"];
+const DIGEST_KEYWORDS = [
+  "ringkasan hari ini",
+  "ringkasan harian",
+  "briefing hari ini",
+  "briefing harian",
+  "rekap hari ini",
+  "update hari ini",
+  "kondisi hari ini",
+  "apa yang terjadi hari ini",
+  "gimana hari ini",
+];
 
 const MAX_HISTORY_TURNS = 12; // pasangan user+assistant, dipangkas dari yang terlama
 let conversationHistory = [];
+
+// Cache ringkasan harian di memori supaya tanya berkali-kali dalam satu
+// sesi tidak berulang kali baca tabel -- digest sendiri cuma di-generate
+// ulang sekali sehari (17:00 WITA) di server, jadi TTL cache di sini bisa
+// longgar.
+const DIGEST_CACHE_TTL_MS = 30 * 60 * 1000;
+let digestCache = null; // { text, fetchedAt }
 
 function timeOfDayGreeting() {
   const hour = new Date().getHours();
@@ -77,6 +95,14 @@ export async function getResponse(userText) {
     return { text: `Aku belum login ke MK Connect, ${HONORIFIC}. Aktifkan ulang untuk login.` };
   }
 
+  const asksDigest = DIGEST_KEYWORDS.some((k) => text.includes(k));
+  if (asksDigest) {
+    const digestAnswer = await getDigestAnswer(token);
+    if (digestAnswer) return { text: digestAnswer };
+    // Tidak ada digest tersimpan (mis. cron belum pernah jalan) -- lanjut
+    // ke Gemini di bawah supaya tetap ada jawaban, bukan diam saja.
+  }
+
   try {
     const res = await fetch(MKHSISTEM_VOICE_ASSISTANT_URL, {
       method: "POST",
@@ -92,5 +118,26 @@ export async function getResponse(userText) {
   } catch (err) {
     console.error("Voice assistant error:", err);
     return { text: `Maaf, ${HONORIFIC}. Aku gagal menghubungi otak utamaku barusan.` };
+  }
+}
+
+/**
+ * Ringkasan harian dari cache di memori, atau baca ulang dari MK Connect
+ * kalau cache kosong/kedaluwarsa -- baca tabel biasa, BUKAN panggilan
+ * Gemini, jadi tidak menghabiskan token sama sekali.
+ */
+async function getDigestAnswer(token) {
+  const now = Date.now();
+  if (digestCache && now - digestCache.fetchedAt < DIGEST_CACHE_TTL_MS) {
+    return digestCache.text;
+  }
+  try {
+    const digest = await getDailyDigest(token);
+    if (!digest?.digest_text) return null;
+    digestCache = { text: digest.digest_text, fetchedAt: now };
+    return digest.digest_text;
+  } catch (err) {
+    console.error("Gagal mengambil ringkasan harian:", err);
+    return null;
   }
 }

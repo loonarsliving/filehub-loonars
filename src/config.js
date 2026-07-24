@@ -21,3 +21,10 @@ export const MKHSISTEM_SUPABASE_ANON_KEY =
 // menyimpan API key LLM apa pun sendiri.
 export const MKHSISTEM_VOICE_ASSISTANT_URL =
   import.meta.env.VITE_MKHSISTEM_VOICE_ASSISTANT_URL || "https://mkh.haluoleo.id/api/ai/voice-assistant";
+
+// Ringkasan harian MK Connect (dibuat sekali sehari jam 17:00 WITA oleh
+// pg_cron di server, lihat supabase/migrations/0171 di repo Mkhsistem).
+// Ultron membaca baris ini langsung -- tanpa panggil Gemini -- untuk
+// menjawab pertanyaan "ringkasan hari ini" secara instan.
+export const MKHSISTEM_DAILY_DIGEST_URL =
+  import.meta.env.VITE_MKHSISTEM_DAILY_DIGEST_URL || "https://mkh.haluoleo.id/api/ai/voice-bridge/daily-digest";

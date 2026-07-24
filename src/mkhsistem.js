@@ -5,7 +5,7 @@
 // menyimpan sesi di localStorage sendiri, jadi login cukup sekali per browser.
 
 import { createClient } from "@supabase/supabase-js";
-import { MKHSISTEM_SUPABASE_URL, MKHSISTEM_SUPABASE_ANON_KEY } from "./config.js";
+import { MKHSISTEM_DAILY_DIGEST_URL, MKHSISTEM_SUPABASE_ANON_KEY, MKHSISTEM_SUPABASE_URL } from "./config.js";
 
 let client = null;
 
@@ -45,4 +45,19 @@ export async function logout() {
 export async function getAccessToken() {
   const session = await getSession();
   return session?.access_token ?? null;
+}
+
+/**
+ * Ringkasan harian MK Connect terbaru -- satu baca tabel biasa, TIDAK
+ * memanggil Gemini. Return null kalau belum ada digest (mis. cron belum
+ * pernah jalan) atau token tidak tersedia.
+ */
+export async function getDailyDigest(token) {
+  if (!token) return null;
+  const res = await fetch(MKHSISTEM_DAILY_DIGEST_URL, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => ({}));
+  return data.digest ?? null;
 }
