@@ -1,5 +1,5 @@
-// Identitas pengguna & sebutan yang dipakai Ultron saat bicara.
-// Ubah di sini saja -- tidak perlu ubah brain.js/main.js.
+// Identitas asisten & pengguna. Ubah di sini saja -- dipakai di brain.js/main.js.
+export const ASSISTANT_NAME = "FRIDAY";
 export const USER_NAME = "Avi";
 export const HONORIFIC = "Bos";
 

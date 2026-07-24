@@ -1,16 +1,29 @@
-// Logika respons Ultron. Sapaan/identitas/pengetahuan umum dijawab lokal
-// (cepat, tanpa round trip, tanpa token Gemini -- lihat knowledge.js). Semua
-// yang butuh data MK Connect sungguhan dikirim ke endpoint
-// /api/ai/voice-assistant milik Mkhsistem (lihat mkhsistem.js untuk sesi
-// login) -- otaknya (Gemini) dan API key-nya hidup di server Mkhsistem,
-// bukan di Ultron.
+// Logika respons FRIDAY. Secara default FRIDAY menjawab MURNI dari kemampuan &
+// pengetahuan lokal (cepat, tanpa panggilan AI). Ia hanya menghubungi MK Connect
+// (otak AI/Gemini di server Mkhsistem) bila ucapan memuat kata pembuka
+// "cek perusahaan" -- itulah "pintu" ke MK Connect. Tanpa kata pembuka itu,
+// pertanyaan yang tak dikenali dijawab dengan fallback lokal, bukan diteruskan
+// ke AI.
 
-import { HONORIFIC, MKHSISTEM_VOICE_ASSISTANT_URL } from "./config.js";
+import { ASSISTANT_NAME, HONORIFIC, MKHSISTEM_VOICE_ASSISTANT_URL } from "./config.js";
 import { findLocalAnswer } from "./knowledge.js";
 import { findFact } from "./facts.js";
 import { findLoonars } from "./loonars.js";
 import { runSkill } from "./skills.js";
 import { getAccessToken, getDailyDigest } from "./mkhsistem.js";
+
+// Kata pembuka gerbang MK Connect. Hanya bila salah satunya muncul, FRIDAY
+// masuk ke MK Connect / AI. Sisa ucapan setelah kata pembuka dipakai sebagai
+// pertanyaan sesungguhnya.
+const COMPANY_GATE = [
+  "cek perusahaan",
+  "check perusahaan",
+  "cek data perusahaan",
+  "periksa perusahaan",
+  "buka mk connect",
+  "cek mk connect",
+  "tanya perusahaan",
+];
 
 // Sapaan dicocokkan sebagai kata utuh (bukan substring) supaya "hi" tidak
 // ikut kepicu oleh kata seperti "hitung"/"putih", dan "hai" tidak oleh "hari".
@@ -87,6 +100,16 @@ export async function getResponse(userText) {
     return { text: "Aku tidak menangkap apa pun. Ulangi." };
   }
 
+  // GERBANG MK CONNECT: hanya bila ucapan memuat kata pembuka "cek perusahaan"
+  // (dsb.) FRIDAY masuk ke MK Connect / AI. Pertanyaan sesungguhnya adalah sisa
+  // ucapan setelah kata pembuka dibuang.
+  const gate = matchCompanyGate(userText);
+  if (gate) {
+    return await askMkConnect(gate.query);
+  }
+
+  // ---- MULAI DI SINI: MURNI LOKAL, TIDAK PERNAH MEMANGGIL AI ----
+
   const isGreeting = GREETINGS.some((g) => hasWord(text, g));
   const asksOnline = ONLINE_KEYWORDS.some((k) => hasWord(text, k));
 
@@ -97,7 +120,7 @@ export async function getResponse(userText) {
     };
   }
   if (hasWord(text, "nama") && !hasWord(text, "namaku") && !hasWord(text, "nama saya") && !text.includes("nama aku")) {
-    return { text: "Ultron. Ingat nama itu." };
+    return { text: `Namaku ${ASSISTANT_NAME}, ${HONORIFIC}. Siap membantu.` };
   }
 
   const localAnswer = findLocalAnswer(text);
@@ -106,28 +129,66 @@ export async function getResponse(userText) {
   }
 
   // Kemampuan lokal (jam, tanggal, hitung, konversi, timer, koin/dadu, catatan,
-  // lelucon, kutipan, fakta unik, obrolan) -- dijawab langsung tanpa panggilan
-  // API. Inilah yang membuat Ultron tidak perlu selalu memanggil otak utama.
+  // lelucon, kutipan, fakta unik, obrolan) -- dijawab langsung tanpa panggilan API.
   const skillAnswer = runSkill(userText);
   if (skillAnswer) {
     return skillAnswer;
   }
 
   // Basis pengetahuan umum yang "ditanamkan" (sains, antariksa, geografi,
-  // Indonesia, teknologi, tubuh manusia, penemu, persona ala JARVIS) -- juga
-  // dijawab lokal tanpa panggilan API.
+  // Indonesia, teknologi, tubuh manusia, penemu, persona) -- juga lokal.
   const fact = findFact(text);
   if (fact) {
     return { text: fact };
   }
 
   // Pengetahuan bisnis Loonars (pengelolaan villa/kos/homestay/F&B, model
-  // asset-light, jalan menuju IPO) -- juga dijawab lokal tanpa panggilan API.
+  // asset-light, jalan menuju IPO) -- juga lokal.
   const loonars = findLoonars(text);
   if (loonars) {
     return { text: loonars };
   }
 
+  // Fallback lokal -- TIDAK memanggil AI. Arahkan ke gerbang perusahaan bila
+  // pertanyaannya memang soal data MK Connect.
+  return {
+    text: `Maaf, ${HONORIFIC}, itu di luar pengetahuan lokalku. Kalau ini soal data perusahaan, awali dengan "cek perusahaan".`,
+  };
+}
+
+/**
+ * Cari kata pembuka gerbang perusahaan pada ucapan. Mengembalikan { query }
+ * berisi sisa ucahan setelah kata pembuka dibuang (bisa string kosong bila
+ * pengguna hanya bilang "cek perusahaan"), atau null bila tak ada kata pembuka.
+ */
+function matchCompanyGate(userText) {
+  const lower = userText.toLowerCase();
+  for (const phrase of COMPANY_GATE) {
+    const idx = lower.indexOf(phrase);
+    if (idx !== -1) {
+      const query = (userText.slice(0, idx) + " " + userText.slice(idx + phrase.length))
+        .replace(/\s+/g, " ")
+        .replace(/^[\s,.:;\-]+|[\s,.:;\-]+$/g, "")
+        .trim();
+      return { query };
+    }
+  }
+  return null;
+}
+
+/** True bila ucapan memicu gerbang MK Connect (dipakai main.js untuk memicu login). */
+export function isCompanyGate(userText) {
+  return matchCompanyGate(userText) !== null;
+}
+
+/**
+ * Jalur MK Connect / AI. Hanya dipanggil setelah gerbang "cek perusahaan"
+ * terpicu. `query` adalah pertanyaan sesungguhnya (tanpa kata pembuka).
+ */
+async function askMkConnect(query) {
+  if (!query) {
+    return { text: `Pintu MK Connect terbuka, ${HONORIFIC}. Apa yang ingin kamu cek?` };
+  }
   if (!MKHSISTEM_VOICE_ASSISTANT_URL) {
     return { text: `Aku belum disambungkan ke MK Connect, ${HONORIFIC}. Set dulu VITE_MKHSISTEM_VOICE_ASSISTANT_URL.` };
   }
@@ -142,24 +203,23 @@ export async function getResponse(userText) {
     return { text: `Aku belum login ke MK Connect, ${HONORIFIC}. Aktifkan ulang untuk login.` };
   }
 
-  const asksDigest = DIGEST_KEYWORDS.some((k) => text.includes(k));
+  const asksDigest = DIGEST_KEYWORDS.some((k) => query.toLowerCase().includes(k));
   if (asksDigest) {
     const digestAnswer = await getDigestAnswer(token);
     if (digestAnswer) return { text: digestAnswer };
-    // Tidak ada digest tersimpan (mis. cron belum pernah jalan) -- lanjut
-    // ke Gemini di bawah supaya tetap ada jawaban, bukan diam saja.
+    // Tidak ada digest tersimpan -- lanjut ke Gemini supaya tetap ada jawaban.
   }
 
   try {
     const res = await fetch(MKHSISTEM_VOICE_ASSISTANT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ message: userText, history: conversationHistory }),
+      body: JSON.stringify({ message: query, history: conversationHistory }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Voice assistant gagal (${res.status})`);
 
-    pushHistory("user", userText);
+    pushHistory("user", query);
     pushHistory("assistant", data.text);
     return { text: data.text };
   } catch (err) {

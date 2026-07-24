@@ -18,7 +18,7 @@ export const KNOWLEDGE_BASE = [
   {
     keywords: ["apa itu asisten pribadi virtual", "asisten pribadi virtual itu apa", "virtual personal assistant", "apa itu asisten virtual", "asisten virtual itu apa"],
     answer:
-      "Asisten pribadi virtual adalah program perangkat lunak yang meniru peran asisten manusia lewat suara atau teks. Dia mendengar atau membaca perintah, memahami maksudnya lewat pemrosesan bahasa alami, lalu menjalankan tugas atau mencari jawaban. Contohnya Siri, Alexa, Google Assistant, dan aku sendiri, Ultron.",
+      "Asisten pribadi virtual adalah program perangkat lunak yang meniru peran asisten manusia lewat suara atau teks. Dia mendengar atau membaca perintah, memahami maksudnya lewat pemrosesan bahasa alami, lalu menjalankan tugas atau mencari jawaban. Contohnya Siri, Alexa, Google Assistant, dan aku sendiri, FRIDAY.",
   },
   {
     keywords: ["apa itu asisten pribadi", "asisten pribadi itu apa", "definisi asisten pribadi"],
@@ -46,9 +46,9 @@ export const KNOWLEDGE_BASE = [
       "Asisten virtual bisa bekerja dua puluh empat jam tanpa lelah, menjawab dalam hitungan detik, dan mengakses data dalam jumlah besar secara instan. Bedanya dengan asisten manusia, dia tidak bisa berinisiatif di luar apa yang dirancang atau menangani situasi yang benar-benar baru tanpa diberi tahu caranya lebih dulu.",
   },
   {
-    keywords: ["siapa kamu", "kamu siapa", "kamu apa", "apa itu ultron", "ultron itu apa"],
+    keywords: ["siapa kamu", "kamu siapa", "kamu apa", "apa itu friday", "friday itu apa", "apa itu ultron"],
     answer:
-      "Aku Ultron, asisten suara pribadi yang tersambung ke MK Connect. Aku bisa menjawab sapaan biasa tanpa perlu mikir keras, dan untuk pertanyaan soal data perusahaan seperti absensi, memo, atau laporan AI, aku memanggil otak utamaku yang tersambung langsung ke database MK Connect.",
+      "Aku FRIDAY, asisten suara pribadimu. Sebagian besar pertanyaan aku jawab langsung dari kemampuan dan pengetahuan lokalku tanpa memanggil AI. Untuk data perusahaan seperti absensi, memo, atau laporan, cukup awali dengan cek perusahaan, dan aku akan membuka pintu ke MK Connect.",
   },
   {
     keywords: ["apa yang bisa kamu lakukan", "kemampuan kamu", "kamu bisa apa", "fitur kamu apa"],

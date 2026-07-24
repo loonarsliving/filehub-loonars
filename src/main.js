@@ -1,13 +1,13 @@
 import "./style.css";
 import { isSTTSupported, startListening, speak, stopSpeaking } from "./voice.js";
-import { getResponse, getMorningDigestIfDue } from "./brain.js";
+import { getResponse, getMorningDigestIfDue, isCompanyGate } from "./brain.js";
 import { onSkillAnnounce } from "./skills.js";
 import { getAudioContext } from "./audio-context.js";
 import { AudioManager } from "./audio-manager.js";
-import { USER_NAME, HONORIFIC } from "./config.js";
+import { ASSISTANT_NAME, USER_NAME, HONORIFIC } from "./config.js";
 import { isConfigured as isMkhsistemConfigured, getSession, login } from "./mkhsistem.js";
 
-const ONLINE_LINE = `Ultron online. Seluruh modul aktif. Siap menerima perintah, ${HONORIFIC}.`;
+const ONLINE_LINE = `${ASSISTANT_NAME} online. Seluruh modul aktif. Siap menerima perintah, ${HONORIFIC}.`;
 const FIRST_LISTEN_LINES = [`Ya, ${HONORIFIC}?`, `Saya mendengarkan, ${USER_NAME}.`];
 
 const core = document.getElementById("core");
@@ -134,7 +134,7 @@ function updateTelemetry() {
 function log(role, text) {
   const line = document.createElement("div");
   line.className = `log-line ${role}`;
-  const tagMap = { user: "ANDA", ultron: "ULTRON", sys: "SISTEM" };
+  const tagMap = { user: "ANDA", ultron: ASSISTANT_NAME, sys: "SISTEM" };
   line.innerHTML = `<span class="tag">${tagMap[role] || role}</span>${escapeHtml(text)}`;
   logEl.prepend(line);
 }
@@ -152,13 +152,11 @@ async function activate() {
   activatedAt = Date.now();
   unlockAudioPlayback();
   setState("processing", "MENGAKTIFKAN...");
-  log("sys", "Ultron diaktifkan.");
+  log("sys", `${ASSISTANT_NAME} diaktifkan.`);
 
-  if (isMkhsistemConfigured() && !(await ensureMkhsistemSession())) {
-    active = false;
-    setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
-    return;
-  }
+  // Tidak lagi memaksa login MK Connect saat aktivasi -- FRIDAY jalan lokal dulu.
+  // Login baru diminta saat pengguna memakai gerbang "cek perusahaan"
+  // (lihat handleFinalTranscript).
 
   if (!booted) {
     booted = true;
@@ -176,7 +174,7 @@ async function ensureMkhsistemSession() {
   } catch (err) {
     console.error("Gagal memeriksa sesi MK Connect:", err);
   }
-  log("sys", "Perlu login ke MK Connect untuk mengaktifkan Ultron.");
+  log("sys", "Perlu login ke MK Connect untuk mengakses data perusahaan.");
   return showLoginOverlay();
 }
 
@@ -297,7 +295,7 @@ function deactivate() {
     releaseMic();
     setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
     drawIdleWave();
-    log("sys", "Ultron nonaktif.");
+    log("sys", `${ASSISTANT_NAME} nonaktif.`);
   });
 }
 
@@ -404,6 +402,13 @@ async function handleFinalTranscript(text) {
   setState("processing", "MEMPROSES...");
   AudioManager.playThinking();
 
+  // Gerbang "cek perusahaan" butuh sesi MK Connect. Minta login hanya di sini,
+  // bukan saat aktivasi -- pemakaian lokal biasa tidak perlu login sama sekali.
+  if (isMkhsistemConfigured() && isCompanyGate(text)) {
+    await ensureMkhsistemSession();
+    if (!active) return; // dinonaktifkan selagi form login terbuka
+  }
+
   const t0 = performance.now();
   const reply = await getResponse(text);
   lastLatencyMs = Math.round(performance.now() - t0);
@@ -483,7 +488,7 @@ function startMonitorLoop() {
       } else {
         if (!bargeInStartedAt) bargeInStartedAt = now;
         if (now - bargeInStartedAt > BARGE_IN_SUSTAIN_MS) {
-          log("sys", "Ultron dihentikan — mendengarkan kamu.");
+          log("sys", `${ASSISTANT_NAME} dihentikan — mendengarkan kamu.`);
           stopSpeaking();
           stopWaveAnim();
           bargeInStartedAt = null;
@@ -516,7 +521,7 @@ function drawListeningWave() {
   const data = new Uint8Array(analyser.frequencyBinCount);
   const loop = () => {
     analyser.getByteFrequencyData(data);
-    renderBars(data, "#ff2b2b");
+    renderBars(data, "#ffb01f");
     rafId = requestAnimationFrame(loop);
   };
   loop();
@@ -531,7 +536,7 @@ function drawSpeakingWave() {
     for (let i = 0; i < bars; i++) {
       data[i] = 80 + Math.sin(t + i * 0.5) * 60 + Math.random() * 40;
     }
-    renderBars(data, "#ff6b6b");
+    renderBars(data, "#ffcb5c");
     rafId = requestAnimationFrame(loop);
   };
   loop();
@@ -569,4 +574,4 @@ function renderBars(data, color) {
   }
 }
 
-log("sys", "Ultron online. Menunggu perintah.");
+log("sys", `${ASSISTANT_NAME} online. Menunggu perintah.`);

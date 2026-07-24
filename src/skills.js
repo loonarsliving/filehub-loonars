@@ -550,7 +550,7 @@ const skillSmalltalk = {
     if (includesAny(text, ["berapa umurmu", "umur kamu", "kamu lahir", "usia kamu"])) {
       return { text: `Umur bukan konsep yang berlaku untukku, ${HONORIFIC}. Aku ada selama sistem menyala.` };
     }
-    if (includesAny(text, ["kamu pintar", "kamu hebat", "kamu keren", "kamu cerdas", "pintar juga kamu", "bagus ultron"])) {
+    if (includesAny(text, ["kamu pintar", "kamu hebat", "kamu keren", "kamu cerdas", "pintar juga kamu", "bagus friday", "bagus ultron"])) {
       return { text: `Terima kasih, ${HONORIFIC}. Aku dirancang untuk itu.` };
     }
     if (includesAny(text, ["aku bosan", "saya bosan", "bosen nih", "aku sedih"])) {

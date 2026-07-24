@@ -1,6 +1,6 @@
-# Ultron
+# FRIDAY
 
-Antarmuka suara bergaya Ultron (Iron Man) — bicara ke browser, browser bicara balik.
+Antarmuka suara bergaya FRIDAY (Iron Man) — bicara ke browser, browser bicara balik.
 
 
 ## Fitur
@@ -12,7 +12,7 @@ Antarmuka suara bergaya Ultron (Iron Man) — bicara ke browser, browser bicara 
 
 ## Kemampuan lokal (tanpa panggilan AI)
 
-Ini yang membuat Ultron tidak perlu selalu memanggil otak utama. Pertanyaan yang
+Ini yang membuat FRIDAY tidak perlu selalu memanggil otak utama. Pertanyaan yang
 jawabannya bisa dihitung atau diketahui di perangkat ditangani langsung oleh
 `src/skills.js` — instan, hemat, tanpa token Gemini. Contoh perintah:
 
@@ -33,7 +33,7 @@ tiga") lewat `src/numbers-id.js`, dan mengevaluasi ekspresi lewat evaluator aman
 `src/calc.js` (tanpa `eval`).
 
 **Pengetahuan yang ditanamkan** — seperti asisten ala JARVIS yang dibekali
-pengetahuan luas, Ultron menyimpan lebih dari seratus fakta terkurasi di
+pengetahuan luas, FRIDAY menyimpan lebih dari seratus fakta terkurasi di
 `src/facts.js`: antariksa & astronomi, geografi dunia, Indonesia, teknologi &
 komputer, sains & tubuh manusia, penemu, sejarah dunia, keuangan & investasi,
 kekayaan & kebebasan finansial, pengembang properti, cara mempertahankan
@@ -43,7 +43,7 @@ bank", "apa itu KPR", "cara mempertahankan kekayaan", "kapan Perang Dunia Kedua"
 Pertanyaan yang butuh data MK Connect yang bisa berubah (absensi, memo, karyawan,
 dst.) tetap diteruskan ke otak utama.
 
-**Pengetahuan bisnis Loonars** (`src/loonars.js`) — Ultron paham bisnis tempatnya
+**Pengetahuan bisnis Loonars** (`src/loonars.js`) — FRIDAY paham bisnis tempatnya
 bekerja: pengelolaan villa, rumah kos, homestay, dan F&B; model perusahaan
 pengelola tanpa aset (asset-light) dan sumber pendapatannya; metrik hospitality
 (okupansi, ADR, RevPAR, NOI, food cost, prime cost, menu engineering); serta
@@ -55,16 +55,16 @@ yang berubah-ubah (yang itu tetap lewat otak utama).
 
 ## Struktur
 - `src/voice.js` — abstraksi STT/TTS dengan provider `elevenlabs` (aktif) dan `webspeech` (fallback tanpa API key, tinggal ganti `ACTIVE_PROVIDER` kalau mau pakai itu lagi)
-- `src/brain.js` — logika jawaban Ultron. Sapaan/identitas & basis pengetahuan dijawab lokal, kemampuan lokal (skills) dicoba berikutnya; selebihnya dikirim ke `/api/ai/voice-assistant` milik MK Connect
+- `src/brain.js` — logika jawaban FRIDAY. Secara default **murni lokal** (sapaan, kemampuan/skills, pengetahuan, Loonars). FRIDAY hanya masuk ke MK Connect / AI bila ucapan memuat kata pembuka **"cek perusahaan"** — lihat bagian "Gerbang MK Connect" di bawah. Tanpa kata pembuka itu, pertanyaan yang tak dikenali dijawab fallback lokal, bukan diteruskan ke AI
 - `src/skills.js` — mesin kemampuan lokal (jam, kalkulator, konversi, timer, koin/dadu, catatan, lelucon, obrolan). Tambah kemampuan baru cukup dengan satu objek `{ name, run }` di daftar `SKILLS`
 - `src/numbers-id.js` — parser & pembentuk kata bilangan Bahasa Indonesia (dipakai kalkulator/konversi/timer)
 - `src/calc.js` — evaluator ekspresi aritmetika yang aman tanpa `eval`
 - `src/match.js` — pencocokan pengetahuan yang toleran terhadap variasi ucapan (STT): cocok bila keyword muncul utuh ATAU semua katanya hadir (urutan bebas), plus normalisasi ejaan brand "Loonars". Dipakai knowledge/facts/loonars agar pertanyaan pengetahuan andal dijawab lokal, bukan jatuh ke AI
-- `src/knowledge.js` — basis pengetahuan konsep (asisten virtual, AI/ML, identitas Ultron) yang dijawab tanpa panggilan API
+- `src/knowledge.js` — basis pengetahuan konsep (asisten virtual, AI/ML, identitas FRIDAY) yang dijawab tanpa panggilan API
 - `src/facts.js` — basis pengetahuan umum yang ditanamkan (sains, antariksa, geografi, Indonesia, teknologi, tubuh manusia, penemu, sejarah, keuangan, kekayaan, properti, perbankan, persona) + koleksi kutipan & fakta unik. Tambah pengetahuan baru cukup satu objek `{ keywords, answer }`
 - `src/loonars.js` — pengetahuan bisnis Loonars: pengelolaan villa, rumah kos, homestay, dan F&B; model perusahaan pengelola tanpa aset (asset-light); metrik hospitality (okupansi/ADR/RevPAR/NOI, food cost/prime cost); sampai jalan menuju IPO. Dijawab lokal tanpa panggilan API
 - `src/mkhsistem.js` — sesi login ke MK Connect lewat Supabase Auth-nya langsung (lihat bagian "Jembatan ke MK Connect" di bawah)
-- `src/main.js` — state machine UI + visualizer, termasuk gerbang login MK Connect sebelum Ultron aktif
+- `src/main.js` — state machine UI + visualizer. FRIDAY aktif tanpa perlu login; login MK Connect baru diminta saat pengguna memakai gerbang "cek perusahaan"
 - `src/audio-manager.js` — Audio Experience Engine: pemutar cue branding (`online`, `listening`, `thinking`, `success`, `notification`, `error`, `shutdown`). Reusable — tambah cue baru lewat `AudioManager.registerCue(nama, path)`, tidak perlu ubah kode lain
 - `public/audio/` — file mp3 cue branding (lihat `AUDIO.md` cara generate)
 - `scripts/generate-audio-assets.mjs` — generator sekali-jalan cue branding lewat ElevenLabs Sound Effects API (fallback Freesound)
@@ -72,21 +72,25 @@ yang berubah-ubah (yang itu tetap lewat otak utama).
 
 ## Jembatan ke MK Connect (Mkhsistem)
 
-Ultron bisa menjawab dan bertindak atas data MK Connect (absensi, memo, pengumuman, karyawan, notifikasi, CRM, dll) lewat suara — **tanpa API key LLM sendiri**. Otaknya (Gemini) hidup di server MK Connect, memakai `GEMINI_API_KEY` yang memang sudah dipakai modul AI MK Connect lainnya (HR/Markom/CRM/kontenai) — Ultron tidak menambah biaya LLM baru, cuma jadi client suara ke sana.
+FRIDAY bisa menjawab dan bertindak atas data MK Connect (absensi, memo, pengumuman, karyawan, notifikasi, CRM, dll) lewat suara — **tanpa API key LLM sendiri**. Otaknya (Gemini) hidup di server MK Connect, memakai `GEMINI_API_KEY` yang memang sudah dipakai modul AI MK Connect lainnya (HR/Markom/CRM/kontenai) — FRIDAY tidak menambah biaya LLM baru, cuma jadi client suara ke sana.
+
+### Gerbang MK Connect ("cek perusahaan")
+
+FRIDAY **tidak** otomatis menghubungi MK Connect. Ia hanya masuk ke MK Connect / AI bila ucapan diawali/mengandung kata pembuka **"cek perusahaan"** (juga: "periksa perusahaan", "tanya perusahaan", "cek data perusahaan", "buka mk connect"). Sisa ucapan setelah kata pembuka itulah pertanyaan yang dikirim ke Gemini. Tanpa kata pembuka, FRIDAY menjawab murni lokal — hemat, cepat, dan tidak membebani otak utama. Contoh: *"cek perusahaan, berapa karyawan hadir hari ini"*.
 
 Alurnya:
 
-1. Saat diaktifkan, Ultron meminta login (email/password akun Super Admin MK Connect) lewat `src/mkhsistem.js` — login langsung ke project Supabase yang sama dengan MK Connect, sesi tersimpan di browser sehingga login cukup sekali.
-2. Setiap giliran bicara yang bukan sapaan dikirim langsung (dari browser) ke `POST /api/ai/voice-assistant` milik MK Connect, bersama token sesi tadi dan riwayat percakapan singkat.
+1. FRIDAY aktif langsung tanpa login. Login (email/password akun MK Connect) baru diminta saat pertama kali memakai gerbang "cek perusahaan" — login langsung ke project Supabase yang sama dengan MK Connect, sesi tersimpan di browser sehingga login cukup sekali.
+2. Hanya giliran bicara yang memuat kata pembuka "cek perusahaan" yang dikirim (dari browser) ke `POST /api/ai/voice-assistant` milik MK Connect, bersama token sesi tadi dan riwayat percakapan singkat.
 3. Di server MK Connect, Gemini (lewat `lib/ai/voice-bridge/gemini-agent.ts`) memutuskan tool mana yang perlu dipanggil (absensi, memo, karyawan, dst — lihat `lib/ai/voice-bridge/tools.ts`), menjalankannya langsung terhadap database (RLS-scoped), lalu menyusun satu jawaban singkat untuk dibacakan.
-4. MK Connect sendiri yang menegakkan otorisasi (endpoint dibatasi khusus Super Admin lewat RLS + pengecekan role) dan CORS (hanya origin Ultron yang diizinkan) — lihat `app/api/ai/voice-assistant/route.ts` di repo Mkhsistem.
+4. MK Connect sendiri yang menegakkan otorisasi (endpoint dibatasi khusus Super Admin lewat RLS + pengecekan role) dan CORS (hanya origin FRIDAY yang diizinkan) — lihat `app/api/ai/voice-assistant/route.ts` di repo Mkhsistem.
 
 ### Env var tambahan (Vercel → Project Settings → Environment Variables)
 
 - `VITE_MKHSISTEM_SUPABASE_URL`, `VITE_MKHSISTEM_SUPABASE_ANON_KEY` — sama seperti `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` di project Mkhsistem. Dipakai di browser, bukan rahasia (RLS yang menjaga data).
 - `VITE_MKHSISTEM_VOICE_ASSISTANT_URL` — URL endpoint percakapan suara di deployment Mkhsistem, mis. `https://mkconnect.vercel.app/api/ai/voice-assistant`.
 
-Di sisi Mkhsistem, set `VOICE_BRIDGE_ALLOWED_ORIGIN` ke origin deployment Ultron ini (mis. `https://ultron.vercel.app`) supaya CORS mengizinkannya, dan pastikan `GEMINI_API_KEY` sudah disetel (biasanya sudah, karena dipakai modul AI lain).
+Di sisi Mkhsistem, set `VOICE_BRIDGE_ALLOWED_ORIGIN` ke origin deployment FRIDAY ini (mis. `https://ultron.vercel.app`) supaya CORS mengizinkannya, dan pastikan `GEMINI_API_KEY` sudah disetel (biasanya sudah, karena dipakai modul AI lain).
 
 ## Audio branding
 

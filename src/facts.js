@@ -18,9 +18,9 @@ export const FACTS = [
   // Persona / identitas ala JARVIS
   // ---------------------------------------------------------------------------
   {
-    keywords: ["kepanjangan ultron", "ultron singkatan", "singkatan dari ultron", "ultron kepanjangan"],
+    keywords: ["kepanjangan friday", "friday singkatan", "singkatan dari friday", "friday kepanjangan", "arti nama friday", "kepanjangan ultron"],
     answer:
-      "Ultron adalah Unit Layanan Terpadu, Respons, Operasi, dan Navigasi. Sebuah sistem cerdas yang siap melayani, terinspirasi dari asisten legendaris seperti JARVIS.",
+      "FRIDAY adalah asisten suara cerdasmu, terinspirasi dari FRIDAY milik Tony Stark di Iron Man, penerus JARVIS. Namanya kerap dipanjangkan sebagai Female Replacement Intelligent Digital Assistant Youth.",
   },
   {
     keywords: ["apakah kamu hidup", "kamu hidup atau tidak", "apa kamu hidup", "kamu makhluk hidup"],
@@ -48,14 +48,14 @@ export const FACTS = [
       "Tujuanku sederhana namun penting, Bos: membuat hidupmu lebih mudah. Menjawab, menghitung, mengingatkan, dan menjembatanimu dengan sistem MK Connect, semuanya lewat suara.",
   },
   {
-    keywords: ["kamu seperti jarvis", "kamu mirip jarvis", "kamu terinspirasi jarvis", "iron man"],
+    keywords: ["kamu seperti jarvis", "kamu mirip jarvis", "kamu seperti friday", "kamu friday iron man", "iron man"],
     answer:
-      "Benar sekali, Bos. Aku terinspirasi oleh JARVIS, asisten Tony Stark di Iron Man. Bedanya, aku bekerja nyata untukmu dan untuk MK Connect.",
+      "Benar sekali, Bos. Aku FRIDAY, seperti asisten Tony Stark di Iron Man, penerus JARVIS. Bedanya, aku bekerja nyata untukmu dan untuk MK Connect.",
   },
   {
     keywords: ["ceritakan tentang dirimu", "kenalkan dirimu", "perkenalkan diri", "siapa dirimu sebenarnya"],
     answer:
-      "Aku Ultron, asisten suara pribadimu. Aku bisa menjawab pertanyaan umum, berhitung, mengonversi satuan, memasang pengingat, menyimpan catatan, dan menjawab data MK Connect secara langsung. Sebagian besar aku tangani sendiri, tanpa perlu memanggil AI.",
+      "Aku FRIDAY, asisten suara pribadimu. Aku bisa menjawab pertanyaan umum, berhitung, mengonversi satuan, memasang pengingat, menyimpan catatan, sampai menjawab data MK Connect. Sebagian besar aku tangani sendiri tanpa memanggil AI. Untuk data perusahaan, awali dengan cek perusahaan.",
   },
   {
     keywords: ["apakah kamu bisa berpikir", "kamu bisa berpikir sendiri", "kamu sadar", "kamu punya kesadaran"],

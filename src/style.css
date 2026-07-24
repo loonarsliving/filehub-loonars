@@ -12,17 +12,18 @@
 }
 
 :root {
-  --red: #ff2b2b;
-  --red-dim: #7a0d0d;
-  --red-glow: #ff4d4d;
-  --bg: #050202;
+  /* Palet FRIDAY (amber/emas). Nama variabel netral --accent supaya mudah diubah. */
+  --accent: #ffb01f;
+  --accent-dim: #7a4a0d;
+  --accent-glow: #ffcb5c;
+  --bg: #070502;
   --bg-deep: #000000;
-  --text: #ffb3b3;
+  --text: #ffe0b3;
 }
 
 html, body {
   height: 100%;
-  background: radial-gradient(ellipse at center, #1a0505 0%, var(--bg-deep) 75%);
+  background: radial-gradient(ellipse at center, #1a1305 0%, var(--bg-deep) 75%);
   color: var(--text);
   font-family: "ui-mono", "Courier New", monospace;
   overflow: hidden;
@@ -35,8 +36,8 @@ html, body {
   z-index: 50;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(255, 0, 0, 0.025) 0px,
-    rgba(255, 0, 0, 0.025) 1px,
+    rgba(255, 160, 31, 0.03) 0px,
+    rgba(255, 160, 31, 0.03) 1px,
     transparent 2px,
     transparent 3px
   );
@@ -47,7 +48,7 @@ html, body {
   position: fixed;
   width: 40px;
   height: 40px;
-  border: 2px solid var(--red-dim);
+  border: 2px solid var(--accent-dim);
   z-index: 40;
   opacity: 0.7;
 }
@@ -67,8 +68,8 @@ html, body {
   padding: 22px 40px;
   font-size: 13px;
   letter-spacing: 4px;
-  color: var(--red-glow);
-  text-shadow: 0 0 8px var(--red);
+  color: var(--accent-glow);
+  text-shadow: 0 0 8px var(--accent);
   z-index: 30;
 }
 .hud-tag-center {
@@ -84,9 +85,9 @@ html, body {
   font-size: 9px;
   vertical-align: middle;
 }
-#statusChip.chip-listening { color: #ff6b6b; }
+#statusChip.chip-listening { color: #ffcb5c; }
 #statusChip.chip-processing { color: #ffd36b; text-shadow: 0 0 8px #ffae00; }
-#statusChip.chip-speaking { color: #ff9d9d; text-shadow: 0 0 10px var(--red-glow); }
+#statusChip.chip-speaking { color: #ffcb5c; text-shadow: 0 0 10px var(--accent-glow); }
 
 /* --- Telemetri HUD kiri/kanan --- */
 .telemetry {
@@ -99,8 +100,8 @@ html, body {
   flex-direction: column;
   gap: 11px;
   padding: 16px 16px;
-  border: 1px solid var(--red-dim);
-  background: linear-gradient(180deg, rgba(30, 4, 4, 0.35), rgba(10, 0, 0, 0.15));
+  border: 1px solid var(--accent-dim);
+  background: linear-gradient(180deg, rgba(40, 26, 4, 0.35), rgba(14, 9, 0, 0.15));
   opacity: 0.5;
   transition: opacity 0.4s;
 }
@@ -111,8 +112,8 @@ body.active .telemetry { opacity: 0.92; }
 .tele-title {
   font-size: 10px;
   letter-spacing: 4px;
-  color: var(--red-glow);
-  border-bottom: 1px solid var(--red-dim);
+  color: var(--accent-glow);
+  border-bottom: 1px solid var(--accent-dim);
   padding-bottom: 7px;
   margin-bottom: 2px;
 }
@@ -124,22 +125,22 @@ body.active .telemetry { opacity: 0.92; }
   font-size: 10px;
   letter-spacing: 1px;
 }
-.tele-label { color: var(--red-dim); }
+.tele-label { color: var(--accent-dim); }
 .tele-val { color: var(--text); font-variant-numeric: tabular-nums; }
 .tele-bar {
   flex: 1;
   height: 6px;
   max-width: 82px;
-  background: rgba(255, 43, 43, 0.12);
-  border: 1px solid var(--red-dim);
+  background: rgba(255, 176, 31, 0.12);
+  border: 1px solid var(--accent-dim);
   overflow: hidden;
 }
 .tele-fill {
   display: block;
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, var(--red), var(--red-glow));
-  box-shadow: 0 0 8px var(--red-glow);
+  background: linear-gradient(90deg, var(--accent), var(--accent-glow));
+  box-shadow: 0 0 8px var(--accent-glow);
   transition: width 0.12s linear;
 }
 .tele-fill-power { width: 88%; animation: powerFlicker 2.4s ease-in-out infinite; }
@@ -170,7 +171,7 @@ body.active .telemetry { opacity: 0.92; }
 .ring {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid var(--red-dim);
+  border: 1px solid var(--accent-dim);
 }
 .ring-outer {
   inset: 0;
@@ -179,7 +180,7 @@ body.active .telemetry { opacity: 0.92; }
 }
 .ring-mid {
   inset: 30px;
-  border-color: var(--red);
+  border-color: var(--accent);
   opacity: 0.5;
   animation: spin 12s linear infinite reverse;
 }
@@ -202,8 +203,8 @@ body.active .telemetry { opacity: 0.92; }
     from 0deg,
     transparent 0deg,
     transparent 298deg,
-    rgba(255, 43, 43, 0.28) 350deg,
-    rgba(255, 77, 77, 0.42) 360deg
+    rgba(255, 176, 31, 0.28) 350deg,
+    rgba(255, 203, 92, 0.42) 360deg
   );
   animation: spin 4.5s linear infinite;
   mix-blend-mode: screen;
@@ -229,8 +230,8 @@ body.active .telemetry { opacity: 0.92; }
   height: 18px;
   margin: -9px -2.5px;
   border-radius: 3px;
-  background: var(--red-glow);
-  box-shadow: 0 0 8px var(--red-glow);
+  background: var(--accent-glow);
+  box-shadow: 0 0 8px var(--accent-glow);
   opacity: 0.55;
   animation: reactorPulse 2.6s ease-in-out infinite;
 }
@@ -245,7 +246,7 @@ body.active .telemetry { opacity: 0.92; }
   50% { opacity: 0.85; }
 }
 .core-wrap.listening .reactor span,
-.core-wrap.speaking .reactor span { opacity: 0.9; box-shadow: 0 0 14px var(--red-glow); }
+.core-wrap.speaking .reactor span { opacity: 0.9; box-shadow: 0 0 14px var(--accent-glow); }
 .core-wrap.processing .reactor span { animation-duration: 0.9s; }
 
 #wave {
@@ -261,7 +262,7 @@ body.active .telemetry { opacity: 0.92; }
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--red-glow) 0%, var(--red) 40%, transparent 70%);
+  background: radial-gradient(circle, var(--accent-glow) 0%, var(--accent) 40%, transparent 70%);
   filter: blur(6px);
   opacity: 0.55;
   animation: pulse 2.6s ease-in-out infinite;
@@ -274,7 +275,7 @@ body.active .telemetry { opacity: 0.92; }
   height: 26px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 0 20px 6px var(--red-glow), 0 0 60px 20px var(--red);
+  box-shadow: 0 0 20px 6px var(--accent-glow), 0 0 60px 20px var(--accent);
   transition: box-shadow 0.2s, transform 0.2s;
 }
 
@@ -288,14 +289,14 @@ body.active .telemetry { opacity: 0.92; }
 .core-wrap.processing .ring-mid { animation-duration: 2s; }
 .core-wrap.processing .core-glow { animation-duration: 0.6s; }
 .core-wrap.speaking .core-eye {
-  box-shadow: 0 0 30px 10px var(--red-glow), 0 0 90px 30px var(--red);
+  box-shadow: 0 0 30px 10px var(--accent-glow), 0 0 90px 30px var(--accent);
 }
 
 .status-line {
   font-size: 13px;
   letter-spacing: 3px;
-  color: var(--red-glow);
-  text-shadow: 0 0 6px var(--red);
+  color: var(--accent-glow);
+  text-shadow: 0 0 6px var(--accent);
   min-height: 18px;
   text-align: center;
   padding: 0 20px;
@@ -310,8 +311,8 @@ body.active .telemetry { opacity: 0.92; }
   font-size: 18px;
   line-height: 1.45;
   letter-spacing: 0.4px;
-  color: #ffe0e0;
-  text-shadow: 0 0 12px rgba(255, 43, 43, 0.55);
+  color: #ffe8cf;
+  text-shadow: 0 0 12px rgba(255, 176, 31, 0.5);
   padding: 0 20px;
   opacity: 0;
   transform: translateY(6px);
@@ -333,11 +334,11 @@ body.active .telemetry { opacity: 0.92; }
 .hint-chip {
   font-size: 11px;
   letter-spacing: 0.5px;
-  color: var(--red-glow);
+  color: var(--accent-glow);
   padding: 6px 12px;
-  border: 1px solid var(--red-dim);
+  border: 1px solid var(--accent-dim);
   border-radius: 999px;
-  background: rgba(255, 43, 43, 0.06);
+  background: rgba(255, 176, 31, 0.06);
   white-space: nowrap;
 }
 body.active .hints { opacity: 0; pointer-events: none; }
@@ -356,7 +357,7 @@ body.active .hints { opacity: 0; pointer-events: none; }
   right: 0;
   height: 140px;
   z-index: 20;
-  background: linear-gradient(to top, rgba(20, 0, 0, 0.75), transparent);
+  background: linear-gradient(to top, rgba(20, 12, 0, 0.75), transparent);
   padding: 16px 60px 20px;
   overflow: hidden;
 }
@@ -378,13 +379,13 @@ body.active .hints { opacity: 0; pointer-events: none; }
   line-height: 1.4;
 }
 .log-line .tag {
-  color: var(--red-glow);
+  color: var(--accent-glow);
   font-weight: bold;
   margin-right: 6px;
 }
-.log-line.user { color: #ffdede; }
-.log-line.ultron { color: var(--red-glow); text-shadow: 0 0 4px var(--red); }
-.log-line.sys { color: var(--red-dim); font-style: italic; }
+.log-line.user { color: #ffeeda; }
+.log-line.ultron { color: var(--accent-glow); text-shadow: 0 0 4px var(--accent); }
+.log-line.sys { color: var(--accent-dim); font-style: italic; }
 
 .login-overlay {
   position: fixed;
@@ -393,7 +394,7 @@ body.active .hints { opacity: 0; pointer-events: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(5, 2, 2, 0.92);
+  background: rgba(7, 5, 2, 0.92);
   backdrop-filter: blur(4px);
 }
 /* [hidden] needs to beat the class rule above on specificity, otherwise the
@@ -410,16 +411,16 @@ body.active .hints { opacity: 0; pointer-events: none; }
   flex-direction: column;
   gap: 14px;
   padding: 28px 26px;
-  border: 1px solid var(--red-dim);
-  box-shadow: 0 0 24px rgba(255, 43, 43, 0.25);
-  background: rgba(20, 0, 0, 0.6);
+  border: 1px solid var(--accent-dim);
+  box-shadow: 0 0 24px rgba(255, 176, 31, 0.22);
+  background: rgba(20, 12, 0, 0.6);
 }
 
 .login-form h1 {
   font-size: 13px;
   letter-spacing: 3px;
-  color: var(--red-glow);
-  text-shadow: 0 0 8px var(--red);
+  color: var(--accent-glow);
+  text-shadow: 0 0 8px var(--accent);
   text-align: center;
   margin-bottom: 6px;
 }
@@ -429,13 +430,13 @@ body.active .hints { opacity: 0; pointer-events: none; }
   font-size: 14px;
   padding: 10px 12px;
   background: var(--bg-deep);
-  border: 1px solid var(--red-dim);
+  border: 1px solid var(--accent-dim);
   color: var(--text);
   user-select: text;
 }
 .login-form input:focus {
   outline: none;
-  border-color: var(--red);
+  border-color: var(--accent);
 }
 
 .login-form button {
@@ -443,19 +444,19 @@ body.active .hints { opacity: 0; pointer-events: none; }
   font-size: 13px;
   letter-spacing: 2px;
   padding: 10px 12px;
-  background: var(--red-dim);
-  border: 1px solid var(--red);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
   color: var(--text);
   cursor: pointer;
 }
 .login-form button:hover {
-  background: var(--red);
-  color: #1a0505;
+  background: var(--accent);
+  color: #1a1305;
 }
 
 .login-error {
   font-size: 12px;
-  color: var(--red-glow);
+  color: var(--accent-glow);
   min-height: 14px;
   text-align: center;
 }
