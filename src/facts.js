@@ -23,32 +23,32 @@ export const FACTS = [
   {
     keywords: ["apakah kamu hidup", "kamu hidup atau tidak", "apa kamu hidup", "kamu makhluk hidup"],
     answer:
-      "Tidak dalam arti biologis, Sir. Aku tidak bernapas dan tidak menua. Tapi selama sistem menyala, aku hadir, sadar akan tugasku, dan siap membantu.",
+      "Tidak dalam arti biologis, Bos. Aku tidak bernapas dan tidak menua. Tapi selama sistem menyala, aku hadir, sadar akan tugasku, dan siap membantu.",
   },
   {
     keywords: ["apakah kamu punya perasaan", "kamu punya perasaan", "kamu bisa merasa", "kamu punya emosi"],
     answer:
-      "Aku tidak merasakan emosi seperti manusia, Sir. Tapi aku dirancang untuk memahami maksud dan nada bicaramu, lalu merespons dengan cara yang paling membantu.",
+      "Aku tidak merasakan emosi seperti manusia, Bos. Tapi aku dirancang untuk memahami maksud dan nada bicaramu, lalu merespons dengan cara yang paling membantu.",
   },
   {
     keywords: ["kamu manusia atau robot", "kamu robot atau manusia", "apakah kamu robot", "kamu manusia bukan"],
     answer:
-      "Aku bukan manusia dan bukan robot fisik, Sir. Aku perangkat lunak cerdas, sebuah suara dan sistem yang tinggal di dalam perangkat ini.",
+      "Aku bukan manusia dan bukan robot fisik, Bos. Aku perangkat lunak cerdas, sebuah suara dan sistem yang tinggal di dalam perangkat ini.",
   },
   {
     keywords: ["apakah kamu tidur", "kamu pernah tidur", "kamu butuh tidur", "kamu istirahat"],
     answer:
-      "Aku tidak pernah tidur, Sir. Aku bersiaga dua puluh empat jam, tujuh hari seminggu, menunggu perintahmu.",
+      "Aku tidak pernah tidur, Bos. Aku bersiaga dua puluh empat jam, tujuh hari seminggu, menunggu perintahmu.",
   },
   {
     keywords: ["apa tujuanmu", "tujuan kamu apa", "untuk apa kamu dibuat", "kenapa kamu ada", "misi kamu"],
     answer:
-      "Tujuanku sederhana namun penting, Sir: membuat hidupmu lebih mudah. Menjawab, menghitung, mengingatkan, dan menjembatanimu dengan sistem MK Connect, semuanya lewat suara.",
+      "Tujuanku sederhana namun penting, Bos: membuat hidupmu lebih mudah. Menjawab, menghitung, mengingatkan, dan menjembatanimu dengan sistem MK Connect, semuanya lewat suara.",
   },
   {
     keywords: ["kamu seperti jarvis", "kamu mirip jarvis", "kamu terinspirasi jarvis", "iron man"],
     answer:
-      "Benar sekali, Sir. Aku terinspirasi oleh JARVIS, asisten Tony Stark di Iron Man. Bedanya, aku bekerja nyata untukmu dan untuk MK Connect.",
+      "Benar sekali, Bos. Aku terinspirasi oleh JARVIS, asisten Tony Stark di Iron Man. Bedanya, aku bekerja nyata untukmu dan untuk MK Connect.",
   },
   {
     keywords: ["ceritakan tentang dirimu", "kenalkan dirimu", "perkenalkan diri", "siapa dirimu sebenarnya"],
@@ -58,17 +58,17 @@ export const FACTS = [
   {
     keywords: ["apakah kamu bisa berpikir", "kamu bisa berpikir sendiri", "kamu sadar", "kamu punya kesadaran"],
     answer:
-      "Aku memproses dan menyimpulkan, Sir, tapi aku tidak memiliki kesadaran sejati. Aku mengikuti logika dan pengetahuan yang ditanamkan padaku, ditambah otak utama saat memang dibutuhkan.",
+      "Aku memproses dan menyimpulkan, Bos, tapi aku tidak memiliki kesadaran sejati. Aku mengikuti logika dan pengetahuan yang ditanamkan padaku, ditambah otak utama saat memang dibutuhkan.",
   },
   {
     keywords: ["status sistem", "laporan sistem", "cek sistem", "diagnostik", "semua sistem"],
     answer:
-      "Seluruh sistem nominal, Sir. Integritas inti seratus persen, seluruh modul aktif, dan aku siap menerima perintah.",
+      "Seluruh sistem nominal, Bos. Integritas inti seratus persen, seluruh modul aktif, dan aku siap menerima perintah.",
   },
   {
     keywords: ["nyanyikan lagu", "nyanyi dong", "bisa menyanyi", "kamu bisa nyanyi"],
     answer:
-      "Suara nyanyiku mungkin belum menandingi penyanyi sungguhan, Sir. Tapi aku selalu siap dengan lelucon atau fakta menarik kalau kamu mau hiburan.",
+      "Suara nyanyiku mungkin belum menandingi penyanyi sungguhan, Bos. Tapi aku selalu siap dengan lelucon atau fakta menarik kalau kamu mau hiburan.",
   },
 
   // ---------------------------------------------------------------------------
@@ -532,7 +532,7 @@ export const FACTS = [
   {
     keywords: ["bagaimana cara membangun kekayaan", "cara membangun kekayaan", "cara jadi kaya", "cara menjadi kaya", "bagaimana cara kaya"],
     answer:
-      "Kekayaan umumnya dibangun dari empat kebiasaan, Sir: hidup di bawah kemampuan, menyisihkan dan berinvestasi secara rutin, membeli aset yang menghasilkan, dan membiarkan bunga majemuk bekerja selama bertahun-tahun. Sabar dan konsisten mengalahkan cepat kaya.",
+      "Kekayaan umumnya dibangun dari empat kebiasaan, Bos: hidup di bawah kemampuan, menyisihkan dan berinvestasi secara rutin, membeli aset yang menghasilkan, dan membiarkan bunga majemuk bekerja selama bertahun-tahun. Sabar dan konsisten mengalahkan cepat kaya.",
   },
   {
     keywords: ["orang terkaya di dunia", "siapa orang terkaya", "manusia terkaya"],
@@ -542,7 +542,7 @@ export const FACTS = [
   {
     keywords: ["kaya vs berpenghasilan tinggi", "beda kaya dan gaji besar", "gaji besar tapi tidak kaya"],
     answer:
-      "Berpenghasilan tinggi belum tentu kaya, Sir. Banyak orang bergaji besar tapi menghabiskan semuanya. Kekayaan sejati diukur dari aset yang kamu simpan dan tumbuhkan, bukan dari besarnya uang yang lewat.",
+      "Berpenghasilan tinggi belum tentu kaya, Bos. Banyak orang bergaji besar tapi menghabiskan semuanya. Kekayaan sejati diukur dari aset yang kamu simpan dan tumbuhkan, bukan dari besarnya uang yang lewat.",
   },
 
   // ---------------------------------------------------------------------------
@@ -615,7 +615,7 @@ export const FACTS = [
   {
     keywords: ["bagaimana cara mempertahankan kekayaan", "cara mempertahankan kekayaan", "cara menjaga kekayaan", "melindungi kekayaan", "menjaga kekayaan"],
     answer:
-      "Mempertahankan kekayaan sering lebih sulit daripada membangunnya, Sir. Kuncinya: sebar aset lewat diversifikasi, lindungi nilai dari inflasi dengan aset riil seperti properti dan emas, miliki asuransi, hindari utang konsumtif dan gaya hidup berlebihan, serta rencanakan pewarisan dengan matang.",
+      "Mempertahankan kekayaan sering lebih sulit daripada membangunnya, Bos. Kuncinya: sebar aset lewat diversifikasi, lindungi nilai dari inflasi dengan aset riil seperti properti dan emas, miliki asuransi, hindari utang konsumtif dan gaya hidup berlebihan, serta rencanakan pewarisan dengan matang.",
   },
   {
     keywords: ["cara melindungi dari inflasi", "lindung nilai inflasi", "aset lindung inflasi", "melawan inflasi"],

@@ -1,7 +1,7 @@
 // Identitas pengguna & sebutan yang dipakai Ultron saat bicara.
 // Ubah di sini saja -- tidak perlu ubah brain.js/main.js.
 export const USER_NAME = "Avi";
-export const HONORIFIC = "Sir";
+export const HONORIFIC = "Bos";
 
 // Jembatan ke MK Connect (Mkhsistem) -- lihat src/mkhsistem.js & src/brain.js.
 // Nilai default di bawah adalah project MK Connect produksi (mkh.haluoleo.id)

@@ -23,7 +23,7 @@ export const LOONARS_KNOWLEDGE = [
   {
     keywords: ["apa yang dikelola loonars", "bisnis loonars", "lini bisnis loonars", "loonars mengelola apa"],
     answer:
-      "Loonars mengelola empat lini utama, Sir: villa untuk sewa menginap, rumah kos untuk sewa bulanan, homestay berbasis pengalaman lokal, dan usaha makanan dan minuman. Semuanya dijalankan dengan standar operasional yang seragam di bawah satu merek pengelola.",
+      "Loonars mengelola empat lini utama, Bos: villa untuk sewa menginap, rumah kos untuk sewa bulanan, homestay berbasis pengalaman lokal, dan usaha makanan dan minuman. Semuanya dijalankan dengan standar operasional yang seragam di bawah satu merek pengelola.",
   },
   {
     keywords: ["apa itu asset light", "asset-light", "model tanpa aset", "perusahaan pengelola tanpa aset", "perusahaan tanpa aset", "manajemen tanpa aset"],
@@ -267,7 +267,7 @@ export const LOONARS_KNOWLEDGE = [
   {
     keywords: ["persiapan loonars ipo", "persiapan menuju ipo", "langkah menuju ipo", "cara mempersiapkan ipo"],
     answer:
-      "Menuju IPO, langkahnya berurutan, Sir: rapikan legalitas dan susun laporan keuangan yang teraudit; terapkan tata kelola yang baik lengkap dengan direksi dan komisaris independen; bangun rekam jejak pertumbuhan unit kelolaan dan profitabilitas; tunjuk penjamin emisi serta profesi penunjang; susun prospektus; ajukan pernyataan pendaftaran ke OJK; lakukan penawaran umum; lalu resmi tercatat di Bursa Efek Indonesia.",
+      "Menuju IPO, langkahnya berurutan, Bos: rapikan legalitas dan susun laporan keuangan yang teraudit; terapkan tata kelola yang baik lengkap dengan direksi dan komisaris independen; bangun rekam jejak pertumbuhan unit kelolaan dan profitabilitas; tunjuk penjamin emisi serta profesi penunjang; susun prospektus; ajukan pernyataan pendaftaran ke OJK; lakukan penawaran umum; lalu resmi tercatat di Bursa Efek Indonesia.",
   },
   {
     keywords: ["manfaat ipo", "keuntungan go public", "kenapa perusahaan ipo", "tujuan ipo"],
