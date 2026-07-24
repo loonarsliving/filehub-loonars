@@ -8,9 +8,11 @@
 // lewat Gemini karena butuh tool-calling ke database sungguhan.
 //
 // Tambah entri baru kapan saja: satu objek { keywords, answer }. keywords
-// dicocokkan sebagai substring dari ucapan pengguna (huruf kecil semua),
-// entri pertama yang cocok yang dipakai -- urutkan yang lebih spesifik
-// duluan kalau ada potensi tumpang tindih kata kunci.
+// dicocokkan secara toleran (lihat match.js): cocok bila keyword muncul utuh
+// ATAU semua katanya hadir di ucapan (urutan bebas). Entri pertama yang cocok
+// yang dipakai -- urutkan yang lebih spesifik duluan kalau ada tumpang tindih.
+
+import { findAnswer } from "./match.js";
 
 export const KNOWLEDGE_BASE = [
   {
@@ -80,13 +82,7 @@ export const KNOWLEDGE_BASE = [
   },
 ];
 
-/** Substring match sederhana terhadap teks pengguna (sudah huruf kecil). Null kalau tidak ada yang cocok. */
+/** Pencocokan toleran (lihat match.js). Null kalau tidak ada yang cocok. */
 export function findLocalAnswer(userText) {
-  const text = userText.toLowerCase();
-  for (const entry of KNOWLEDGE_BASE) {
-    if (entry.keywords.some((keyword) => text.includes(keyword))) {
-      return entry.answer;
-    }
-  }
-  return null;
+  return findAnswer(KNOWLEDGE_BASE, userText);
 }

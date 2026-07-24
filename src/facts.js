@@ -11,6 +11,8 @@
 // tidak salah kepicu oleh pertanyaan data MK Connect. Entri pertama yang cocok
 // yang dipakai -- urutkan yang lebih spesifik lebih dulu bila ada tumpang tindih.
 
+import { findAnswer } from "./match.js";
+
 export const FACTS = [
   // ---------------------------------------------------------------------------
   // Persona / identitas ala JARVIS
@@ -722,15 +724,9 @@ export const FACTS = [
   },
 ];
 
-/** Substring match sederhana terhadap teks pengguna (huruf kecil). Null bila tak ada yang cocok. */
+/** Pencocokan toleran (lihat match.js). Null bila tak ada yang cocok. */
 export function findFact(userText) {
-  const text = userText.toLowerCase();
-  for (const entry of FACTS) {
-    if (entry.keywords.some((keyword) => text.includes(keyword))) {
-      return entry.answer;
-    }
-  }
-  return null;
+  return findAnswer(FACTS, userText);
 }
 
 // ---------------------------------------------------------------------------

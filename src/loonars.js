@@ -11,12 +11,14 @@
 // angka internal Loonars. Untuk data internal yang berubah-ubah, Ultron tetap
 // meneruskannya ke otak utama.
 
+import { findAnswer } from "./match.js";
+
 export const LOONARS_KNOWLEDGE = [
   // ---------------------------------------------------------------------------
   // Loonars & model asset-light
   // ---------------------------------------------------------------------------
   {
-    keywords: ["apa itu loonars", "loonars itu apa", "tentang loonars", "perusahaan loonars"],
+    keywords: ["apa itu loonars", "loonars itu apa", "tentang loonars", "perusahaan loonars", "jelaskan loonars", "ceritakan loonars", "kenalkan loonars", "siapa loonars"],
     answer:
       "Loonars adalah perusahaan pengelola di bidang hospitality dan properti dengan model asset-light. Loonars mengelola villa, rumah kos, homestay, dan usaha makanan dan minuman milik mitra dan pemilik, tanpa harus memiliki asetnya sendiri, dan memperoleh pendapatan dari jasa pengelolaan.",
   },
@@ -233,7 +235,19 @@ export const LOONARS_KNOWLEDGE = [
 
   // ---------------------------------------------------------------------------
   // Jalan menuju IPO
+  // Catatan urutan: entri IPO yang spesifik Loonars diletakkan SEBELUM entri
+  // IPO umum, supaya "cara Loonars IPO" tidak tertangkap keyword umum "cara ipo".
   // ---------------------------------------------------------------------------
+  {
+    keywords: ["persiapan loonars ipo", "persiapan menuju ipo", "langkah menuju ipo", "cara mempersiapkan ipo", "loonars siap ipo", "langkah loonars ipo"],
+    answer:
+      "Menuju IPO, langkahnya berurutan, Bos: rapikan legalitas dan susun laporan keuangan yang teraudit; terapkan tata kelola yang baik lengkap dengan direksi dan komisaris independen; bangun rekam jejak pertumbuhan unit kelolaan dan profitabilitas; tunjuk penjamin emisi serta profesi penunjang; susun prospektus; ajukan pernyataan pendaftaran ke OJK; lakukan penawaran umum; lalu resmi tercatat di Bursa Efek Indonesia.",
+  },
+  {
+    keywords: ["loonars ipo", "cara loonars ipo", "bagaimana perusahaan pengelola ipo", "asset light bisa ipo", "ipo perusahaan pengelola", "ipo tanpa aset", "loonars go public", "perusahaan pengelola bisa ipo"],
+    answer:
+      "Perusahaan pengelola tanpa aset seperti Loonars bisa IPO karena nilainya bertumpu pada pendapatan fee yang berulang, pertumbuhan jumlah unit kelolaan, kekuatan merek, dan laba, bukan pada aset fisik. Justru model yang ringan modal ini menarik bagi investor karena mudah diperbesar. Kuncinya: laporan keuangan teraudit rapi selama beberapa tahun, tata kelola perusahaan yang kuat, dan rekam jejak pertumbuhan yang konsisten.",
+  },
   {
     keywords: ["apa itu ipo", "ipo itu apa", "go public", "penawaran umum perdana"],
     answer:
@@ -260,29 +274,13 @@ export const LOONARS_KNOWLEDGE = [
       "Prospektus adalah dokumen resmi yang wajib diterbitkan saat IPO. Isinya seluruh fakta material tentang perusahaan: kegiatan usaha, laporan keuangan teraudit, risiko, dan rencana penggunaan dana. Prospektus menjadi dasar calon investor menilai perusahaan sebelum membeli sahamnya.",
   },
   {
-    keywords: ["bagaimana perusahaan pengelola ipo", "cara loonars ipo", "asset light bisa ipo", "ipo perusahaan pengelola", "ipo tanpa aset", "loonars go public"],
-    answer:
-      "Perusahaan pengelola tanpa aset seperti Loonars bisa IPO karena nilainya bertumpu pada pendapatan fee yang berulang, pertumbuhan jumlah unit kelolaan, kekuatan merek, dan laba, bukan pada aset fisik. Justru model yang ringan modal ini menarik bagi investor karena mudah diperbesar. Kuncinya: laporan keuangan teraudit rapi selama beberapa tahun, tata kelola perusahaan yang kuat, dan rekam jejak pertumbuhan yang konsisten.",
-  },
-  {
-    keywords: ["persiapan loonars ipo", "persiapan menuju ipo", "langkah menuju ipo", "cara mempersiapkan ipo"],
-    answer:
-      "Menuju IPO, langkahnya berurutan, Bos: rapikan legalitas dan susun laporan keuangan yang teraudit; terapkan tata kelola yang baik lengkap dengan direksi dan komisaris independen; bangun rekam jejak pertumbuhan unit kelolaan dan profitabilitas; tunjuk penjamin emisi serta profesi penunjang; susun prospektus; ajukan pernyataan pendaftaran ke OJK; lakukan penawaran umum; lalu resmi tercatat di Bursa Efek Indonesia.",
-  },
-  {
     keywords: ["manfaat ipo", "keuntungan go public", "kenapa perusahaan ipo", "tujuan ipo"],
     answer:
       "IPO memberi perusahaan modal segar untuk ekspansi, meningkatkan kredibilitas dan pamor merek, memberi likuiditas bagi pemegang saham awal, serta membuka peluang memakai saham sebagai alat akuisisi. Bagi perusahaan pengelola yang ingin cepat memperbanyak unit kelolaan, modal dari IPO bisa menjadi bahan bakar pertumbuhan.",
   },
 ];
 
-/** Substring match sederhana terhadap teks pengguna (huruf kecil). Null bila tak ada yang cocok. */
+/** Pencocokan toleran (lihat match.js). Null bila tak ada yang cocok. */
 export function findLoonars(userText) {
-  const text = userText.toLowerCase();
-  for (const entry of LOONARS_KNOWLEDGE) {
-    if (entry.keywords.some((keyword) => text.includes(keyword))) {
-      return entry.answer;
-    }
-  }
-  return null;
+  return findAnswer(LOONARS_KNOWLEDGE, userText);
 }

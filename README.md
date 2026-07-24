@@ -59,6 +59,7 @@ yang berubah-ubah (yang itu tetap lewat otak utama).
 - `src/skills.js` — mesin kemampuan lokal (jam, kalkulator, konversi, timer, koin/dadu, catatan, lelucon, obrolan). Tambah kemampuan baru cukup dengan satu objek `{ name, run }` di daftar `SKILLS`
 - `src/numbers-id.js` — parser & pembentuk kata bilangan Bahasa Indonesia (dipakai kalkulator/konversi/timer)
 - `src/calc.js` — evaluator ekspresi aritmetika yang aman tanpa `eval`
+- `src/match.js` — pencocokan pengetahuan yang toleran terhadap variasi ucapan (STT): cocok bila keyword muncul utuh ATAU semua katanya hadir (urutan bebas), plus normalisasi ejaan brand "Loonars". Dipakai knowledge/facts/loonars agar pertanyaan pengetahuan andal dijawab lokal, bukan jatuh ke AI
 - `src/knowledge.js` — basis pengetahuan konsep (asisten virtual, AI/ML, identitas Ultron) yang dijawab tanpa panggilan API
 - `src/facts.js` — basis pengetahuan umum yang ditanamkan (sains, antariksa, geografi, Indonesia, teknologi, tubuh manusia, penemu, sejarah, keuangan, kekayaan, properti, perbankan, persona) + koleksi kutipan & fakta unik. Tambah pengetahuan baru cukup satu objek `{ keywords, answer }`
 - `src/loonars.js` — pengetahuan bisnis Loonars: pengelolaan villa, rumah kos, homestay, dan F&B; model perusahaan pengelola tanpa aset (asset-light); metrik hospitality (okupansi/ADR/RevPAR/NOI, food cost/prime cost); sampai jalan menuju IPO. Dijawab lokal tanpa panggilan API
