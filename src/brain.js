@@ -33,6 +33,16 @@ let conversationHistory = [];
 const DIGEST_CACHE_TTL_MS = 30 * 60 * 1000;
 let digestCache = null; // { text, fetchedAt }
 
+// Tanggal (lokal browser) terakhir kali laporan pagi dibacakan otomatis --
+// disimpan di localStorage supaya "sekali per hari" bertahan lintas
+// reload/tutup-buka tab, bukan cuma per sesi JS.
+const MORNING_DIGEST_STORAGE_KEY = "ultron-morning-digest-date";
+
+function todayLocalDateString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function timeOfDayGreeting() {
   const hour = new Date().getHours();
   if (hour >= 4 && hour < 11) return "pagi";
@@ -138,6 +148,34 @@ async function getDigestAnswer(token) {
     return digest.digest_text;
   } catch (err) {
     console.error("Gagal mengambil ringkasan harian:", err);
+    return null;
+  }
+}
+
+/**
+ * Dipanggil dari main.js tiap kali Ultron pertama diaktifkan (boot
+ * sequence). Kalau belum pernah lapor hari ini (per tanggal lokal
+ * browser) dan digest tersedia, kembalikan teksnya supaya main.js bisa
+ * membacakannya otomatis tanpa diminta -- termasuk hasil audit media
+ * sosial harian yang sudah tercakup di dalam digest. Null kalau sudah
+ * pernah lapor hari ini, belum login, atau digest belum ada.
+ */
+export async function getMorningDigestIfDue() {
+  try {
+    const today = todayLocalDateString();
+    if (localStorage.getItem(MORNING_DIGEST_STORAGE_KEY) === today) return null;
+
+    const token = await getAccessToken();
+    if (!token) return null;
+
+    const digest = await getDailyDigest(token);
+    if (!digest?.digest_text) return null;
+
+    localStorage.setItem(MORNING_DIGEST_STORAGE_KEY, today);
+    digestCache = { text: digest.digest_text, fetchedAt: Date.now() };
+    return digest.digest_text;
+  } catch (err) {
+    console.error("Gagal mengambil laporan pagi otomatis:", err);
     return null;
   }
 }

@@ -1,6 +1,6 @@
 import "./style.css";
 import { isSTTSupported, startListening, speak, stopSpeaking } from "./voice.js";
-import { getResponse } from "./brain.js";
+import { getResponse, getMorningDigestIfDue } from "./brain.js";
 import { getAudioContext } from "./audio-context.js";
 import { AudioManager } from "./audio-manager.js";
 import { USER_NAME, HONORIFIC } from "./config.js";
@@ -168,6 +168,17 @@ async function runBootSequence() {
   setState("speaking", "MENGAKTIFKAN...");
   await AudioManager.playOnline();
   await speakBranding(ONLINE_LINE);
+
+  // Laporan pagi otomatis -- sekali per hari kalender, begitu Ultron online
+  // dia langsung membacakan ringkasan MK Connect terakhir (termasuk audit
+  // media sosial harian) tanpa perlu diminta. Baca tabel biasa lewat
+  // mkhsistem.js, bukan panggilan Gemini.
+  const morningDigest = await getMorningDigestIfDue();
+  if (morningDigest) {
+    log("sys", "Laporan pagi otomatis.");
+    await speakBranding(morningDigest);
+  }
+
   await startHandsFree({ announce: true });
 }
 
