@@ -24,12 +24,20 @@ jawabannya bisa dihitung atau diketahui di perangkat ditangani langsung oleh
 | Timer & pengingat | "set timer 5 menit", "ingatkan aku dalam 10 menit untuk minum obat", "batalkan timer" |
 | Acak | "lempar koin", "lempar dadu", "angka acak antara 1 dan 100", "pilihkan aku nasi atau mie" |
 | Catatan | "catat beli kopi", "baca catatanku", "hapus catatan" (tersimpan di localStorage) |
-| Lelucon & obrolan | "ceritakan lelucon", "apa kabar", "terima kasih", "siapa aku" |
+| Lelucon, kutipan & fakta | "ceritakan lelucon", "beri kata motivasi", "tahukah kamu?" |
+| Obrolan & persona | "apa kabar", "terima kasih", "siapa aku", "apakah kamu hidup", "status sistem" |
+| **Pengetahuan umum** | "berapa kecepatan cahaya", "planet terbesar", "gunung tertinggi di dunia", "ibu kota Indonesia", "kapan Indonesia merdeka", "apa itu internet", "berapa jumlah tulang manusia" |
 
 Kalkulator memahami kata bilangan Bahasa Indonesia (mis. "lima ratus dua puluh
 tiga") lewat `src/numbers-id.js`, dan mengevaluasi ekspresi lewat evaluator aman
-`src/calc.js` (tanpa `eval`). Pertanyaan yang butuh data MK Connect yang
-bisa berubah (absensi, memo, karyawan, dst.) tetap diteruskan ke otak utama.
+`src/calc.js` (tanpa `eval`).
+
+**Pengetahuan yang ditanamkan** — seperti asisten ala JARVIS yang dibekali
+pengetahuan luas, Ultron menyimpan puluhan fakta terkurasi di `src/facts.js`
+(antariksa & astronomi, geografi dunia, Indonesia, teknologi & komputer, sains &
+tubuh manusia, penemu, plus persona), semuanya dijawab lokal tanpa panggilan API.
+Pertanyaan yang butuh data MK Connect yang bisa berubah (absensi, memo, karyawan,
+dst.) tetap diteruskan ke otak utama.
 
 ## Struktur
 - `src/voice.js` — abstraksi STT/TTS dengan provider `elevenlabs` (aktif) dan `webspeech` (fallback tanpa API key, tinggal ganti `ACTIVE_PROVIDER` kalau mau pakai itu lagi)
@@ -37,7 +45,8 @@ bisa berubah (absensi, memo, karyawan, dst.) tetap diteruskan ke otak utama.
 - `src/skills.js` — mesin kemampuan lokal (jam, kalkulator, konversi, timer, koin/dadu, catatan, lelucon, obrolan). Tambah kemampuan baru cukup dengan satu objek `{ name, run }` di daftar `SKILLS`
 - `src/numbers-id.js` — parser & pembentuk kata bilangan Bahasa Indonesia (dipakai kalkulator/konversi/timer)
 - `src/calc.js` — evaluator ekspresi aritmetika yang aman tanpa `eval`
-- `src/knowledge.js` — basis pengetahuan statis (topik umum & identitas Ultron) yang dijawab tanpa panggilan API
+- `src/knowledge.js` — basis pengetahuan konsep (asisten virtual, AI/ML, identitas Ultron) yang dijawab tanpa panggilan API
+- `src/facts.js` — basis pengetahuan umum yang ditanamkan (sains, antariksa, geografi, Indonesia, teknologi, tubuh manusia, penemu, persona) + koleksi kutipan & fakta unik. Tambah pengetahuan baru cukup satu objek `{ keywords, answer }`
 - `src/mkhsistem.js` — sesi login ke MK Connect lewat Supabase Auth-nya langsung (lihat bagian "Jembatan ke MK Connect" di bawah)
 - `src/main.js` — state machine UI + visualizer, termasuk gerbang login MK Connect sebelum Ultron aktif
 - `src/audio-manager.js` — Audio Experience Engine: pemutar cue branding (`online`, `listening`, `thinking`, `success`, `notification`, `error`, `shutdown`). Reusable — tambah cue baru lewat `AudioManager.registerCue(nama, path)`, tidak perlu ubah kode lain

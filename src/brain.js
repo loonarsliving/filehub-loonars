@@ -7,6 +7,7 @@
 
 import { HONORIFIC, MKHSISTEM_VOICE_ASSISTANT_URL } from "./config.js";
 import { findLocalAnswer } from "./knowledge.js";
+import { findFact } from "./facts.js";
 import { runSkill } from "./skills.js";
 import { getAccessToken, getDailyDigest } from "./mkhsistem.js";
 
@@ -15,7 +16,9 @@ import { getAccessToken, getDailyDigest } from "./mkhsistem.js";
 // Sapaan waktu ("selamat pagi", dst.) ditangani skillSmalltalk supaya tidak
 // salah kepicu oleh "ada memo malam ini" dan sejenisnya.
 const GREETINGS = ["halo", "hai", "hei", "hey", "hi", "hello", "helo", "assalamualaikum"];
-const ONLINE_KEYWORDS = ["online", "aktif", "hidup", "siap"];
+// "hidup" sengaja TIDAK di sini -- "apakah kamu hidup" ditangani jawaban persona
+// di facts.js yang lebih berkarakter, bukan sekadar konfirmasi status online.
+const ONLINE_KEYWORDS = ["online", "aktif", "siap"];
 
 function hasWord(text, word) {
   return new RegExp(`(^|\\W)${word}(\\W|$)`, "i").test(text);
@@ -102,11 +105,19 @@ export async function getResponse(userText) {
   }
 
   // Kemampuan lokal (jam, tanggal, hitung, konversi, timer, koin/dadu, catatan,
-  // lelucon, obrolan) -- dijawab langsung tanpa panggilan API. Inilah yang
-  // membuat Ultron tidak perlu selalu memanggil otak utama.
+  // lelucon, kutipan, fakta unik, obrolan) -- dijawab langsung tanpa panggilan
+  // API. Inilah yang membuat Ultron tidak perlu selalu memanggil otak utama.
   const skillAnswer = runSkill(userText);
   if (skillAnswer) {
     return skillAnswer;
+  }
+
+  // Basis pengetahuan umum yang "ditanamkan" (sains, antariksa, geografi,
+  // Indonesia, teknologi, tubuh manusia, penemu, persona ala JARVIS) -- juga
+  // dijawab lokal tanpa panggilan API.
+  const fact = findFact(text);
+  if (fact) {
+    return { text: fact };
   }
 
   if (!MKHSISTEM_VOICE_ASSISTANT_URL) {

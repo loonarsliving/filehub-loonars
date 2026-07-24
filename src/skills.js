@@ -14,6 +14,7 @@
 import { HONORIFIC, USER_NAME } from "./config.js";
 import { wordsToNumber, numberToWords, replaceNumberWords } from "./numbers-id.js";
 import { evaluateExpression } from "./calc.js";
+import { QUOTES, FUN_FACTS } from "./facts.js";
 
 const DAYS = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 const MONTHS = [
@@ -439,6 +440,37 @@ const skillJoke = {
 };
 
 // ---------------------------------------------------------------------------
+// Kemampuan: Kutipan motivasi & fakta unik (acak, tidak mengulang persis)
+// ---------------------------------------------------------------------------
+
+function pickDifferent(arr, lastIndexRef) {
+  let idx = Math.floor(Math.random() * arr.length);
+  if (idx === lastIndexRef.value && arr.length > 1) idx = (idx + 1) % arr.length;
+  lastIndexRef.value = idx;
+  return arr[idx];
+}
+const quoteRef = { value: -1 };
+const factRef = { value: -1 };
+
+const skillQuote = {
+  name: "kutipan",
+  run(rawText) {
+    const text = rawText.toLowerCase();
+    if (!includesAny(text, ["kata motivasi", "kata bijak", "kata mutiara", "kutipan", "quote", "motivasi dong", "beri motivasi", "kasih motivasi", "inspirasi dong", "kata-kata inspiratif"])) return null;
+    return { text: pickDifferent(QUOTES, quoteRef) };
+  },
+};
+
+const skillFunFact = {
+  name: "fakta-unik",
+  run(rawText) {
+    const text = rawText.toLowerCase();
+    if (!includesAny(text, ["tahukah kamu", "fakta menarik", "fakta unik", "fakta acak", "kasih fakta", "beri fakta", "fun fact", "fakta random", "fakta dong"])) return null;
+    return { text: pickDifferent(FUN_FACTS, factRef) };
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Kemampuan: Catatan (localStorage, bertahan lintas sesi)
 // ---------------------------------------------------------------------------
 
@@ -547,7 +579,8 @@ const skillHelp = {
       text:
         `Banyak yang bisa aku tangani langsung tanpa memanggil otak utama, ${HONORIFIC}. ` +
         `Aku bisa memberi tahu jam dan tanggal, berhitung, mengonversi satuan, memasang timer atau pengingat, ` +
-        `melempar koin atau dadu, memilih angka acak, menyimpan catatan, sampai menceritakan lelucon. ` +
+        `melempar koin atau dadu, memilih angka acak, menyimpan catatan, menceritakan lelucon, memberi kutipan motivasi dan fakta unik, ` +
+        `serta menjawab ribuan hal soal sains, antariksa, geografi, Indonesia, teknologi, dan tubuh manusia dari pengetahuan yang tertanam padaku. ` +
         `Untuk data MK Connect seperti absensi, memo, atau laporan, aku panggil otak utamaku.`,
     };
   },
@@ -570,6 +603,8 @@ const SKILLS = [
   skillRandom,
   skillPick,
   skillJoke,
+  skillQuote,
+  skillFunFact,
   skillNotes,
   skillHelp,
   skillSmalltalk,
