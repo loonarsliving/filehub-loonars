@@ -4,6 +4,7 @@
 // Provider "webspeech" tetap tersedia sebagai fallback tanpa API key.
 
 import { getAudioContext } from "./audio-context.js";
+import { getCachedAudio, setCachedAudio } from "./tts-cache.js";
 
 const ACTIVE_PROVIDER = "elevenlabs";
 
@@ -111,14 +112,27 @@ const providers = {
       (async () => {
         try {
           const ac = getAudioContext();
-          const url = `/api/tts?text=${encodeURIComponent(text)}`;
-          const res = await fetch(url);
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            throw new Error(data.error || `TTS gagal (${res.status})`);
+
+          // Kalimat yang persis sama (branding boot, sapaan, jawaban basis
+          // pengetahuan lokal, ringkasan harian) sering terulang -- cek
+          // cache dulu supaya tidak memanggil ElevenLabs lagi untuk teks
+          // yang sudah pernah di-generate.
+          let audioBuffer = await getCachedAudio(ac, text);
+          if (!audioBuffer) {
+            const url = `/api/tts?text=${encodeURIComponent(text)}`;
+            const res = await fetch(url);
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              throw new Error(data.error || `TTS gagal (${res.status})`);
+            }
+            const arrayBuffer = await res.arrayBuffer();
+            // decodeAudioData can detach/neuter its input buffer in some
+            // browsers (Safari) -- clone before decoding so the copy handed
+            // to setCachedAudio (for localStorage persistence) is still valid.
+            const arrayBufferForCache = arrayBuffer.slice(0);
+            audioBuffer = await ac.decodeAudioData(arrayBuffer);
+            setCachedAudio(text, arrayBufferForCache, audioBuffer);
           }
-          const arrayBuffer = await res.arrayBuffer();
-          const audioBuffer = await ac.decodeAudioData(arrayBuffer);
 
           currentSource?.stop?.();
           const source = ac.createBufferSource();
