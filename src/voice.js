@@ -5,6 +5,7 @@
 
 import { getAudioContext } from "./audio-context.js";
 import { getCachedAudio, setCachedAudio } from "./tts-cache.js";
+import { toSpeech } from "./pronunciation.js";
 
 const ACTIVE_PROVIDER = "elevenlabs";
 
@@ -169,7 +170,9 @@ export function startListening(opts) {
 }
 
 export function speak(text, opts) {
-  return provider.speak(text, opts);
+  // Terapkan override pengucapan HANYA untuk audio -- teks yang tampil di layar
+  // (diatur di main.js) tetap memakai teks asli.
+  return provider.speak(toSpeech(text), opts);
 }
 
 export function stopSpeaking() {
