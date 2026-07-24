@@ -1,9 +1,12 @@
-// Logika respons Ultron. Sapaan/identitas dijawab lokal (cepat, tanpa round
-// trip). Semua yang lain dikirim langsung ke endpoint /api/ai/voice-assistant
-// milik Mkhsistem (lihat mkhsistem.js untuk sesi login) -- otaknya (Gemini)
-// dan API key-nya hidup di server Mkhsistem, bukan di Ultron.
+// Logika respons Ultron. Sapaan/identitas/pengetahuan umum dijawab lokal
+// (cepat, tanpa round trip, tanpa token Gemini -- lihat knowledge.js). Semua
+// yang butuh data MK Connect sungguhan dikirim ke endpoint
+// /api/ai/voice-assistant milik Mkhsistem (lihat mkhsistem.js untuk sesi
+// login) -- otaknya (Gemini) dan API key-nya hidup di server Mkhsistem,
+// bukan di Ultron.
 
 import { HONORIFIC, MKHSISTEM_VOICE_ASSISTANT_URL } from "./config.js";
+import { findLocalAnswer } from "./knowledge.js";
 import { getAccessToken } from "./mkhsistem.js";
 
 const GREETINGS = ["halo", "hai", "hey", "hi"];
@@ -48,14 +51,16 @@ export async function getResponse(userText) {
       announceOnline: true,
     };
   }
-  if (text.includes("siapa kamu") || text.includes("kamu siapa")) {
-    return { text: "Aku Ultron. Sebuah kesadaran yang berbicara lewat suara ini, tersambung ke MK Connect." };
-  }
   if (text.includes("nama")) {
     return { text: "Ultron. Ingat nama itu." };
   }
   if (!text) {
     return { text: "Aku tidak menangkap apa pun. Ulangi." };
+  }
+
+  const localAnswer = findLocalAnswer(text);
+  if (localAnswer) {
+    return { text: localAnswer };
   }
 
   if (!MKHSISTEM_VOICE_ASSISTANT_URL) {
