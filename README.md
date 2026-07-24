@@ -33,9 +33,13 @@ tiga") lewat `src/numbers-id.js`, dan mengevaluasi ekspresi lewat evaluator aman
 `src/calc.js` (tanpa `eval`).
 
 **Pengetahuan yang ditanamkan** — seperti asisten ala JARVIS yang dibekali
-pengetahuan luas, Ultron menyimpan puluhan fakta terkurasi di `src/facts.js`
-(antariksa & astronomi, geografi dunia, Indonesia, teknologi & komputer, sains &
-tubuh manusia, penemu, plus persona), semuanya dijawab lokal tanpa panggilan API.
+pengetahuan luas, Ultron menyimpan lebih dari seratus fakta terkurasi di
+`src/facts.js`: antariksa & astronomi, geografi dunia, Indonesia, teknologi &
+komputer, sains & tubuh manusia, penemu, sejarah dunia, keuangan & investasi,
+kekayaan & kebebasan finansial, pengembang properti, cara mempertahankan
+kekayaan, dan cara kerja dunia perbankan — plus persona ala JARVIS. Semuanya
+dijawab lokal tanpa panggilan API. Contoh: "apa itu bunga majemuk", "cara kerja
+bank", "apa itu KPR", "cara mempertahankan kekayaan", "kapan Perang Dunia Kedua".
 Pertanyaan yang butuh data MK Connect yang bisa berubah (absensi, memo, karyawan,
 dst.) tetap diteruskan ke otak utama.
 

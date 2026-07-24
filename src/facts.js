@@ -367,6 +367,359 @@ export const FACTS = [
     keywords: ["penemu telepon", "siapa alexander graham bell"],
     answer: "Telepon ditemukan oleh Alexander Graham Bell pada tahun seribu delapan ratus tujuh puluh enam.",
   },
+
+  // ---------------------------------------------------------------------------
+  // Sejarah dunia
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["kapan perang dunia pertama", "perang dunia 1", "perang dunia satu", "perang dunia i"],
+    answer:
+      "Perang Dunia Pertama berlangsung dari tahun seribu sembilan ratus empat belas sampai seribu sembilan ratus delapan belas, dipicu oleh pembunuhan Pangeran Franz Ferdinand dari Austria.",
+  },
+  {
+    keywords: ["kapan perang dunia kedua", "perang dunia 2", "perang dunia dua", "perang dunia ii"],
+    answer:
+      "Perang Dunia Kedua berlangsung dari tahun seribu sembilan ratus tiga puluh sembilan sampai seribu sembilan ratus empat puluh lima, dan menjadi konflik paling mematikan dalam sejarah manusia.",
+  },
+  {
+    keywords: ["apa itu revolusi industri", "revolusi industri", "kapan revolusi industri"],
+    answer:
+      "Revolusi Industri dimulai di Inggris pada akhir abad kedelapan belas, mengubah produksi dari tenaga tangan menjadi mesin, dan melahirkan era pabrik, mesin uap, serta kota-kota modern.",
+  },
+  {
+    keywords: ["siapa penemu benua amerika", "columbus", "penemu benua amerika"],
+    answer:
+      "Christopher Columbus mendarat di Amerika pada tahun seribu empat ratus sembilan puluh dua, meski benua itu sudah lama dihuni bangsa asli, dan sebenarnya orang Viking lebih dulu tiba.",
+  },
+  {
+    keywords: ["revolusi perancis", "revolusi prancis", "kapan revolusi perancis"],
+    answer:
+      "Revolusi Perancis meletus pada tahun seribu tujuh ratus delapan puluh sembilan, menumbangkan monarki dan menyebarkan gagasan kebebasan, kesetaraan, dan persaudaraan.",
+  },
+  {
+    keywords: ["manusia pertama ke bulan", "siapa yang pertama ke bulan", "pendaratan di bulan", "neil armstrong"],
+    answer:
+      "Manusia pertama yang menginjak Bulan adalah Neil Armstrong, lewat misi Apollo Sebelas pada tahun seribu sembilan ratus enam puluh sembilan.",
+  },
+  {
+    keywords: ["runtuhnya tembok berlin", "tembok berlin", "kapan tembok berlin runtuh"],
+    answer:
+      "Tembok Berlin runtuh pada tahun seribu sembilan ratus delapan puluh sembilan, menandai berakhirnya Perang Dingin dan bersatunya kembali Jerman.",
+  },
+  {
+    keywords: ["apa itu perang dingin", "perang dingin"],
+    answer:
+      "Perang Dingin adalah ketegangan panjang antara Amerika Serikat dan Uni Soviet setelah Perang Dunia Kedua, tanpa perang terbuka langsung, tapi diwarnai perlombaan senjata dan luar angkasa.",
+  },
+  {
+    keywords: ["siapa penemu mesin cetak", "mesin cetak gutenberg", "penemu mesin cetak"],
+    answer:
+      "Mesin cetak modern ditemukan oleh Johannes Gutenberg pada abad kelima belas, yang memungkinkan penyebaran ilmu pengetahuan secara massal untuk pertama kalinya.",
+  },
+  {
+    keywords: ["apa itu jalur sutra", "jalur sutra"],
+    answer:
+      "Jalur Sutra adalah jaringan jalur perdagangan kuno yang menghubungkan Asia dengan Eropa, tempat sutra, rempah, ide, dan budaya dipertukarkan selama berabad-abad.",
+  },
+  {
+    keywords: ["kekaisaran romawi", "kerajaan romawi"],
+    answer:
+      "Kekaisaran Romawi adalah salah satu peradaban paling berpengaruh dalam sejarah, menguasai wilayah luas di sekitar Laut Tengah dan mewariskan hukum, bahasa, serta arsitektur yang masih dipakai hingga kini.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Keuangan & investasi
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["apa itu inflasi", "inflasi itu apa", "arti inflasi"],
+    answer:
+      "Inflasi adalah kenaikan harga barang dan jasa secara umum dari waktu ke waktu. Akibatnya, daya beli uangmu menurun, sehingga jumlah uang yang sama membeli lebih sedikit barang di masa depan.",
+  },
+  {
+    keywords: ["apa itu bunga majemuk", "bunga majemuk", "compound interest", "bunga berbunga"],
+    answer:
+      "Bunga majemuk adalah bunga yang dihitung atas pokok ditambah bunga yang sudah terkumpul sebelumnya. Efeknya seperti bola salju: uang bertumbuh makin cepat seiring waktu. Albert Einstein konon menyebutnya keajaiban dunia kedelapan.",
+  },
+  {
+    keywords: ["aturan 72", "rule of 72", "rumus 72"],
+    answer:
+      "Aturan tujuh puluh dua adalah cara cepat memperkirakan berapa lama uang berlipat ganda. Bagi angka tujuh puluh dua dengan persen bunga tahunan. Contohnya, pada bunga sembilan persen, uang berlipat ganda dalam sekitar delapan tahun.",
+  },
+  {
+    keywords: ["apa itu saham", "saham itu apa", "arti saham"],
+    answer:
+      "Saham adalah bukti kepemilikan atas sebagian sebuah perusahaan. Saat kamu membeli saham, kamu menjadi pemilik kecil perusahaan itu dan berhak atas pertumbuhan serta sebagian labanya.",
+  },
+  {
+    keywords: ["apa itu obligasi", "obligasi itu apa"],
+    answer:
+      "Obligasi adalah surat utang. Saat kamu membeli obligasi, kamu meminjamkan uang kepada perusahaan atau pemerintah, dan mereka membayarmu kembali dengan bunga pada waktu yang disepakati.",
+  },
+  {
+    keywords: ["apa itu reksadana", "reksa dana", "reksadana itu apa"],
+    answer:
+      "Reksadana adalah wadah yang mengumpulkan uang dari banyak investor, lalu dikelola oleh manajer investasi profesional untuk dibelikan saham, obligasi, atau aset lain. Cocok untuk pemula karena praktis dan terdiversifikasi.",
+  },
+  {
+    keywords: ["apa itu dividen", "dividen itu apa"],
+    answer:
+      "Dividen adalah bagian dari laba perusahaan yang dibagikan kepada para pemegang saham, biasanya secara berkala. Ini salah satu bentuk pendapatan pasif dari berinvestasi saham.",
+  },
+  {
+    keywords: ["apa itu diversifikasi", "diversifikasi itu apa"],
+    answer:
+      "Diversifikasi adalah menyebar investasi ke berbagai jenis aset agar risiko berkurang. Prinsipnya sederhana: jangan menaruh semua telur dalam satu keranjang.",
+  },
+  {
+    keywords: ["apa itu roi", "return on investment", "tingkat pengembalian"],
+    answer:
+      "ROI atau Return on Investment adalah ukuran keuntungan dari sebuah investasi, dihitung dari laba dibagi modal yang dikeluarkan, lalu dinyatakan dalam persen.",
+  },
+  {
+    keywords: ["apa itu likuiditas", "likuiditas itu apa"],
+    answer:
+      "Likuiditas adalah seberapa mudah sebuah aset diubah menjadi uang tunai tanpa kehilangan banyak nilai. Uang tunai paling likuid, sementara properti tergolong kurang likuid.",
+  },
+  {
+    keywords: ["apa itu investasi emas", "emas sebagai investasi", "kenapa investasi emas"],
+    answer:
+      "Emas adalah penyimpan nilai yang sudah dipercaya selama ribuan tahun. Karena jumlahnya terbatas dan tidak bisa dicetak seperti uang kertas, emas sering dipakai untuk melindungi kekayaan dari inflasi dan krisis.",
+  },
+  {
+    keywords: ["apa itu bitcoin", "apa itu kripto", "mata uang kripto", "cryptocurrency"],
+    answer:
+      "Mata uang kripto seperti Bitcoin adalah uang digital yang berjalan di atas teknologi blockchain, tanpa bank sentral. Nilainya bisa sangat fluktuatif, jadi tergolong investasi berisiko tinggi.",
+  },
+  {
+    keywords: ["apa itu portofolio", "portofolio investasi"],
+    answer:
+      "Portofolio adalah kumpulan seluruh investasi yang kamu miliki, seperti saham, obligasi, properti, dan emas. Portofolio yang seimbang membantu menekan risiko sekaligus mengejar pertumbuhan.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Kekayaan & kebebasan finansial
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["apa itu kekayaan bersih", "net worth", "kekayaan bersih itu apa"],
+    answer:
+      "Kekayaan bersih atau net worth adalah total nilai seluruh asetmu dikurangi seluruh utangmu. Inilah ukuran sesungguhnya dari kekayaan seseorang, bukan sekadar besarnya penghasilan.",
+  },
+  {
+    keywords: ["apa itu aset dan liabilitas", "beda aset dan liabilitas", "aset vs liabilitas"],
+    answer:
+      "Aset adalah segala hal yang memasukkan uang ke kantongmu, seperti properti sewaan atau saham. Liabilitas adalah yang mengeluarkan uang, seperti cicilan mobil. Orang kaya membeli aset lebih dulu, bukan liabilitas.",
+  },
+  {
+    keywords: ["apa itu pendapatan pasif", "passive income", "penghasilan pasif"],
+    answer:
+      "Pendapatan pasif adalah penghasilan yang terus mengalir tanpa harus kamu kerjakan aktif setiap saat, seperti uang sewa, dividen saham, atau royalti. Ini kunci menuju kebebasan finansial.",
+  },
+  {
+    keywords: ["apa itu kebebasan finansial", "financial freedom", "merdeka finansial", "kebebasan keuangan"],
+    answer:
+      "Kebebasan finansial adalah keadaan saat pendapatan pasifmu sudah cukup untuk menutupi seluruh biaya hidupmu. Pada titik itu, bekerja menjadi pilihan, bukan keharusan.",
+  },
+  {
+    keywords: ["apa itu dana darurat", "dana darurat itu apa", "emergency fund"],
+    answer:
+      "Dana darurat adalah simpanan khusus setara tiga sampai enam bulan biaya hidup, yang hanya dipakai saat keadaan mendesak seperti kehilangan pekerjaan atau sakit. Ia adalah bantalan pertama sebelum berinvestasi.",
+  },
+  {
+    keywords: ["aturan 50 30 20", "50 30 20", "rumus anggaran"],
+    answer:
+      "Aturan lima puluh, tiga puluh, dua puluh adalah panduan anggaran sederhana: lima puluh persen penghasilan untuk kebutuhan, tiga puluh persen untuk keinginan, dan dua puluh persen untuk menabung serta berinvestasi.",
+  },
+  {
+    keywords: ["bagaimana cara membangun kekayaan", "cara membangun kekayaan", "cara jadi kaya", "cara menjadi kaya", "bagaimana cara kaya"],
+    answer:
+      "Kekayaan umumnya dibangun dari empat kebiasaan, Sir: hidup di bawah kemampuan, menyisihkan dan berinvestasi secara rutin, membeli aset yang menghasilkan, dan membiarkan bunga majemuk bekerja selama bertahun-tahun. Sabar dan konsisten mengalahkan cepat kaya.",
+  },
+  {
+    keywords: ["orang terkaya di dunia", "siapa orang terkaya", "manusia terkaya"],
+    answer:
+      "Posisi orang terkaya di dunia berganti-ganti setiap tahun. Dalam beberapa tahun terakhir, nama seperti Elon Musk dan Bernard Arnault kerap menempati puncak daftar Forbes.",
+  },
+  {
+    keywords: ["kaya vs berpenghasilan tinggi", "beda kaya dan gaji besar", "gaji besar tapi tidak kaya"],
+    answer:
+      "Berpenghasilan tinggi belum tentu kaya, Sir. Banyak orang bergaji besar tapi menghabiskan semuanya. Kekayaan sejati diukur dari aset yang kamu simpan dan tumbuhkan, bukan dari besarnya uang yang lewat.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Pengembang properti / real estate
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["apa itu developer properti", "pengembang properti", "developer properti itu apa"],
+    answer:
+      "Pengembang properti atau developer adalah pihak yang membeli lahan, mengurus perizinan, membangun rumah, ruko, atau gedung, lalu menjual atau menyewakannya. Keuntungannya berasal dari nilai tambah yang diciptakan atas tanah dan bangunan itu.",
+  },
+  {
+    keywords: ["apa itu kpr", "kredit pemilikan rumah", "kpr itu apa"],
+    answer:
+      "KPR atau Kredit Pemilikan Rumah adalah pinjaman dari bank untuk membeli rumah. Kamu membayar uang muka lebih dulu, lalu mencicil sisanya beserta bunga selama bertahun-tahun, dengan rumah sebagai jaminan.",
+  },
+  {
+    keywords: ["apa itu capital gain", "capital gain properti", "keuntungan modal"],
+    answer:
+      "Capital gain adalah keuntungan dari selisih harga jual dikurangi harga beli sebuah aset seperti properti. Contohnya, membeli rumah lalu menjualnya beberapa tahun kemudian dengan harga lebih tinggi.",
+  },
+  {
+    keywords: ["apa itu rental yield", "yield sewa", "imbal hasil sewa", "hasil sewa properti"],
+    answer:
+      "Rental yield atau imbal hasil sewa adalah pendapatan sewa setahun dibagi harga properti, dinyatakan dalam persen. Ini mengukur seberapa produktif sebuah properti menghasilkan uang sewa dibanding harganya.",
+  },
+  {
+    keywords: ["apa itu leverage", "leverage properti", "leverage dalam investasi"],
+    answer:
+      "Leverage adalah memakai uang pinjaman untuk mengendalikan aset yang jauh lebih besar dari modal sendiri. Dalam properti, dengan uang muka kecil kamu bisa menguasai rumah bernilai besar. Leverage memperbesar keuntungan, tapi juga memperbesar risiko.",
+  },
+  {
+    keywords: ["beda shm dan hgb", "apa itu shm", "sertifikat hak milik", "hak guna bangunan"],
+    answer:
+      "SHM atau Sertifikat Hak Milik adalah bukti kepemilikan tanah yang paling kuat dan berlaku selamanya. HGB atau Hak Guna Bangunan hanya memberi hak membangun dan memakai untuk jangka waktu tertentu, biasanya tiga puluh tahun, dan bisa diperpanjang.",
+  },
+  {
+    keywords: ["apa itu njop", "nilai jual objek pajak"],
+    answer:
+      "NJOP atau Nilai Jual Objek Pajak adalah nilai yang ditetapkan pemerintah atas sebuah tanah dan bangunan, dan dipakai sebagai dasar menghitung pajak properti.",
+  },
+  {
+    keywords: ["apa itu bphtb", "bea perolehan hak"],
+    answer:
+      "BPHTB adalah Bea Perolehan Hak atas Tanah dan Bangunan, yaitu pajak yang dibayar pembeli saat memperoleh properti, umumnya sebesar lima persen dari nilai transaksi setelah dikurangi batas tidak kena pajak.",
+  },
+  {
+    keywords: ["apa itu pbb", "pajak bumi dan bangunan"],
+    answer:
+      "PBB atau Pajak Bumi dan Bangunan adalah pajak tahunan yang wajib dibayar pemilik atas tanah dan bangunan yang dimilikinya.",
+  },
+  {
+    keywords: ["apa itu pre selling", "jual indent", "properti indent", "pre-selling"],
+    answer:
+      "Pre-selling atau indent adalah menjual properti sebelum bangunannya selesai atau bahkan sebelum dibangun. Pengembang mendapat dana awal, sementara pembeli biasanya memperoleh harga lebih murah.",
+  },
+  {
+    keywords: ["faktor terpenting properti", "kenapa lokasi penting", "lokasi properti"],
+    answer:
+      "Dalam properti ada pepatah terkenal: yang terpenting adalah lokasi, lokasi, dan lokasi. Lokasi yang strategis, dekat fasilitas dan akses, adalah penentu utama nilai serta pertumbuhan harga sebuah properti.",
+  },
+  {
+    keywords: ["apa itu flipping properti", "flipping rumah", "flip properti"],
+    answer:
+      "Flipping properti adalah membeli properti dengan harga murah, memperbaiki atau merenovasinya, lalu menjualnya kembali dengan cepat untuk mengambil keuntungan dari selisih harga.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mempertahankan kekayaan
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["bagaimana cara mempertahankan kekayaan", "cara mempertahankan kekayaan", "cara menjaga kekayaan", "melindungi kekayaan", "menjaga kekayaan"],
+    answer:
+      "Mempertahankan kekayaan sering lebih sulit daripada membangunnya, Sir. Kuncinya: sebar aset lewat diversifikasi, lindungi nilai dari inflasi dengan aset riil seperti properti dan emas, miliki asuransi, hindari utang konsumtif dan gaya hidup berlebihan, serta rencanakan pewarisan dengan matang.",
+  },
+  {
+    keywords: ["cara melindungi dari inflasi", "lindung nilai inflasi", "aset lindung inflasi", "melawan inflasi"],
+    answer:
+      "Untuk melindungi kekayaan dari inflasi, tempatkan dana pada aset yang nilainya cenderung ikut naik, seperti properti, emas, dan saham perusahaan yang sehat. Menyimpan terlalu banyak uang tunai justru membuat nilainya tergerus inflasi diam-diam.",
+  },
+  {
+    keywords: ["apa itu lifestyle inflation", "inflasi gaya hidup", "gaya hidup naik"],
+    answer:
+      "Inflasi gaya hidup adalah kebiasaan menaikkan pengeluaran setiap kali penghasilan bertambah, sehingga tabungan tidak pernah ikut naik. Ini salah satu musuh terbesar dalam membangun dan menjaga kekayaan.",
+  },
+  {
+    keywords: ["bahaya utang konsumtif", "utang konsumtif", "beda utang baik dan buruk"],
+    answer:
+      "Utang konsumtif adalah utang untuk membeli barang yang nilainya menurun, seperti gawai atau liburan. Berbeda dengan utang produktif yang dipakai membeli aset penghasil uang. Utang konsumtif berlebihan bisa cepat menggerus kekayaan.",
+  },
+  {
+    keywords: ["kenapa perlu asuransi", "fungsi asuransi", "pentingnya asuransi"],
+    answer:
+      "Asuransi melindungi kekayaanmu dari kejadian tak terduga seperti sakit, kecelakaan, atau kebakaran. Dengan membayar premi kecil, kamu memindahkan risiko kerugian besar kepada perusahaan asuransi.",
+  },
+  {
+    keywords: ["apa itu perencanaan warisan", "estate planning", "mengatur warisan", "wasiat harta"],
+    answer:
+      "Perencanaan warisan adalah mengatur bagaimana kekayaanmu diwariskan lewat cara seperti wasiat, hibah, atau lembaga wali amanat. Tujuannya agar aset berpindah dengan lancar ke ahli waris, meminimalkan pajak, dan mencegah konflik keluarga.",
+  },
+  {
+    keywords: ["beda aset riil dan kertas", "aset riil vs kertas", "aset nyata"],
+    answer:
+      "Aset riil adalah barang berwujud seperti properti, tanah, dan emas yang cenderung tahan inflasi. Aset kertas seperti uang tunai dan sebagian obligasi lebih mudah dicairkan, tapi nilainya bisa tergerus inflasi seiring waktu. Kekayaan yang kokoh biasanya memadukan keduanya.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Dunia perbankan
+  // ---------------------------------------------------------------------------
+  // Catatan urutan: entri spesifik "apa itu bank sentral/run/cadangan pecahan"
+  // sengaja diletakkan SEBELUM entri umum "apa itu bank" di bawah, karena
+  // pencocokan substring memakai entri pertama yang cocok.
+  {
+    keywords: ["bagaimana bank menghasilkan uang", "dari mana keuntungan bank", "bagaimana bank untung", "cara bank menghasilkan uang"],
+    answer:
+      "Bank terutama menghasilkan uang dari selisih bunga. Ia membayar bunga kecil kepada penabung, lalu meminjamkan dana itu dengan bunga lebih tinggi. Selisihnya, ditambah berbagai biaya layanan, menjadi keuntungan bank.",
+  },
+  {
+    keywords: ["bagaimana dunia perbankan bekerja", "cara kerja bank", "sistem perbankan bekerja", "bagaimana perbankan bekerja"],
+    answer:
+      "Secara sederhana, bank menampung uang penabung, menyimpan sebagian kecil sebagai cadangan, lalu meminjamkan sisanya kepada peminjam. Dari proses ini uang berputar, bahkan bertambah, di dalam perekonomian. Semuanya diawasi oleh bank sentral agar tetap stabil.",
+  },
+  {
+    keywords: ["apa itu bank cadangan pecahan", "fractional reserve", "cadangan pecahan", "sistem cadangan bank"],
+    answer:
+      "Sistem cadangan pecahan berarti bank hanya menyimpan sebagian kecil dari total simpanan sebagai cadangan tunai, dan meminjamkan sisanya. Inilah alasan bank tidak menyimpan seluruh uang nasabah dalam bentuk tunai di brankasnya.",
+  },
+  {
+    keywords: ["bagaimana uang diciptakan", "penciptaan uang", "uang diciptakan bank", "uang giral"],
+    answer:
+      "Menariknya, sebagian besar uang justru diciptakan saat bank memberi pinjaman. Ketika bank menyetujui kredit, ia mencatat dana baru di rekening peminjam, sehingga jumlah uang beredar di masyarakat, disebut uang giral, bertambah.",
+  },
+  {
+    keywords: ["apa itu bank sentral", "bank sentral", "bank indonesia itu apa", "tugas bank indonesia"],
+    answer:
+      "Bank sentral, di Indonesia adalah Bank Indonesia, adalah lembaga yang mengatur jumlah uang beredar, menjaga inflasi tetap stabil, menerbitkan Rupiah, dan mengawasi sistem pembayaran. Ia adalah banknya para bank.",
+  },
+  {
+    keywords: ["apa itu suku bunga acuan", "bi rate", "suku bunga acuan", "bunga acuan bank sentral"],
+    answer:
+      "Suku bunga acuan adalah bunga patokan yang ditetapkan bank sentral. Saat dinaikkan, bunga kredit dan deposito ikut naik sehingga menekan inflasi. Saat diturunkan, pinjaman jadi lebih murah untuk mendorong pertumbuhan ekonomi.",
+  },
+  {
+    keywords: ["apa itu giro wajib minimum", "giro wajib minimum", "reserve requirement"],
+    answer:
+      "Giro wajib minimum adalah persentase simpanan yang wajib disimpan setiap bank di bank sentral, tidak boleh dipinjamkan. Aturan ini menjaga agar bank selalu punya cadangan dan sistem keuangan tetap aman.",
+  },
+  {
+    keywords: ["apa itu lps", "lembaga penjamin simpanan", "penjaminan simpanan"],
+    answer:
+      "LPS atau Lembaga Penjamin Simpanan menjamin dana nasabah di bank sampai batas tertentu, saat ini sampai dua miliar rupiah per nasabah per bank, sehingga tabunganmu tetap aman meski banknya bermasalah.",
+  },
+  {
+    keywords: ["apa itu bank run", "rush money", "penarikan dana besar-besaran"],
+    answer:
+      "Bank run terjadi saat banyak nasabah menarik uangnya secara bersamaan karena panik. Karena bank tidak menyimpan seluruh dana dalam bentuk tunai, aksi ini bisa membuat bank yang sehat sekalipun kolaps.",
+  },
+  {
+    // Entri umum -- diletakkan setelah entri "apa itu bank ..." yang spesifik.
+    keywords: ["apa itu bank", "fungsi bank", "bank itu apa", "kegunaan bank"],
+    answer:
+      "Bank adalah lembaga keuangan yang menerima simpanan masyarakat, menyalurkannya kembali sebagai pinjaman, dan melayani lalu lintas pembayaran. Bank menjadi jantung yang mengalirkan uang dalam perekonomian.",
+  },
+  {
+    keywords: ["apa itu deposito", "deposito itu apa", "simpanan berjangka"],
+    answer:
+      "Deposito adalah simpanan berjangka di bank yang dananya dikunci selama periode tertentu, dan sebagai gantinya kamu memperoleh bunga lebih tinggi daripada tabungan biasa.",
+  },
+  {
+    keywords: ["apa itu kredit", "kredit itu apa", "apa itu pinjaman bank"],
+    answer:
+      "Kredit adalah pinjaman uang dari bank yang harus dikembalikan secara berkala beserta bunga. Bank menilai kelayakan peminjam lebih dulu, sering memakai prinsip lima C, seperti karakter dan kemampuan membayar.",
+  },
+  {
+    keywords: ["apa itu swift", "kode swift", "transfer internasional bank"],
+    answer:
+      "SWIFT adalah jaringan pesan global yang dipakai bank-bank di seluruh dunia untuk saling berkomunikasi dan menyelesaikan transfer uang antarnegara dengan aman.",
+  },
 ];
 
 /** Substring match sederhana terhadap teks pengguna (huruf kecil). Null bila tak ada yang cocok. */
