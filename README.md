@@ -43,6 +43,16 @@ bank", "apa itu KPR", "cara mempertahankan kekayaan", "kapan Perang Dunia Kedua"
 Pertanyaan yang butuh data MK Connect yang bisa berubah (absensi, memo, karyawan,
 dst.) tetap diteruskan ke otak utama.
 
+**Pengetahuan bisnis Loonars** (`src/loonars.js`) — Ultron paham bisnis tempatnya
+bekerja: pengelolaan villa, rumah kos, homestay, dan F&B; model perusahaan
+pengelola tanpa aset (asset-light) dan sumber pendapatannya; metrik hospitality
+(okupansi, ADR, RevPAR, NOI, food cost, prime cost, menu engineering); serta
+tata cara sampai Loonars bisa IPO sebagai perusahaan pengelola. Contoh: "apa itu
+Loonars", "pengelolaan villa", "jasa manajemen kost", "apa itu Sapta Pesona",
+"apa itu food cost", "cara Loonars IPO", "syarat go public". Semua dijawab lokal
+tanpa panggilan API; angka bersifat rujukan industri, bukan data internal Loonars
+yang berubah-ubah (yang itu tetap lewat otak utama).
+
 ## Struktur
 - `src/voice.js` — abstraksi STT/TTS dengan provider `elevenlabs` (aktif) dan `webspeech` (fallback tanpa API key, tinggal ganti `ACTIVE_PROVIDER` kalau mau pakai itu lagi)
 - `src/brain.js` — logika jawaban Ultron. Sapaan/identitas & basis pengetahuan dijawab lokal, kemampuan lokal (skills) dicoba berikutnya; selebihnya dikirim ke `/api/ai/voice-assistant` milik MK Connect
@@ -50,7 +60,8 @@ dst.) tetap diteruskan ke otak utama.
 - `src/numbers-id.js` — parser & pembentuk kata bilangan Bahasa Indonesia (dipakai kalkulator/konversi/timer)
 - `src/calc.js` — evaluator ekspresi aritmetika yang aman tanpa `eval`
 - `src/knowledge.js` — basis pengetahuan konsep (asisten virtual, AI/ML, identitas Ultron) yang dijawab tanpa panggilan API
-- `src/facts.js` — basis pengetahuan umum yang ditanamkan (sains, antariksa, geografi, Indonesia, teknologi, tubuh manusia, penemu, persona) + koleksi kutipan & fakta unik. Tambah pengetahuan baru cukup satu objek `{ keywords, answer }`
+- `src/facts.js` — basis pengetahuan umum yang ditanamkan (sains, antariksa, geografi, Indonesia, teknologi, tubuh manusia, penemu, sejarah, keuangan, kekayaan, properti, perbankan, persona) + koleksi kutipan & fakta unik. Tambah pengetahuan baru cukup satu objek `{ keywords, answer }`
+- `src/loonars.js` — pengetahuan bisnis Loonars: pengelolaan villa, rumah kos, homestay, dan F&B; model perusahaan pengelola tanpa aset (asset-light); metrik hospitality (okupansi/ADR/RevPAR/NOI, food cost/prime cost); sampai jalan menuju IPO. Dijawab lokal tanpa panggilan API
 - `src/mkhsistem.js` — sesi login ke MK Connect lewat Supabase Auth-nya langsung (lihat bagian "Jembatan ke MK Connect" di bawah)
 - `src/main.js` — state machine UI + visualizer, termasuk gerbang login MK Connect sebelum Ultron aktif
 - `src/audio-manager.js` — Audio Experience Engine: pemutar cue branding (`online`, `listening`, `thinking`, `success`, `notification`, `error`, `shutdown`). Reusable — tambah cue baru lewat `AudioManager.registerCue(nama, path)`, tidak perlu ubah kode lain

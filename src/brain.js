@@ -8,6 +8,7 @@
 import { HONORIFIC, MKHSISTEM_VOICE_ASSISTANT_URL } from "./config.js";
 import { findLocalAnswer } from "./knowledge.js";
 import { findFact } from "./facts.js";
+import { findLoonars } from "./loonars.js";
 import { runSkill } from "./skills.js";
 import { getAccessToken, getDailyDigest } from "./mkhsistem.js";
 
@@ -118,6 +119,13 @@ export async function getResponse(userText) {
   const fact = findFact(text);
   if (fact) {
     return { text: fact };
+  }
+
+  // Pengetahuan bisnis Loonars (pengelolaan villa/kos/homestay/F&B, model
+  // asset-light, jalan menuju IPO) -- juga dijawab lokal tanpa panggilan API.
+  const loonars = findLoonars(text);
+  if (loonars) {
+    return { text: loonars };
   }
 
   if (!MKHSISTEM_VOICE_ASSISTANT_URL) {
