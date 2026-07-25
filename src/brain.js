@@ -52,6 +52,11 @@ const DIGEST_KEYWORDS = [
 const MAX_HISTORY_TURNS = 12; // pasangan user+assistant, dipangkas dari yang terlama
 let conversationHistory = [];
 
+// Jawaban terakhir, supaya "ulangi" bisa memutarnya kembali. Karena teksnya
+// sama persis, audionya diambil dari cache -- nol panggilan ElevenLabs.
+let lastAnswer = null;
+const REPEAT_PHRASES = ["ulangi", "ulang lagi", "apa tadi", "coba ulangi", "sekali lagi", "tadi apa"];
+
 // Cache ringkasan harian di memori supaya tanya berkali-kali dalam satu
 // sesi tidak berulang kali baca tabel -- digest sendiri cuma di-generate
 // ulang sekali sehari (17:00 WITA) di server, jadi TTL cache di sini bisa
@@ -87,6 +92,7 @@ function pushHistory(role, content) {
 
 export function resetConversation() {
   conversationHistory = [];
+  lastAnswer = null;
 }
 
 /**
@@ -94,10 +100,23 @@ export function resetConversation() {
  * main.js untuk memutar chime "online" bersamaan dengan ucapan ini.
  */
 export async function getResponse(userText) {
+  const reply = await computeResponse(userText);
+  if (reply?.text) lastAnswer = reply.text;
+  return reply;
+}
+
+async function computeResponse(userText) {
   const text = userText.toLowerCase().trim();
 
   if (!text) {
-    return { text: "Aku tidak menangkap apa pun. Ulangi." };
+    return { text: "Aku tidak menangkap apa pun. Coba ulangi." };
+  }
+
+  // "Ulangi" -- putar kembali jawaban terakhir. Teksnya identik sehingga
+  // audionya datang dari cache: tanpa panggilan ElevenLabs sama sekali.
+  if (REPEAT_PHRASES.some((p) => text === p || text.startsWith(p + " ") || text.endsWith(" " + p))) {
+    if (lastAnswer) return { text: lastAnswer };
+    return { text: `Belum ada yang bisa aku ulangi, ${HONORIFIC}.` };
   }
 
   // GERBANG MK CONNECT: hanya bila ucapan memuat kata pembuka "cek perusahaan"

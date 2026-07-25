@@ -53,6 +53,30 @@ Loonars", "pengelolaan villa", "jasa manajemen kost", "apa itu Sapta Pesona",
 tanpa panggilan API; angka bersifat rujukan industri, bukan data internal Loonars
 yang berubah-ubah (yang itu tetap lewat otak utama).
 
+## Hemat panggilan ElevenLabs
+
+FRIDAY dirancang supaya satu kalimat cukup di-generate **sekali seumur hidup perangkat**:
+
+- **Cache suara di IndexedDB** (`src/tts-cache.js`) — mp3 disimpan permanen dengan kuota ratusan MB (bukan lagi localStorage ~5 MB) dan **tanpa batas panjang teks**, jadi jawaban panjang (fakta, Loonars, ringkasan harian) ikut tersimpan. Budget 40 MB dengan pembuangan LRU. Cache lama otomatis dimigrasi.
+- **Prewarm** — kalimat yang pasti diucapkan (boot, sapaan tiap waktu, jawaban fallback) di-generate sekali di latar belakang saat perangkat menganggur, lalu permanen.
+- **"Ulangi"** — memutar jawaban terakhir dari cache, nol panggilan API.
+- **Fallback suara bawaan** — kalau ElevenLabs gagal (offline/kuota habis), FRIDAY tetap menjawab memakai `speechSynthesis` perangkat, tidak bisu.
+- Panel telemetri menampilkan `CACHE` = jumlah kalimat tersimpan / berapa kali dipakai ulang (tiap pemakaian ulang = satu panggilan ElevenLabs yang tidak jadi terkirim).
+
+Terverifikasi: tiga ucapan identik berturut-turut hanya menghasilkan **satu** panggilan `/api/tts`.
+
+## Memanggil FRIDAY saat layar mati
+
+Halaman web **tidak bisa** mendengarkan terus-menerus saat layar mati atau terkunci — sistem operasi menghentikan mikrofon halaman yang di latar belakang, dan tidak ada API wake-word untuk web di iOS maupun Android. Yang tersedia dan sudah dipasang:
+
+1. **Layar tidak mati sendiri saat FRIDAY aktif** — Screen Wake Lock API dipakai selama sesi hands-free, dan diambil ulang otomatis saat kembali ke tab.
+2. **Bisa dipasang sebagai aplikasi (PWA)** — manifest + service worker + ikon. Tambahkan ke Layar Utama, buka layar penuh, dan tetap jalan offline untuk semua kemampuan lokalnya.
+3. **Diluncurkan lewat suara** — buka `/?autostart=1` dan FRIDAY langsung menyala serta mendengarkan tanpa disentuh. Pasangkan dengan asisten bawaan ponsel:
+   - **iPhone**: Pintasan (Shortcuts) → Tindakan "Buka URL" `https://<domain>/?autostart=1`, beri nama **FRIDAY**. Lalu cukup ucapkan *"Hey Siri, FRIDAY"* — bisa dari layar terkunci.
+   - **Android**: pasang PWA-nya, lalu *"Ok Google, buka FRIDAY"*; atau buat Rutinitas Google Assistant yang membuka URL di atas.
+
+Untuk wake-word sungguhan yang berjalan dengan layar mati (*"Hey FRIDAY"* tanpa menyentuh apa pun), perlu aplikasi native pembungkus (Capacitor/TWA) dengan foreground service — di luar cakupan aplikasi web ini.
+
 ## Struktur
 - `src/voice.js` — abstraksi STT/TTS dengan provider `elevenlabs` (aktif) dan `webspeech` (fallback tanpa API key, tinggal ganti `ACTIVE_PROVIDER` kalau mau pakai itu lagi)
 - `src/brain.js` — logika jawaban FRIDAY. Secara default **murni lokal** (sapaan, kemampuan/skills, pengetahuan, Loonars). FRIDAY hanya masuk ke MK Connect / AI bila ucapan memuat kata pembuka **"cek perusahaan"** — lihat bagian "Gerbang MK Connect" di bawah. Tanpa kata pembuka itu, pertanyaan yang tak dikenali dijawab fallback lokal, bukan diteruskan ke AI

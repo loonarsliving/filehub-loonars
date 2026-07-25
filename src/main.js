@@ -1,5 +1,6 @@
 import "./style.css";
-import { isSTTSupported, startListening, speak, stopSpeaking } from "./voice.js";
+import { isSTTSupported, startListening, speak, stopSpeaking, prefetchSpeech } from "./voice.js";
+import { getCacheStats, refreshCacheStats } from "./tts-cache.js";
 import { getResponse, getMorningDigestIfDue, isCompanyGate } from "./brain.js";
 import { onSkillAnnounce } from "./skills.js";
 import { getAudioContext } from "./audio-context.js";
@@ -29,6 +30,7 @@ const tCore = document.getElementById("tCore");
 const tMic = document.getElementById("tMic");
 const tLatency = document.getElementById("tLatency");
 const tUptime = document.getElementById("tUptime");
+const tCache = document.getElementById("tCache");
 
 // Label ringkas per-state untuk chip status di header.
 const CHIP_LABELS = { idle: "SIAGA", listening: "MENDENGARKAN", processing: "MEMPROSES", speaking: "MERESPONS" };
@@ -62,11 +64,13 @@ let bargeInStartedAt = null;
 let activatedAt = null; // untuk uptime telemetri
 let lastLatencyMs = null; // waktu jawaban terakhir (skill lokal ~0ms, Gemini lebih lama)
 let coreTemp = 36.6; // suhu inti (estetika HUD, random walk)
+let wakeLock = null; // WakeLockSentinel -- menahan layar tetap menyala saat aktif
 
 setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
 tickClock();
 setInterval(tickClock, 1000);
 setInterval(updateTelemetry, 500);
+refreshCacheStats(); // hitung kalimat yang sudah tersimpan dari sesi sebelumnya
 drawIdleWave();
 
 // Timer/pengingat yang selesai (dari skills.js) diumumkan lewat sini.
@@ -85,6 +89,92 @@ core.addEventListener("keydown", (e) => {
 
 function unlockAudioPlayback() {
   getAudioContext();
+}
+
+// --- wake lock: layar tidak mati selama FRIDAY aktif -----------------------
+// Browser TIDAK mengizinkan halaman web mendengarkan saat layar mati/terkunci
+// (mic dihentikan sistem). Yang bisa dilakukan: menahan layar tetap menyala
+// selama FRIDAY aktif, supaya sesi hands-free tidak terputus sendiri.
+
+async function acquireWakeLock() {
+  try {
+    if (!("wakeLock" in navigator)) return;
+    wakeLock = await navigator.wakeLock.request("screen");
+    wakeLock.addEventListener?.("release", () => {
+      wakeLock = null;
+    });
+  } catch (err) {
+    console.warn("[wakelock] tidak bisa menahan layar:", err?.message);
+  }
+}
+
+function releaseWakeLock() {
+  try {
+    wakeLock?.release?.();
+  } catch {
+    /* abaikan */
+  }
+  wakeLock = null;
+}
+
+// Sistem melepas wake lock saat tab tersembunyi -- ambil lagi begitu kembali.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && active && !wakeLock) acquireWakeLock();
+});
+
+// --- service worker: pasang sebagai app (PWA) + jalan offline --------------
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((err) => {
+      console.warn("[sw] gagal mendaftar:", err?.message);
+    });
+  });
+}
+
+// --- prewarm cache suara ---------------------------------------------------
+// Kalimat yang PASTI diucapkan (boot, sapaan pertama) dan beberapa jawaban yang
+// paling sering diminta di-generate sekali di latar belakang saat perangkat
+// menganggur. Setelah itu tersimpan permanen -- pemakaian berikutnya nol
+// panggilan ElevenLabs. Hanya dijalankan sekali per versi daftar.
+
+const PREWARM_VERSION_KEY = "friday-prewarm-v1";
+
+function prewarmLines() {
+  return [
+    ONLINE_LINE,
+    ...FIRST_LISTEN_LINES,
+    `Selamat pagi, ${HONORIFIC}. Saya online dan siap melayani.`,
+    `Selamat siang, ${HONORIFIC}. Saya online dan siap melayani.`,
+    `Selamat sore, ${HONORIFIC}. Saya online dan siap melayani.`,
+    `Selamat malam, ${HONORIFIC}. Saya online dan siap melayani.`,
+    `Sama-sama, ${HONORIFIC}. Dengan senang hati.`,
+    `Sistemku berjalan optimal, ${HONORIFIC}. Seluruh modul nominal dan siap membantu.`,
+    `Pintu MK Connect terbuka, ${HONORIFIC}. Apa yang ingin kamu cek?`,
+    `Maaf, ${HONORIFIC}, itu di luar pengetahuan lokalku. Kalau ini soal data perusahaan, awali dengan "cek perusahaan".`,
+  ];
+}
+
+async function prewarmVoiceCache() {
+  try {
+    if (localStorage.getItem(PREWARM_VERSION_KEY)) return;
+  } catch {
+    return; // localStorage diblokir -- lewati prewarm
+  }
+
+  let generated = 0;
+  for (const line of prewarmLines()) {
+    if (!navigator.onLine) break;
+    // Berurutan (bukan paralel) supaya tidak kena rate limit ElevenLabs.
+    if (await prefetchSpeech(line)) generated++;
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  try {
+    localStorage.setItem(PREWARM_VERSION_KEY, String(Date.now()));
+  } catch {
+    /* abaikan */
+  }
+  if (generated) log("sys", `${generated} kalimat suara disiapkan untuk dipakai offline.`);
+  refreshCacheStats();
 }
 
 function tickClock() {
@@ -129,6 +219,13 @@ function updateTelemetry() {
 
   if (lastLatencyMs != null) tLatency.textContent = `${lastLatencyMs} ms`;
   if (!active) tMic.style.width = "0%";
+
+  // Cache suara: berapa kalimat tersimpan & berapa kali dipakai ulang (tiap
+  // pemakaian ulang = satu panggilan ElevenLabs yang tidak jadi terkirim).
+  if (tCache) {
+    const c = getCacheStats();
+    tCache.textContent = `${c.entries} / ${c.hits}`;
+  }
 }
 
 function log(role, text) {
@@ -151,6 +248,7 @@ async function activate() {
   active = true;
   activatedAt = Date.now();
   unlockAudioPlayback();
+  acquireWakeLock(); // tahan layar supaya sesi hands-free tidak terputus
   setState("processing", "MENGAKTIFKAN...");
   log("sys", `${ASSISTANT_NAME} diaktifkan.`);
 
@@ -231,6 +329,11 @@ async function runBootSequence() {
   }
 
   await startHandsFree({ announce: true });
+
+  // Siapkan cache suara saat perangkat menganggur -- sekali saja, di latar
+  // belakang, supaya pemakaian berikutnya tidak memanggil ElevenLabs lagi.
+  const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 3000));
+  idle(() => prewarmVoiceCache());
 }
 
 async function startHandsFree({ announce }) {
@@ -284,6 +387,7 @@ function speakBranding(text) {
 function deactivate() {
   active = false;
   activatedAt = null;
+  releaseWakeLock();
   setSubtitle("");
   stopListeningFn?.();
   stopListeningFn = null;
@@ -575,3 +679,19 @@ function renderBars(data, color) {
 }
 
 log("sys", `${ASSISTANT_NAME} online. Menunggu perintah.`);
+
+// --- peluncuran lewat suara (Pintasan Siri / Google Assistant) -------------
+// Halaman web tidak bisa mendengarkan saat layar mati -- sistem menghentikan
+// mic-nya. Yang bisa: dipanggil lewat asisten bawaan ponsel. Buat Pintasan Siri
+// "FRIDAY" (atau ucapkan "Ok Google, buka FRIDAY") yang membuka URL
+// "/?autostart=1"; FRIDAY langsung menyala dan mendengarkan tanpa perlu disentuh.
+if (new URLSearchParams(location.search).get("autostart") === "1") {
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      if (!active) {
+        log("sys", "Dipanggil lewat pintasan suara.");
+        core.click();
+      }
+    }, 300);
+  });
+}
