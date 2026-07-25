@@ -15,6 +15,7 @@ import { HONORIFIC, USER_NAME } from "./config.js";
 import { wordsToNumber, numberToWords, replaceNumberWords } from "./numbers-id.js";
 import { evaluateExpression } from "./calc.js";
 import { QUOTES, FUN_FACTS } from "./facts.js";
+import { EXTRA_SKILLS } from "./skills-more.js";
 
 const DAYS = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 const MONTHS = [
@@ -577,11 +578,12 @@ const skillHelp = {
     if (!includesAny(text, ["apa saja yang bisa", "kemampuan lokal", "bisa bantu apa saja", "fitur baru", "kamu bisa apa saja", "daftar perintah", "contoh perintah", "bantuan"])) return null;
     return {
       text:
-        `Banyak yang bisa aku tangani langsung tanpa memanggil otak utama, ${HONORIFIC}. ` +
-        `Aku bisa memberi tahu jam dan tanggal, berhitung, mengonversi satuan, memasang timer atau pengingat, ` +
-        `melempar koin atau dadu, memilih angka acak, menyimpan catatan, menceritakan lelucon, memberi kutipan motivasi dan fakta unik, ` +
-        `serta menjawab ribuan hal soal sains, antariksa, geografi, Indonesia, teknologi, dan tubuh manusia dari pengetahuan yang tertanam padaku. ` +
-        `Untuk data MK Connect seperti absensi, memo, atau laporan, aku panggil otak utamaku.`,
+        `Banyak yang bisa aku tangani sendiri tanpa memanggil AI, ${HONORIFIC}. ` +
+        `Soal waktu: jam, tanggal, hari apa suatu tanggal, hitung mundur, umur, dan jam di kota lain. ` +
+        `Soal hitungan: aritmetika, konversi satuan, diskon, PPN, cicilan, bagi tagihan, persentase, dan indeks massa tubuh. ` +
+        `Soal alat: timer, pengingat, stopwatch, catatan, sandi acak, ejaan, angka Romawi, koin, dan dadu. ` +
+        `Aku juga menyimpan ratusan pengetahuan soal sains, kesehatan, sejarah, geografi, Indonesia, teknologi, keuangan, properti, perbankan, dan bisnis Loonars. ` +
+        `Untuk data perusahaan yang berubah-ubah, awali dengan cek perusahaan.`,
     };
   },
 };
@@ -593,6 +595,11 @@ const skillHelp = {
 // Urutan penting: yang lebih spesifik/aman lebih dulu. Kalkulator & konversi
 // pakai penjaga pola-angka sendiri sehingga aman diletakkan sebelum Gemini.
 const SKILLS = [
+  // Kemampuan tambahan lebih dulu: sebagian besar lebih spesifik daripada
+  // skill dasar di bawahnya (mis. "jam berapa di Tokyo" harus ditangani zona
+  // waktu, bukan jam lokal; "hari apa tanggal 17 Agustus" oleh hitung-tanggal,
+  // bukan tanggal hari ini; "diskon 30 persen dari 250 ribu" bukan kalkulator).
+  ...EXTRA_SKILLS,
   skillTime,
   skillDate,
   skillTimer,

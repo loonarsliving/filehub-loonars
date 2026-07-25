@@ -19,6 +19,10 @@ jawabannya bisa dihitung atau diketahui di perangkat ditangani langsung oleh
 | Kategori | Contoh ucapan |
 | --- | --- |
 | Waktu & tanggal | "jam berapa sekarang", "hari ini tanggal berapa", "hari apa sekarang" |
+| Tanggal lanjutan | "tanggal berapa 30 hari lagi", "berapa hari lagi ke 25 Desember", "hari apa tanggal 17 Agustus 2026", "umur saya kalau lahir 17 Agustus 1990", "jam berapa di Tokyo" |
+| Uang & bisnis | "diskon 30 persen dari 250 ribu", "PPN dari 5 juta", "cicilan 500 juta bunga 10 persen 15 tahun", "bagi tagihan 300 ribu untuk 4 orang", "naik berapa persen dari 100 ke 150" |
+| Kesehatan & alat | "BMI berat 70 kg tinggi 170 cm", "berat badan ideal tinggi 170", "mulai stopwatch", "buatkan password 12 karakter", "eja Loonars", "2026 dalam angka Romawi" |
+| Ulangi | "ulangi" — memutar jawaban terakhir dari cache, tanpa panggilan API |
 | Kalkulator | "hitung 128 kali 7", "berapa lima ratus tambah tiga puluh", "akar dari 144", "20 persen dari 150" |
 | Konversi satuan | "10 kilometer ke mil", "2 jam ke menit", "100 celsius ke fahrenheit", "5 kilogram ke pon" |
 | Timer & pengingat | "set timer 5 menit", "ingatkan aku dalam 10 menit untuk minum obat", "batalkan timer" |
@@ -83,7 +87,8 @@ Untuk wake-word sungguhan yang berjalan dengan layar mati (*"Hey FRIDAY"* tanpa 
 - `src/skills.js` — mesin kemampuan lokal (jam, kalkulator, konversi, timer, koin/dadu, catatan, lelucon, obrolan). Tambah kemampuan baru cukup dengan satu objek `{ name, run }` di daftar `SKILLS`
 - `src/numbers-id.js` — parser & pembentuk kata bilangan Bahasa Indonesia (dipakai kalkulator/konversi/timer)
 - `src/calc.js` — evaluator ekspresi aritmetika yang aman tanpa `eval`
-- `src/match.js` — pencocokan pengetahuan yang toleran terhadap variasi ucapan (STT): cocok bila keyword muncul utuh ATAU semua katanya hadir (urutan bebas), plus normalisasi ejaan brand "Loonars". Dipakai knowledge/facts/loonars agar pertanyaan pengetahuan andal dijawab lokal, bukan jatuh ke AI
+- `src/match.js` — pencocokan pengetahuan tiga tingkat: (1) frasa utuh, (2) semua kata hadir urutan bebas, (3) **skor kemiripan** memakai kata penting + indeks nama diri dari isi jawaban (sehingga "everest tingginya berapa" tetap ketemu). Kata umum diabaikan, ejaan brand "Loonars" dinormalkan, dan ucapan yang meminta DATA ("hari ini", "laporan", "karyawan", …) sengaja tidak dicocokkan longgar supaya diarahkan ke gerbang "cek perusahaan"
+- `src/skills-more.js` — kemampuan hitung tambahan: hitung tanggal, umur, zona waktu, diskon/PPN, perubahan persen, cicilan anuitas, bagi tagihan, BMI, angka Romawi, ejaan, sandi acak, stopwatch
 - `src/knowledge.js` — basis pengetahuan konsep (asisten virtual, AI/ML, identitas FRIDAY) yang dijawab tanpa panggilan API
 - `src/facts.js` — basis pengetahuan umum yang ditanamkan (sains, antariksa, geografi, Indonesia, teknologi, tubuh manusia, penemu, sejarah, keuangan, kekayaan, properti, perbankan, persona) + koleksi kutipan & fakta unik. Tambah pengetahuan baru cukup satu objek `{ keywords, answer }`
 - `src/loonars.js` — pengetahuan bisnis Loonars: pengelolaan villa, rumah kos, homestay, dan F&B; model perusahaan pengelola tanpa aset (asset-light); metrik hospitality (okupansi/ADR/RevPAR/NOI, food cost/prime cost); sampai jalan menuju IPO. Dijawab lokal tanpa panggilan API

@@ -204,7 +204,10 @@ export function replaceNumberWords(text) {
       out.push(t);
       continue;
     }
-    if (NUMBER_TOKENS.has(t.toLowerCase())) run.push(t);
+    // Angka digit ikut dianggap bagian bilangan supaya "250 ribu" / "5 juta"
+    // tergabung jadi satu nilai (250000 / 5000000), bukan dua angka terpisah.
+    const isNumberish = NUMBER_TOKENS.has(t.toLowerCase()) || /^\d+([.,]\d+)?$/.test(t);
+    if (isNumberish) run.push(t);
     else { flush(); out.push(t); }
   }
   flush();

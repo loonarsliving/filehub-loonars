@@ -722,6 +722,452 @@ export const FACTS = [
     answer:
       "SWIFT adalah jaringan pesan global yang dipakai bank-bank di seluruh dunia untuk saling berkomunikasi dan menyelesaikan transfer uang antarnegara dengan aman.",
   },
+
+  // ---------------------------------------------------------------------------
+  // Kesehatan & tubuh sehari-hari
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["berapa gelas air sehari", "minum air sehari", "kebutuhan air harian"],
+    answer:
+      "Orang dewasa umumnya butuh sekitar dua liter air sehari, kira-kira delapan gelas, dan lebih banyak lagi kalau banyak beraktivitas atau cuaca panas.",
+  },
+  {
+    keywords: ["berapa jam tidur", "kebutuhan tidur", "tidur yang cukup", "tidur ideal"],
+    answer:
+      "Orang dewasa disarankan tidur tujuh sampai sembilan jam setiap malam. Kurang tidur berkepanjangan menurunkan konsentrasi, daya tahan tubuh, dan suasana hati.",
+  },
+  {
+    keywords: ["tekanan darah normal", "tensi normal"],
+    answer:
+      "Tekanan darah yang dianggap normal sekitar seratus dua puluh per delapan puluh milimeter raksa. Di atas seratus empat puluh per sembilan puluh sudah tergolong hipertensi.",
+  },
+  {
+    keywords: ["apa itu kolesterol", "kolesterol tinggi"],
+    answer:
+      "Kolesterol adalah lemak dalam darah yang sebenarnya dibutuhkan tubuh. Yang berbahaya bila kolesterol jahat menumpuk di pembuluh darah, karena bisa memicu penyakit jantung dan stroke.",
+  },
+  {
+    keywords: ["apa itu diabetes", "penyakit gula", "kencing manis"],
+    answer:
+      "Diabetes adalah kondisi kadar gula darah terlalu tinggi karena tubuh kurang menghasilkan insulin atau tidak merespons insulin dengan baik. Dikendalikan lewat pola makan, olahraga, dan pengobatan.",
+  },
+  {
+    keywords: ["manfaat olahraga", "kenapa harus olahraga", "berapa lama olahraga"],
+    answer:
+      "Disarankan berolahraga sekitar seratus lima puluh menit seminggu dengan intensitas sedang. Olahraga rutin memperkuat jantung, menjaga berat badan, memperbaiki tidur, dan menurunkan stres.",
+  },
+  {
+    keywords: ["apa itu vitamin c", "manfaat vitamin c"],
+    answer:
+      "Vitamin C membantu daya tahan tubuh, penyerapan zat besi, dan penyembuhan luka. Banyak terdapat pada jeruk, jambu biji, paprika, dan brokoli.",
+  },
+  {
+    keywords: ["apa itu stres", "cara mengatasi stres", "kelola stres"],
+    answer:
+      "Stres adalah reaksi tubuh terhadap tekanan. Yang membantu mengelolanya: tidur cukup, olahraga teratur, mengatur napas, membatasi kafein, dan berbicara dengan orang yang dipercaya.",
+  },
+  {
+    keywords: ["golongan darah", "berapa golongan darah", "donor darah"],
+    answer:
+      "Golongan darah manusia terbagi menjadi A, B, AB, dan O, masing-masing dengan rhesus positif atau negatif. Golongan O negatif dikenal sebagai donor universal.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Sains lanjutan
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["apa itu fotosintesis", "fotosintesis"],
+    answer:
+      "Fotosintesis adalah proses tumbuhan mengubah cahaya matahari, air, dan karbon dioksida menjadi makanan berupa glukosa, sambil melepaskan oksigen yang kita hirup.",
+  },
+  {
+    keywords: ["apa itu sel", "sel makhluk hidup"],
+    answer:
+      "Sel adalah unit terkecil penyusun makhluk hidup. Tubuh manusia tersusun dari puluhan triliun sel yang masing-masing punya tugas khusus.",
+  },
+  {
+    keywords: ["apa itu gravitasi", "gravitasi itu apa"],
+    answer:
+      "Gravitasi adalah gaya tarik antara benda-benda bermassa. Gravitasi Bumi menahan kita tetap di permukaan dan membuat Bulan terus mengorbit.",
+  },
+  {
+    keywords: ["apa itu energi", "bentuk energi", "hukum kekekalan energi"],
+    answer:
+      "Energi adalah kemampuan melakukan kerja, dan bentuknya bermacam-macam: kinetik, potensial, panas, cahaya, listrik. Menurut hukum kekekalan energi, energi tidak bisa diciptakan atau dimusnahkan, hanya berubah bentuk.",
+  },
+  {
+    keywords: ["apa itu atom", "atom itu apa"],
+    answer:
+      "Atom adalah satuan terkecil suatu unsur, tersusun dari inti berisi proton dan neutron, dikelilingi elektron. Segala benda di sekitarmu tersusun dari atom.",
+  },
+  {
+    keywords: ["apa itu oksigen", "kadar oksigen udara", "komposisi udara"],
+    answer:
+      "Udara yang kita hirup sekitar tujuh puluh delapan persen nitrogen dan dua puluh satu persen oksigen, sisanya gas lain seperti argon dan karbon dioksida.",
+  },
+  {
+    keywords: ["kenapa langit biru", "langit berwarna biru"],
+    answer:
+      "Langit tampak biru karena cahaya matahari dihamburkan oleh molekul udara, dan warna biru yang panjang gelombangnya pendek jauh lebih banyak terhambur ke segala arah.",
+  },
+  {
+    keywords: ["kenapa terjadi pelangi", "pelangi terbentuk"],
+    answer:
+      "Pelangi muncul saat cahaya matahari dibiaskan dan dipantulkan di dalam tetesan air hujan, sehingga cahaya putih terurai menjadi deretan warna.",
+  },
+  {
+    keywords: ["proses terjadinya hujan", "siklus air", "kenapa hujan"],
+    answer:
+      "Air di permukaan menguap oleh panas matahari, naik dan mendingin menjadi awan, lalu jatuh kembali sebagai hujan. Itulah siklus air yang terus berulang.",
+  },
+  {
+    keywords: ["apa itu gempa bumi", "penyebab gempa"],
+    answer:
+      "Gempa bumi terjadi ketika lempeng-lempeng kerak Bumi bergeser dan melepaskan energi secara tiba-tiba. Indonesia sering mengalaminya karena berada di Cincin Api Pasifik.",
+  },
+  {
+    keywords: ["apa itu tsunami", "penyebab tsunami"],
+    answer:
+      "Tsunami adalah gelombang laut sangat besar yang biasanya dipicu gempa bawah laut, letusan gunung, atau longsor bawah laut. Air laut yang surut mendadak adalah tanda bahaya.",
+  },
+  {
+    keywords: ["apa itu pemanasan global", "perubahan iklim", "efek rumah kaca"],
+    answer:
+      "Pemanasan global adalah naiknya suhu rata-rata Bumi akibat gas rumah kaca seperti karbon dioksida yang memerangkap panas. Dampaknya cuaca ekstrem, es kutub mencair, dan permukaan laut naik.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Indonesia: tokoh, budaya, kuliner, tempat
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["siapa kartini", "raden ajeng kartini", "hari kartini"],
+    answer:
+      "Raden Ajeng Kartini adalah pelopor emansipasi perempuan Indonesia. Hari Kartini diperingati setiap tanggal dua puluh satu April.",
+  },
+  {
+    keywords: ["siapa ki hajar dewantara", "bapak pendidikan", "hari pendidikan nasional"],
+    answer:
+      "Ki Hajar Dewantara adalah Bapak Pendidikan Nasional, pendiri Taman Siswa, dengan semboyan tut wuri handayani. Hari lahirnya, dua Mei, diperingati sebagai Hari Pendidikan Nasional.",
+  },
+  {
+    keywords: ["siapa jenderal sudirman", "panglima besar sudirman"],
+    answer:
+      "Jenderal Soedirman adalah Panglima Besar pertama Tentara Nasional Indonesia, terkenal memimpin perang gerilya melawan Belanda meski dalam keadaan sakit parah.",
+  },
+  {
+    keywords: ["sumpah pemuda", "kapan sumpah pemuda"],
+    answer:
+      "Sumpah Pemuda diikrarkan pada dua puluh delapan Oktober tahun seribu sembilan ratus dua puluh delapan, menyatakan satu tanah air, satu bangsa, dan satu bahasa: Indonesia.",
+  },
+  {
+    keywords: ["hari pahlawan", "kenapa sepuluh november"],
+    answer:
+      "Hari Pahlawan diperingati setiap sepuluh November, mengenang pertempuran besar di Surabaya tahun seribu sembilan ratus empat puluh lima melawan pasukan sekutu.",
+  },
+  {
+    keywords: ["candi borobudur", "borobudur"],
+    answer:
+      "Borobudur di Magelang, Jawa Tengah, adalah candi Buddha terbesar di dunia, dibangun sekitar abad kedelapan pada masa Dinasti Syailendra, dan diakui sebagai Warisan Dunia UNESCO.",
+  },
+  {
+    keywords: ["candi prambanan", "prambanan"],
+    answer:
+      "Prambanan adalah kompleks candi Hindu terbesar di Indonesia, terletak di perbatasan Yogyakarta dan Jawa Tengah, dan juga berstatus Warisan Dunia UNESCO.",
+  },
+  {
+    keywords: ["komodo", "hewan khas indonesia", "naga komodo"],
+    answer:
+      "Komodo adalah kadal terbesar di dunia yang hanya hidup alami di Indonesia, terutama di Pulau Komodo dan Rinca, Nusa Tenggara Timur.",
+  },
+  {
+    keywords: ["makanan khas indonesia", "kuliner indonesia", "makanan nasional"],
+    answer:
+      "Kuliner Indonesia sangat kaya. Beberapa yang mendunia: rendang dari Sumatra Barat, nasi goreng, sate, soto, gado-gado, dan bakso. Rendang bahkan kerap masuk daftar makanan terlezat dunia.",
+  },
+  {
+    keywords: ["apa itu batik", "batik indonesia", "hari batik"],
+    answer:
+      "Batik adalah kain bermotif yang dibuat dengan teknik menahan warna memakai lilin malam. UNESCO mengakuinya sebagai warisan budaya takbenda Indonesia, dan Hari Batik dirayakan tiap dua Oktober.",
+  },
+  {
+    keywords: ["apa itu wayang", "wayang kulit"],
+    answer:
+      "Wayang adalah seni pertunjukan boneka tradisional Indonesia yang dimainkan seorang dalang, sering mengangkat kisah Ramayana dan Mahabharata. Termasuk warisan budaya dunia UNESCO.",
+  },
+  {
+    keywords: ["berapa suku di indonesia", "jumlah suku", "suku terbesar indonesia"],
+    answer:
+      "Indonesia memiliki lebih dari seribu tiga ratus suku bangsa. Suku terbesar adalah Jawa, disusul Sunda, Batak, Madura, dan Betawi.",
+  },
+  {
+    keywords: ["berapa bahasa daerah", "jumlah bahasa di indonesia"],
+    answer:
+      "Indonesia memiliki lebih dari tujuh ratus bahasa daerah yang masih digunakan, menjadikannya salah satu negara paling kaya bahasa di dunia.",
+  },
+  {
+    keywords: ["ibu kota sulawesi tenggara", "kendari"],
+    answer:
+      "Ibu kota Provinsi Sulawesi Tenggara adalah Kendari, kota pelabuhan di tepi Teluk Kendari yang berada di zona waktu WITA.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Dunia: negara, tokoh, tempat
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["ibu kota jepang", "tokyo ibu kota"],
+    answer: "Ibu kota Jepang adalah Tokyo, salah satu wilayah metropolitan terpadat di dunia.",
+  },
+  {
+    keywords: ["ibu kota amerika serikat", "washington"],
+    answer: "Ibu kota Amerika Serikat adalah Washington DC, bukan New York yang merupakan kota terbesarnya.",
+  },
+  {
+    keywords: ["ibu kota inggris", "london ibu kota"],
+    answer: "Ibu kota Inggris dan Britania Raya adalah London.",
+  },
+  {
+    keywords: ["ibu kota australia", "canberra"],
+    answer: "Ibu kota Australia adalah Canberra, bukan Sydney yang lebih terkenal.",
+  },
+  {
+    keywords: ["ibu kota arab saudi", "riyadh"],
+    answer: "Ibu kota Arab Saudi adalah Riyadh, sementara Mekah dan Madinah adalah dua kota sucinya.",
+  },
+  {
+    keywords: ["negara terpadat", "penduduk terbanyak"],
+    answer:
+      "Negara berpenduduk terbanyak di dunia saat ini adalah India, disusul Tiongkok. Indonesia berada di peringkat keempat.",
+  },
+  {
+    keywords: ["berapa penduduk dunia", "jumlah penduduk dunia"],
+    answer: "Penduduk dunia saat ini sekitar delapan miliar jiwa dan terus bertambah.",
+  },
+  {
+    keywords: ["berapa penduduk indonesia", "jumlah penduduk indonesia"],
+    answer: "Penduduk Indonesia sekitar dua ratus delapan puluh juta jiwa, terbanyak keempat di dunia.",
+  },
+  {
+    keywords: ["siapa nelson mandela"],
+    answer:
+      "Nelson Mandela adalah tokoh anti-apartheid yang menjadi presiden kulit hitam pertama Afrika Selatan, dan peraih Nobel Perdamaian.",
+  },
+  {
+    keywords: ["siapa albert einstein"],
+    answer:
+      "Albert Einstein adalah fisikawan pencetus teori relativitas dan rumus E sama dengan m c kuadrat, salah satu ilmuwan paling berpengaruh sepanjang sejarah.",
+  },
+  {
+    keywords: ["siapa steve jobs"],
+    answer:
+      "Steve Jobs adalah pendiri Apple, tokoh di balik Macintosh, iPod, dan iPhone, yang mengubah cara dunia memakai teknologi.",
+  },
+  {
+    keywords: ["siapa elon musk"],
+    answer:
+      "Elon Musk adalah pengusaha di balik Tesla dan SpaceX, dikenal karena mendorong mobil listrik dan roket yang bisa dipakai ulang.",
+  },
+  {
+    keywords: ["apa itu unesco"],
+    answer:
+      "UNESCO adalah badan PBB untuk pendidikan, ilmu pengetahuan, dan kebudayaan, yang antara lain menetapkan situs Warisan Dunia.",
+  },
+  {
+    // "apa itu pbb" sengaja tidak dipakai di sini -- sudah dipakai entri Pajak
+    // Bumi dan Bangunan di atas, yang lebih relevan untuk konteks properti.
+    keywords: ["perserikatan bangsa", "apa itu perserikatan bangsa bangsa", "united nations", "pbb perserikatan", "organisasi pbb"],
+    answer:
+      "PBB atau Perserikatan Bangsa-Bangsa adalah organisasi internasional yang berdiri tahun seribu sembilan ratus empat puluh lima untuk menjaga perdamaian dan kerja sama antarnegara.",
+  },
+  {
+    keywords: ["apa itu asean"],
+    answer:
+      "ASEAN adalah perhimpunan negara-negara Asia Tenggara yang berdiri tahun seribu sembilan ratus enam puluh tujuh. Indonesia salah satu pendirinya, dan sekretariatnya di Jakarta.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Teknologi modern
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["apa itu 5g", "jaringan 5g"],
+    answer:
+      "5G adalah generasi kelima jaringan seluler, menawarkan kecepatan jauh lebih tinggi dan jeda sangat rendah dibanding 4G, sehingga cocok untuk video resolusi tinggi dan perangkat pintar.",
+  },
+  {
+    keywords: ["apa itu iot", "internet of things"],
+    answer:
+      "Internet of Things adalah gagasan menghubungkan benda sehari-hari seperti lampu, kunci, dan kamera ke internet, sehingga bisa dipantau dan dikendalikan dari jauh.",
+  },
+  {
+    keywords: ["apa itu mobil listrik", "kendaraan listrik", "ev"],
+    answer:
+      "Mobil listrik digerakkan motor listrik bertenaga baterai, tanpa bahan bakar minyak. Keunggulannya hemat biaya operasional dan tanpa emisi knalpot, tantangannya harga baterai dan ketersediaan tempat pengisian.",
+  },
+  {
+    keywords: ["apa itu vpn"],
+    answer:
+      "VPN adalah jaringan pribadi virtual yang mengenkripsi koneksi internetmu dan menyembunyikan alamat aslinya, berguna saat memakai wifi publik.",
+  },
+  {
+    keywords: ["apa itu phishing", "penipuan online", "link penipuan"],
+    answer:
+      "Phishing adalah penipuan yang menyamar sebagai pihak tepercaya untuk mencuri data seperti sandi atau OTP. Jangan pernah membagikan kode OTP, dan periksa alamat situsnya sebelum masuk.",
+  },
+  {
+    keywords: ["password yang kuat", "sandi yang aman", "tips keamanan akun"],
+    answer:
+      "Sandi kuat itu panjang, unik untuk tiap akun, dan tidak memakai data pribadi. Yang paling penting: aktifkan verifikasi dua langkah, karena itu melindungi akun meski sandinya bocor.",
+  },
+  {
+    keywords: ["apa itu cloud storage", "penyimpanan awan", "google drive"],
+    answer:
+      "Penyimpanan awan menyimpan berkasmu di server internet, bukan hanya di perangkat, sehingga bisa diakses dari mana saja dan aman bila perangkatnya hilang.",
+  },
+  {
+    keywords: ["apa itu qr code", "kode qr", "qris"],
+    answer:
+      "Kode QR adalah barcode dua dimensi yang menyimpan data seperti tautan atau informasi pembayaran. Di Indonesia, standar pembayarannya disebut QRIS.",
+  },
+  {
+    keywords: ["apa itu enkripsi"],
+    answer:
+      "Enkripsi adalah mengacak data sehingga hanya pemilik kuncinya yang bisa membacanya. Inilah yang membuat pesan dan transaksi digital tetap rahasia.",
+  },
+  {
+    keywords: ["apa itu open source", "sumber terbuka"],
+    answer:
+      "Perangkat lunak sumber terbuka adalah program yang kode sumbernya boleh dilihat, diubah, dan disebarkan siapa saja. Contohnya Linux, Android, dan WordPress.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Bisnis & manajemen
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["apa itu swot", "analisis swot"],
+    answer:
+      "Analisis SWOT memetakan empat hal: kekuatan, kelemahan, peluang, dan ancaman. Alat sederhana untuk menilai posisi sebuah usaha sebelum menyusun strategi.",
+  },
+  {
+    keywords: ["apa itu kpi", "indikator kinerja"],
+    answer:
+      "KPI atau indikator kinerja utama adalah ukuran terpilih yang menunjukkan apakah sebuah tim atau usaha berjalan sesuai target, misalnya okupansi, omzet, atau kepuasan pelanggan.",
+  },
+  {
+    keywords: ["apa itu okr"],
+    answer:
+      "OKR adalah metode penetapan sasaran: satu Objective yang ingin dicapai, ditemani beberapa Key Result yang terukur. Populer dipakai perusahaan teknologi untuk menyelaraskan tim.",
+  },
+  {
+    keywords: ["apa itu arus kas", "cash flow", "cashflow"],
+    answer:
+      "Arus kas adalah keluar masuknya uang tunai dalam usaha. Banyak bisnis yang di atas kertas untung tetap bangkrut karena arus kasnya negatif, jadi ini wajib dipantau.",
+  },
+  {
+    keywords: ["apa itu bep", "break even point", "titik impas"],
+    answer:
+      "Titik impas atau BEP adalah kondisi saat total pendapatan sama dengan total biaya, sehingga usaha tidak untung dan tidak rugi. Di atas titik itu barulah usaha mulai untung.",
+  },
+  {
+    keywords: ["apa itu margin", "margin keuntungan", "profit margin"],
+    answer:
+      "Margin keuntungan adalah laba dibagi pendapatan, dinyatakan dalam persen. Margin menunjukkan berapa bagian dari setiap rupiah penjualan yang benar-benar menjadi keuntungan.",
+  },
+  {
+    keywords: ["apa itu branding", "merek yang kuat"],
+    answer:
+      "Branding adalah membangun kesan dan janji yang muncul di benak orang saat mendengar namamu. Merek yang kuat membuat pelanggan memilihmu bahkan ketika harganya tidak paling murah.",
+  },
+  {
+    keywords: ["apa itu funnel", "sales funnel", "corong penjualan"],
+    answer:
+      "Corong penjualan menggambarkan perjalanan calon pelanggan dari mengenal, tertarik, mempertimbangkan, sampai membeli. Tiap tahap punya pesan dan tujuan yang berbeda.",
+  },
+  {
+    keywords: ["apa itu b2b dan b2c", "beda b2b b2c"],
+    answer:
+      "B2B adalah menjual ke perusahaan lain, keputusannya rasional dan prosesnya panjang. B2C adalah menjual langsung ke konsumen, keputusannya lebih cepat dan emosional.",
+  },
+  {
+    keywords: ["apa itu startup"],
+    answer:
+      "Startup adalah perusahaan rintisan yang mencari model bisnis yang bisa tumbuh cepat dan berulang, biasanya bertumpu pada teknologi dan didanai secara bertahap oleh investor.",
+  },
+  {
+    keywords: ["apa itu ukm", "umkm"],
+    answer:
+      "UMKM adalah usaha mikro, kecil, dan menengah. Kelompok ini menyerap sebagian besar tenaga kerja dan menyumbang lebih dari separuh produk domestik bruto Indonesia.",
+  },
+  {
+    keywords: ["apa itu negosiasi", "tips negosiasi"],
+    answer:
+      "Negosiasi yang baik bukan soal menang, melainkan mencari kesepakatan yang bisa dijalankan kedua pihak. Kuncinya: tahu batas bawahmu, pahami kebutuhan lawan bicara, dan bicara data, bukan emosi.",
+  },
+  {
+    keywords: ["apa itu delegasi", "cara delegasi", "mendelegasikan tugas"],
+    answer:
+      "Delegasi adalah menyerahkan tugas beserta wewenangnya kepada orang lain, bukan sekadar melempar pekerjaan. Berikan tujuan yang jelas, batas keputusan, dan waktu evaluasi.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Olahraga
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["berapa pemain sepak bola", "jumlah pemain sepakbola"],
+    answer:
+      "Satu tim sepak bola menurunkan sebelas pemain di lapangan, termasuk penjaga gawang, dan pertandingan berlangsung dua babak masing-masing empat puluh lima menit.",
+  },
+  {
+    keywords: ["piala dunia", "world cup sepak bola"],
+    answer:
+      "Piala Dunia FIFA digelar setiap empat tahun sekali. Brasil adalah negara tersukses dengan lima gelar juara.",
+  },
+  {
+    keywords: ["olimpiade", "kapan olimpiade"],
+    answer:
+      "Olimpiade modern diadakan setiap empat tahun sekali sejak tahun seribu delapan ratus sembilan puluh enam. Indonesia paling sering meraih medali emas dari cabang bulu tangkis.",
+  },
+  {
+    keywords: ["bulutangkis indonesia", "bulu tangkis", "thomas cup"],
+    answer:
+      "Bulu tangkis adalah olahraga kebanggaan Indonesia. Indonesia berkali-kali menjuarai Piala Thomas dan menyumbang sebagian besar medali emas Olimpiade untuk negeri ini.",
+  },
+  {
+    keywords: ["berapa pemain bola basket", "jumlah pemain basket"],
+    answer: "Satu tim bola basket menurunkan lima pemain di lapangan.",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Bahasa, peribahasa, kehidupan
+  // ---------------------------------------------------------------------------
+  {
+    keywords: ["peribahasa", "pepatah indonesia", "kata pepatah"],
+    answer:
+      "Beberapa peribahasa Indonesia yang terkenal: berakit-rakit ke hulu berenang-renang ke tepian, artinya bersakit dahulu bersenang kemudian. Lalu sedia payung sebelum hujan, yang berarti bersiap sebelum masalah datang.",
+  },
+  {
+    keywords: ["arti tut wuri handayani"],
+    answer:
+      "Tut wuri handayani berarti dari belakang memberi dorongan. Bagian dari semboyan Ki Hajar Dewantara tentang cara mendidik: di depan memberi teladan, di tengah membangun semangat, di belakang memberi dorongan.",
+  },
+  {
+    keywords: ["cara belajar efektif", "tips belajar", "biar cepat paham"],
+    answer:
+      "Belajar paling efektif dengan mengulang secara berjarak, menguji diri sendiri, dan menjelaskan ulang materi dengan bahasamu sendiri. Membaca berulang tanpa menguji diri terasa produktif padahal paling lemah hasilnya.",
+  },
+  {
+    keywords: ["cara mengatur waktu", "manajemen waktu", "biar produktif", "tips produktif"],
+    answer:
+      "Yang terbukti membantu: kerjakan tugas terpenting lebih dulu di jam terbaikmu, pecah pekerjaan besar jadi langkah kecil, matikan notifikasi saat fokus, dan sediakan waktu istirahat yang benar-benar istirahat.",
+  },
+  {
+    keywords: ["cara berbicara di depan umum", "public speaking", "biar tidak gugup"],
+    answer:
+      "Kunci berbicara di depan umum: siapkan pembuka dan penutup sampai hafal, bicara lebih lambat dari yang terasa wajar, tarik napas di jeda, dan fokus pada pesan untuk pendengar, bukan pada diri sendiri.",
+  },
+  {
+    keywords: ["cara menabung", "tips menabung", "susah menabung"],
+    answer:
+      "Cara menabung yang paling berhasil adalah menyisihkan di awal, bukan dari sisa. Buat pemindahan otomatis begitu penghasilan masuk, pisahkan rekening tabungan, dan mulai dari jumlah kecil yang pasti sanggup.",
+  },
 ];
 
 /** Pencocokan toleran (lihat match.js). Null bila tak ada yang cocok. */
