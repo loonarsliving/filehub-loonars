@@ -12,6 +12,7 @@ import { findLoonars } from "./loonars.js";
 import { runSkill } from "./skills.js";
 import { getAccessToken, getDailyDigest } from "./mkhsistem.js";
 import { buildExecutiveContext, fetchGroupSnapshot, formatGroupSummary } from "./holding.js";
+import { instructionFor } from "./friday-persona.js";
 
 // Kata pembuka gerbang MK Connect. Hanya bila salah satunya muncul, FRIDAY
 // masuk ke MK Connect / AI. Sisa ucapan setelah kata pembuka dipakai sebagai
@@ -295,7 +296,13 @@ async function askMkConnect(query) {
     const res = await fetch(MKHSISTEM_VOICE_ASSISTANT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ message: query, history: conversationHistory }),
+      // Persona FRIDAY dikirim bersama tiap pertanyaan. System prompt di server
+      // MK Connect masih memperkenalkan diri sebagai asisten lain, jadi tanpa ini
+      // identitas dan cara berpikir FRIDAY tidak pernah ikut ke penalarannya.
+      body: JSON.stringify({
+        message: `${instructionFor(query)}\n\n---\nPertanyaan: ${query}`,
+        history: conversationHistory,
+      }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Voice assistant gagal (${res.status})`);
@@ -357,7 +364,7 @@ async function askHolding(query) {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({
-        message: `${buildExecutiveContext(snapshot)}\n\n---\nPertanyaan pimpinan: ${query}\n\nJawab sebagai FRIDAY, Executive Intelligence Layer holding. Ringkas dan langsung ke poin karena jawaban ini akan DIUCAPKAN, bukan dibaca: maksimal sekitar 6 kalimat. Sebutkan akar penyebab, bukan sekadar gejala, dan tutup dengan satu tindakan konkret yang paling layak diambil lebih dulu.`,
+        message: `${instructionFor(query)}\n\n---\n${buildExecutiveContext(snapshot)}\n\n---\nPertanyaan pimpinan: ${query}`,
         history: conversationHistory,
       }),
     });
