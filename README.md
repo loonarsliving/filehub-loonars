@@ -97,6 +97,8 @@ Untuk wake-word sungguhan yang berjalan dengan layar mati (*"Hey FRIDAY"* tanpa 
 - `src/audio-manager.js` — Audio Experience Engine: pemutar cue branding (`online`, `listening`, `thinking`, `success`, `notification`, `error`, `shutdown`). Reusable — tambah cue baru lewat `AudioManager.registerCue(nama, path)`, tidak perlu ubah kode lain
 - `public/audio/` — file mp3 cue branding (lihat `AUDIO.md` cara generate)
 - `scripts/generate-audio-assets.mjs` — generator sekali-jalan cue branding lewat ElevenLabs Sound Effects API (fallback Freesound)
+- `src/holding.js` — sisi klien jembatan holding: minta snapshot grup, ubah jadi kalimat yang enak **didengar**, dan susun konteks eksekutif saat pengguna minta analisa
+- `api/holding.js` — **lapisan Connector** ke seluruh lini bisnis (registry + pengambilan snapshot). Server-side supaya token tiap dashboard bisnis tidak pernah menyeberang ke browser
 - `api/tts.js`, `api/stt.js` — Vercel Functions yang jadi proxy ke ElevenLabs
 
 ## Jembatan ke MK Connect (Mkhsistem)
@@ -120,6 +122,115 @@ Alurnya:
 - `VITE_MKHSISTEM_VOICE_ASSISTANT_URL` — URL endpoint percakapan suara di deployment Mkhsistem, mis. `https://mkconnect.vercel.app/api/ai/voice-assistant`.
 
 Di sisi Mkhsistem, set `VOICE_BRIDGE_ALLOWED_ORIGIN` ke origin deployment FRIDAY ini (mis. `https://ultron.vercel.app`) supaya CORS mengizinkannya, dan pastikan `GEMINI_API_KEY` sudah disetel (biasanya sudah, karena dipakai modul AI lain).
+
+## FRIDAY sebagai jembatan holding (semua lini bisnis)
+
+FRIDAY bukan ERP, bukan CRM, bukan PMS, bukan sistem keuangan. Ia adalah
+**Executive Intelligence Layer di atas seluruh sistem operasional** — dan
+jembatan yang menghubungkan seluruh lini bisnis ke MKH System.
+
+### Filosofi
+
+Setiap bisnis berdiri sendiri: punya dashboard sendiri, database sendiri,
+automation sendiri, user sendiri, dan **berhak memilih sistem operasionalnya
+sendiri**. MK Connect dipakai holding/developer, Kos punya dashboard-nya
+sendiri, Villa boleh pakai PMS, Homestay boleh pakai apa pun. FRIDAY **tidak
+pernah memaksa satu sistem untuk semua**.
+
+Konsekuensinya tegas: **source of truth tetap di sistem masing-masing.**
+`api/holding.js` hanya menyimpan *cara menjangkau* sebuah bisnis — tidak pernah
+isinya. Tidak ada data booking, buku besar, atau catatan pelanggan yang
+mengendap di FRIDAY. Begitu FRIDAY menyimpan catatan operasional sebuah unit,
+unit itu tidak bisa lagi pergi, dan kemandirian di atas berubah jadi slogan.
+
+### Connector — empat kata kerja, nol logika bisnis
+
+Ambil data, kirim data, jalankan automation, ambil status. Tidak lebih. Begitu
+sebuah connector mulai memutuskan **arti** sebuah angka, source of truth
+diam-diam pindah ke FRIDAY.
+
+Hari ini FRIDAY lewat suara sengaja **read-only**. Menjalankan automation
+lintas bisnis lewat perintah suara, tanpa layar konfirmasi, bukan sesuatu yang
+boleh dibangun diam-diam.
+
+### Gerbang holding ("cek holding")
+
+Dipisah dari gerbang `"cek perusahaan"`, karena keduanya pertanyaan berbeda:
+
+| Ucapan | Artinya |
+| --- | --- |
+| `cek perusahaan, ...` | tanya **MK Connect** saja |
+| `cek holding` / `kondisi grup` / `briefing eksekutif` | baca **seluruh lini bisnis** lewat Connector |
+
+Dua tingkat jawaban, sengaja:
+
+- **`"cek holding"`** — ringkasan status grup dirakit **lokal** dari snapshot.
+  Instan, **nol token AI**. Ini pertanyaan yang paling sering diajukan, dan ia
+  tidak butuh penalaran sama sekali — cukup pembacaan.
+- **`"cek holding, kenapa okupansi turun"`** — snapshot dikirim ke otak MK
+  Connect sebagai konteks, dan analisanya yang diucapkan. Dipicu kata seperti
+  *analisa, kenapa, rekomendasi, prioritas, bandingkan, risiko, peluang*.
+
+### Bisnis yang tidak terbaca bukan bisnis yang sepi
+
+Tiga status dibedakan dan **tidak boleh disamakan**:
+
+| Status | Artinya | Tindakan |
+| --- | --- | --- |
+| `terbaca` | data masuk | analisa seperti biasa |
+| `belum terhubung` | jembatannya memang belum dipasang | pasang env var-nya |
+| `tidak dapat dihubungi` | jembatan ada tapi putus | perbaiki dashboard/koneksinya |
+
+Connector yang gagal **tidak pernah menghasilkan angka nol**, dan konteks yang
+dikirim ke AI memuat larangan eksplisit menilai unit semacam itu berkinerja
+buruk. "Bisnis ini tidak berpendapatan" dan "sistem bisnis ini tidak menjawab"
+menuntut keputusan yang berlawanan.
+
+Satu bisnis yang tak terjangkau **menurunkan** kualitas pembacaan grup — tidak
+pernah membatalkannya.
+
+### Menambah lini bisnis
+
+Tambah satu entri di `BUSINESS_REGISTRY` (`api/holding.js`) plus satu
+environment variable. Bukan connector baru, bukan perubahan cara FRIDAY
+berpikir. Bisnis ke-10 maupun ke-100 sama saja.
+
+Dashboard bisnis cukup menyediakan **satu endpoint GET**:
+
+```
+GET {BASE_URL}/api/friday/snapshot
+{
+  "capturedAt": "2026-07-26T10:00:00.000Z",
+  "metrics": [
+    { "key": "utilization", "label": "Okupansi", "value": 78,
+      "unit": "percent", "direction": "higher_better",
+      "period": "bulan berjalan", "freshnessDays": 0 }
+  ],
+  "narrative": "Detail operasional bebas, bentuk apa pun."
+}
+```
+
+Satuan yang diterima: `idr`, `count`, `percent`, `days`, `ratio`. Metrik dengan
+satuan tak dikenal **dibuang, bukan ditebak**; nilai non-numerik jadi `null`,
+bukan nol.
+
+### Env var lini bisnis (Vercel)
+
+Isi hanya yang sudah siap — sisanya otomatis berstatus `belum terhubung`.
+`*_URL` **wajib https** dan ditolak bila mengarah ke host internal/loopback,
+karena nilainya di-fetch oleh server ini.
+
+| Bisnis | URL | Token (opsional) |
+| --- | --- | --- |
+| Kos | `HOLDING_KOS_URL` | `HOLDING_KOS_TOKEN` |
+| Villa | `HOLDING_VILLA_URL` | `HOLDING_VILLA_TOKEN` |
+| Homestay | `HOLDING_HOMESTAY_URL` | `HOLDING_HOMESTAY_TOKEN` |
+| Hotel | `HOLDING_HOTEL_URL` | `HOLDING_HOTEL_TOKEN` |
+| Coffee Shop | `HOLDING_COFFEE_URL` | `HOLDING_COFFEE_TOKEN` |
+
+MK Connect tidak butuh env var: FRIDAY membacanya lewat sesi Supabase pengguna
+yang sedang login, dan RLS di MK Connect (`friday.view`) yang menentukan boleh
+atau tidaknya.
 
 ## Audio branding
 

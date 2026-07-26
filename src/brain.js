@@ -11,6 +11,7 @@ import { findFact } from "./facts.js";
 import { findLoonars } from "./loonars.js";
 import { runSkill } from "./skills.js";
 import { getAccessToken, getDailyDigest } from "./mkhsistem.js";
+import { buildExecutiveContext, fetchGroupSnapshot, formatGroupSummary } from "./holding.js";
 
 // Kata pembuka gerbang MK Connect. Hanya bila salah satunya muncul, FRIDAY
 // masuk ke MK Connect / AI. Sisa ucapan setelah kata pembuka dipakai sebagai
@@ -29,6 +30,43 @@ const COMPANY_GATE = [
 // ikut kepicu oleh kata seperti "hitung"/"putih", dan "hai" tidak oleh "hari".
 // Sapaan waktu ("selamat pagi", dst.) ditangani skillSmalltalk supaya tidak
 // salah kepicu oleh "ada memo malam ini" dan sejenisnya.
+// GERBANG HOLDING — pintu ke SELURUH lini bisnis, bukan hanya MK Connect.
+//
+// Sengaja dipisah dari COMPANY_GATE. "cek perusahaan" berarti "tanya MK
+// Connect"; "cek holding" berarti "baca seluruh grup lewat Connector". Dua
+// pertanyaan yang berbeda, dan menyamakannya akan membuat pertanyaan tentang
+// satu perusahaan dijawab dengan laporan grup.
+const HOLDING_GATE = [
+  "cek holding",
+  "check holding",
+  "cek grup",
+  "kondisi grup",
+  "kondisi holding",
+  "semua bisnis",
+  "seluruh bisnis",
+  "lini bisnis",
+  "briefing eksekutif",
+  "laporan direksi",
+];
+
+// Kata yang menandakan pengguna ingin ANALISA, bukan sekadar status. Tanpa
+// salah satunya, "cek holding" dijawab lokal dari snapshot -- instan, nol token.
+const HOLDING_ANALYSIS_KEYWORDS = [
+  "analisa",
+  "analisis",
+  "kenapa",
+  "mengapa",
+  "rekomendasi",
+  "saran",
+  "prioritas",
+  "bandingkan",
+  "perbandingan",
+  "mana yang",
+  "apa yang harus",
+  "risiko",
+  "peluang",
+];
+
 const GREETINGS = ["halo", "hai", "hei", "hey", "hi", "hello", "helo", "assalamualaikum"];
 // "hidup" sengaja TIDAK di sini -- "apakah kamu hidup" ditangani jawaban persona
 // di facts.js yang lebih berkarakter, bukan sekadar konfirmasi status online.
@@ -64,6 +102,12 @@ const REPEAT_PHRASES = ["ulangi", "ulang lagi", "apa tadi", "coba ulangi", "seka
 const DIGEST_CACHE_TTL_MS = 30 * 60 * 1000;
 let digestCache = null; // { text, fetchedAt }
 
+// Snapshot grup di-cache pendek saja: ia memanggil setiap dashboard bisnis,
+// jadi mahal untuk diulang, tapi juga jauh lebih cepat berubah daripada digest
+// harian.
+const GROUP_SNAPSHOT_TTL_MS = 3 * 60 * 1000;
+let groupSnapshotCache = null; // { snapshot, fetchedAt }
+
 // Tanggal (lokal browser) terakhir kali laporan pagi dibacakan otomatis --
 // disimpan di localStorage supaya "sekali per hari" bertahan lintas
 // reload/tutup-buka tab, bukan cuma per sesi JS.
@@ -93,6 +137,7 @@ function pushHistory(role, content) {
 export function resetConversation() {
   conversationHistory = [];
   lastAnswer = null;
+  groupSnapshotCache = null;
 }
 
 /**
@@ -122,6 +167,14 @@ async function computeResponse(userText) {
   // GERBANG MK CONNECT: hanya bila ucapan memuat kata pembuka "cek perusahaan"
   // (dsb.) FRIDAY masuk ke MK Connect / AI. Pertanyaan sesungguhnya adalah sisa
   // ucapan setelah kata pembuka dibuang.
+  // Gerbang holding diperiksa LEBIH DULU daripada gerbang perusahaan: ucapan
+  // seperti "cek holding" tidak boleh tertangkap sebagai pertanyaan MK Connect
+  // biasa, sementara sebaliknya tidak mungkin terjadi.
+  const holdingGate = matchGate(userText, HOLDING_GATE);
+  if (holdingGate) {
+    return await askHolding(holdingGate.query);
+  }
+
   const gate = matchCompanyGate(userText);
   if (gate) {
     return await askMkConnect(gate.query);
@@ -180,9 +233,9 @@ async function computeResponse(userText) {
  * berisi sisa ucahan setelah kata pembuka dibuang (bisa string kosong bila
  * pengguna hanya bilang "cek perusahaan"), atau null bila tak ada kata pembuka.
  */
-function matchCompanyGate(userText) {
+function matchGate(userText, phrases) {
   const lower = userText.toLowerCase();
-  for (const phrase of COMPANY_GATE) {
+  for (const phrase of phrases) {
     const idx = lower.indexOf(phrase);
     if (idx !== -1) {
       const query = (userText.slice(0, idx) + " " + userText.slice(idx + phrase.length))
@@ -195,9 +248,18 @@ function matchCompanyGate(userText) {
   return null;
 }
 
+function matchCompanyGate(userText) {
+  return matchGate(userText, COMPANY_GATE);
+}
+
 /** True bila ucapan memicu gerbang MK Connect (dipakai main.js untuk memicu login). */
 export function isCompanyGate(userText) {
-  return matchCompanyGate(userText) !== null;
+  return matchCompanyGate(userText) !== null || matchGate(userText, HOLDING_GATE) !== null;
+}
+
+/** True khusus untuk gerbang holding -- dipisah supaya main.js bisa membedakan keduanya bila perlu. */
+export function isHoldingGate(userText) {
+  return matchGate(userText, HOLDING_GATE) !== null;
 }
 
 /**
@@ -245,6 +307,82 @@ async function askMkConnect(query) {
     console.error("Voice assistant error:", err);
     return { text: `Maaf, ${HONORIFIC}. Aku gagal menghubungi otak utamaku barusan.` };
   }
+}
+
+/**
+ * Jalur HOLDING — FRIDAY sebagai jembatan ke seluruh lini bisnis.
+ *
+ * Dua tingkat, sengaja:
+ *
+ *   "cek holding"                  -> ringkasan status grup, dirakit LOKAL dari
+ *                                     snapshot. Instan, nol token AI.
+ *   "cek holding, kenapa ..."      -> snapshot dikirim ke otak MK Connect
+ *                                     sebagai konteks, dan analisanya yang
+ *                                     diucapkan.
+ *
+ * Pemisahan ini penting karena pertanyaan yang paling sering diajukan ("gimana
+ * grup hari ini") tidak butuh penalaran sama sekali — cukup pembacaan. Memaksa
+ * semuanya lewat AI hanya menambah biaya dan jeda tanpa menambah kebenaran.
+ *
+ * Snapshot di-cache sebentar supaya bertanya beberapa kali berturut-turut
+ * tidak memanggil ulang seluruh dashboard bisnis.
+ */
+async function askHolding(query) {
+  let token = null;
+  try {
+    token = await getAccessToken();
+  } catch (err) {
+    console.error("Gagal mengambil sesi MK Connect:", err);
+  }
+
+  let snapshot;
+  try {
+    snapshot = await getGroupSnapshotCached(token);
+  } catch (err) {
+    console.error("Jembatan holding gagal:", err);
+    return { text: `Maaf, ${HONORIFIC}. Jembatan ke lini bisnis sedang tidak bisa saya baca.` };
+  }
+
+  const wantsAnalysis = query && HOLDING_ANALYSIS_KEYWORDS.some((k) => query.toLowerCase().includes(k));
+  if (!wantsAnalysis) {
+    return { text: formatGroupSummary(snapshot) };
+  }
+
+  if (!token) {
+    return { text: `Aku bisa membaca status grup, tapi untuk analisa aku perlu login MK Connect dulu, ${HONORIFIC}.` };
+  }
+
+  try {
+    const res = await fetch(MKHSISTEM_VOICE_ASSISTANT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        message: `${buildExecutiveContext(snapshot)}\n\n---\nPertanyaan pimpinan: ${query}\n\nJawab sebagai FRIDAY, Executive Intelligence Layer holding. Ringkas dan langsung ke poin karena jawaban ini akan DIUCAPKAN, bukan dibaca: maksimal sekitar 6 kalimat. Sebutkan akar penyebab, bukan sekadar gejala, dan tutup dengan satu tindakan konkret yang paling layak diambil lebih dulu.`,
+        history: conversationHistory,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Voice assistant gagal (${res.status})`);
+
+    pushHistory("user", query);
+    pushHistory("assistant", data.text);
+    return { text: data.text };
+  } catch (err) {
+    console.error("Analisa holding gagal:", err);
+    // Analisanya gagal, tapi statusnya sudah ada di tangan -- lebih berguna
+    // menyampaikan itu daripada menyerah sepenuhnya.
+    return { text: `Otak utamaku gagal dihubungi, ${HONORIFIC}, tapi ini status grupnya. ${formatGroupSummary(snapshot)}` };
+  }
+}
+
+async function getGroupSnapshotCached(token) {
+  const now = Date.now();
+  if (groupSnapshotCache && now - groupSnapshotCache.fetchedAt < GROUP_SNAPSHOT_TTL_MS) {
+    return groupSnapshotCache.snapshot;
+  }
+  const snapshot = await fetchGroupSnapshot(token);
+  groupSnapshotCache = { snapshot, fetchedAt: now };
+  return snapshot;
 }
 
 /**
