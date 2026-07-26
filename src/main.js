@@ -2,6 +2,10 @@ import "./style.css";
 import { isSTTSupported, startListening, speak, stopSpeaking, prefetchSpeech } from "./voice.js";
 import { getCacheStats, refreshCacheStats } from "./tts-cache.js";
 import { getResponse, getMorningDigestIfDue, isCompanyGate } from "./brain.js";
+import { isWakeWordSupported, resume as resumeWakeWord, startWakeWord, suspend as suspendWakeWord } from "./wake-word.js";
+import { bootReportText, buildBootReport, FIXED_BOOT_PHRASES } from "./boot-report.js";
+import { fetchGroupSnapshot } from "./holding.js";
+import { getAccessToken } from "./mkhsistem.js";
 import { onSkillAnnounce } from "./skills.js";
 import { getAudioContext } from "./audio-context.js";
 import { AudioManager } from "./audio-manager.js";
@@ -66,7 +70,8 @@ let lastLatencyMs = null; // waktu jawaban terakhir (skill lokal ~0ms, Gemini le
 let coreTemp = 36.6; // suhu inti (estetika HUD, random walk)
 let wakeLock = null; // WakeLockSentinel -- menahan layar tetap menyala saat aktif
 
-setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+setState("idle", idleStatusText());
+armWakeWord();
 tickClock();
 setInterval(tickClock, 1000);
 setInterval(updateTelemetry, 500);
@@ -162,7 +167,9 @@ async function prewarmVoiceCache() {
   }
 
   let generated = 0;
-  for (const line of prewarmLines()) {
+  // Kalimat tetap laporan bangun ikut dipanaskan: inilah yang membuat
+  // pembangunan berikutnya diputar dari rekaman, bukan dibuat ulang.
+  for (const line of [...prewarmLines(), ...FIXED_BOOT_PHRASES]) {
     if (!navigator.onLine) break;
     // Berurutan (bukan paralel) supaya tidak kena rate limit ElevenLabs.
     if (await prefetchSpeech(line)) generated++;
@@ -244,7 +251,31 @@ function escapeHtml(str) {
 
 // --- power on/off ---
 
+/** Teks siaga menyesuaikan: percuma menjanjikan "panggil FRIDAY" di browser yang tidak mendukungnya. */
+function idleStatusText() {
+  return isWakeWordSupported()
+    ? `SISTEM SIAGA — PANGGIL "${ASSISTANT_NAME}" ATAU SENTUH`
+    : "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN";
+}
+
+/**
+ * Kata bangun hanya hidup saat FRIDAY SIAGA.
+ *
+ * Saat aktif, pipeline utama yang memegang mikrofon, dan dua pendengar pada
+ * satu mikrofon saling berebut. Saat FRIDAY bicara, ia menyebut namanya
+ * sendiri -- tanpa dimatikan, ia akan membangunkan dirinya berulang-ulang.
+ */
+function armWakeWord() {
+  if (!isWakeWordSupported()) return;
+  startWakeWord(() => {
+    if (active) return;
+    log("sys", `Kata bangun terdengar.`);
+    activate();
+  });
+}
+
 async function activate() {
+  suspendWakeWord();
   active = true;
   activatedAt = Date.now();
   unlockAudioPlayback();
@@ -316,7 +347,27 @@ function showLoginOverlay() {
 async function runBootSequence() {
   setState("speaking", "MENGAKTIFKAN...");
   await AudioManager.playOnline();
-  await speakBranding(ONLINE_LINE);
+
+  // Laporan bangun: potongan tetap datang dari cache (nol panggilan
+  // ElevenLabs), hanya potongan berangka dan headline hari ini yang baru.
+  // Snapshot diambil dengan batas waktu -- FRIDAY yang dibangunkan lalu diam
+  // beberapa detik terasa rusak, bahkan kalau penyebabnya cuma jaringan lambat.
+  let snapshot = null;
+  try {
+    const token = await getAccessToken().catch(() => null);
+    snapshot = await Promise.race([
+      fetchGroupSnapshot(token),
+      new Promise((resolve) => setTimeout(() => resolve(null), 6000)),
+    ]);
+  } catch (err) {
+    console.warn("[boot] snapshot grup gagal:", err?.message);
+  }
+
+  const reportLines = buildBootReport(snapshot);
+  log("sys", bootReportText(reportLines));
+  for (const line of reportLines) {
+    await speakBranding(line);
+  }
 
   // Laporan pagi otomatis -- sekali per hari kalender, begitu Ultron online
   // dia langsung membacakan ringkasan MK Connect terakhir (termasuk audit
@@ -340,7 +391,7 @@ async function startHandsFree({ announce }) {
   if (!isSTTSupported()) {
     log("sys", "Browser ini tidak mendukung mode ini. Coba pakai Chrome.");
     active = false;
-    setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+    setState("idle", idleStatusText());
     return;
   }
   try {
@@ -349,7 +400,7 @@ async function startHandsFree({ announce }) {
     log("sys", "Tidak bisa mengakses mikrofon: " + err.message);
     AudioManager.playError();
     active = false;
-    setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+    setState("idle", idleStatusText());
     return;
   }
 
@@ -386,6 +437,7 @@ function speakBranding(text) {
 
 function deactivate() {
   active = false;
+  resumeWakeWord();
   activatedAt = null;
   releaseWakeLock();
   setSubtitle("");
@@ -397,7 +449,7 @@ function deactivate() {
   setState("processing", "MENONAKTIFKAN...");
   AudioManager.playShutdown().then(() => {
     releaseMic();
-    setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+    setState("idle", idleStatusText());
     drawIdleWave();
     log("sys", `${ASSISTANT_NAME} nonaktif.`);
   });
@@ -425,12 +477,12 @@ function announceReminder(text) {
     onEnd: () => {
       stopWaveAnim();
       if (active) beginRecordingSession();
-      else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+      else setState("idle", idleStatusText());
     },
     onError: () => {
       stopWaveAnim();
       if (active) beginRecordingSession();
-      else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+      else setState("idle", idleStatusText());
     },
   });
 }
@@ -482,7 +534,7 @@ function beginRecordingSession() {
         if (lastInterim) handleFinalTranscript(lastInterim);
         else if (active) beginRecordingSession();
         else {
-          setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+          setState("idle", idleStatusText());
         }
       }
     },
@@ -490,7 +542,7 @@ function beginRecordingSession() {
       log("sys", "Error pengenalan suara: " + (e.error || e.message || "tidak diketahui"));
       AudioManager.playError();
       if (active) beginRecordingSession();
-      else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+      else setState("idle", idleStatusText());
     },
   });
 }
@@ -499,7 +551,7 @@ async function handleFinalTranscript(text) {
   stopWaveAnim();
   if (!text) {
     if (active) beginRecordingSession();
-    else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+    else setState("idle", idleStatusText());
     return;
   }
   log("user", text);
@@ -536,7 +588,7 @@ function respond({ text, announceOnline }) {
     onEnd: () => {
       stopWaveAnim();
       if (active) beginRecordingSession();
-      else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+      else setState("idle", idleStatusText());
     },
     onError: (e) => {
       stopWaveAnim();
@@ -545,7 +597,7 @@ function respond({ text, announceOnline }) {
       console.error("TTS error:", e);
       AudioManager.playError();
       if (active) beginRecordingSession();
-      else setState("idle", "SISTEM SIAGA — SENTUH UNTUK MENGAKTIFKAN");
+      else setState("idle", idleStatusText());
     },
   });
 }

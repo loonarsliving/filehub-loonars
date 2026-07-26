@@ -123,6 +123,67 @@ Alurnya:
 
 Di sisi Mkhsistem, set `VOICE_BRIDGE_ALLOWED_ORIGIN` ke origin deployment FRIDAY ini (mis. `https://ultron.vercel.app`) supaya CORS mengizinkannya, dan pastikan `GEMINI_API_KEY` sudah disetel (biasanya sudah, karena dipakai modul AI lain).
 
+## Mengaktifkan dengan suara ("FRIDAY") + laporan bangun
+
+Selain menyentuh core di layar, FRIDAY bisa dibangunkan dengan **memanggil
+namanya**. Begitu bangun, ia langsung melapor: online, seluruh sistem aktif,
+lalu keadaan MK Connect dan lini bisnis lain.
+
+### Kata bangun memakai pengenal suara bawaan browser, bukan ElevenLabs
+
+Mendeteksi kata bangun berarti **mendengarkan terus**. Kalau tiap potongan
+audio dikirim ke ElevenLabs, biayanya berjalan sepanjang hari hanya untuk
+mendengar keheningan. `src/wake-word.js` memakai `SpeechRecognition` bawaan
+Chrome — berjalan lokal, gratis, dan untuk mengenali satu kata sudah cukup.
+Giliran bicara yang sesungguhnya tetap diserahkan ke pipeline ElevenLabs:
+murah di deteksi, akurat di transkripsi.
+
+Tiga hal yang membuatnya tidak menyebalkan:
+
+- **FRIDAY tidak mendengar dirinya sendiri.** Kata bangun dimatikan selama
+  FRIDAY aktif atau sedang bicara — tanpa itu, ia akan membangunkan dirinya
+  sendiri setiap menyebut namanya.
+- **Restart otomatis.** Chrome menghentikan sesi pengenalan sendiri setiap
+  beberapa menit; tanpa restart, kata bangun mati diam-diam.
+- **Salah dengar dimaafkan.** "friday", "fraiday", "praidei", "fride" semuanya
+  diterima. Biaya salah bangun cuma satu sapaan; biaya tidak bangun adalah
+  fitur yang terasa rusak.
+
+Browser yang tidak mendukung tetap jalan normal — teks siaganya otomatis
+berubah jadi "sentuh untuk mengaktifkan" saja, bukan menjanjikan sesuatu yang
+tidak ada.
+
+### Laporan bangun diputar dari rekaman, hanya angkanya yang baru
+
+`tts-cache.js` menyimpan audio berdasarkan **teks persis**. Satu kalimat
+panjang berisi angka hari ini tidak akan pernah cocok dengan kalimat besok —
+jadi seluruh sapaan harus dibuat ulang setiap kali dibangunkan. Lambat, dan
+berbiaya tiap kali.
+
+Karena itu `src/boot-report.js` **memecah laporan jadi potongan**:
+
+| Potongan | Contoh | Sumber |
+| --- | --- | --- |
+| Sapaan | "Selamat pagi, Bos. Saya online." | rekaman |
+| Status sistem | "Seluruh sistem aktif." | rekaman |
+| Jumlah unit | "6 lini bisnis terpantau." | rekaman setelah sekali diucapkan |
+| Terbaca / belum | "1 terbaca." · "5 belum terhubung." | rekaman setelah sekali diucapkan |
+| Severity | "Status MK Connect kritis." | rekaman (hanya 3 kemungkinan) |
+| Temuan hari ini | headline briefing | **satu-satunya yang benar-benar baru** |
+
+Kalimat tetap ikut dipanaskan lewat `prewarmVoiceCache()` sehingga sudah
+tersedia sebelum dipakai pertama kali. Potongan berangka menyimpan dirinya
+sendiri setelah sekali diucapkan — selama jumlahnya sama, besok diputar dari
+rekaman.
+
+Jeda tipis antar potongan bukan cacat; justru membuatnya terdengar seperti
+laporan sistem, bukan satu tarikan napas.
+
+Kalau snapshot gagal atau belum login, laporannya tetap keluar — lebih pendek,
+dan menyebutkan penyebabnya. FRIDAY yang dibangunkan lalu diam terlihat rusak,
+bahkan ketika penyebabnya cuma belum login. Pengambilan snapshot juga dibatasi
+6 detik dengan alasan yang sama.
+
 ## FRIDAY sebagai jembatan holding (semua lini bisnis)
 
 FRIDAY bukan ERP, bukan CRM, bukan PMS, bukan sistem keuangan. Ia adalah
