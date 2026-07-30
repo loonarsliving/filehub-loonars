@@ -293,6 +293,36 @@ MK Connect tidak butuh env var: FRIDAY membacanya lewat sesi Supabase pengguna
 yang sedang login, dan RLS di MK Connect (`friday.view`) yang menentukan boleh
 atau tidaknya.
 
+## Jembatan Villa ↔ MK Connect (file hub sebagai penghubung)
+
+Repo ini juga menjadi penghubung resmi antara aplikasi **Villa** (Loonars
+Private Living) dan **MK Connect (Mkhsistem)**. Dua arus, dua endpoint:
+
+1. **Villa memakai Whacenter milik MK Connect** — `api/wa/send.js`.
+   `villa-api` (Edge Function Supabase) mengirim permintaan WA ke sini
+   (`POST /api/wa/send`, header `x-internal-secret`), lalu file hub
+   meneruskannya ke `POST /api/integrations/whatsapp/bridge-send` di MK
+   Connect (header `x-bridge-secret`), yang mengirim lewat device Whacenter
+   miliknya. Villa tidak pernah memegang kredensial Whacenter.
+2. **Rangkuman okupansi harian Villa tampil di MK Connect** —
+   `api/villa/occupancy.js`. Halaman "Okupansi Kos" MK Connect memanggil
+   `GET /api/villa/occupancy` (header `x-bridge-secret`), lalu file hub
+   membaca `GET /bridge/occupancy` di villa-api (header `x-internal-secret`)
+   dan meneruskan angkanya: total unit, terisi, kosong, kotor, check-in &
+   check-out hari ini, plus persentase okupansi.
+
+Rahasianya dua, satu per pasangan sistem (lihat `api/_bridge.js`):
+
+| Env var (Vercel file hub) | Pasangan | Nilai yang sama disetel di |
+| --- | --- | --- |
+| `VILLA_BRIDGE_SECRET` | villa-api ↔ file hub | Aplikasi Villa → Pengaturan Integrasi → key `vercel_bridge` → field `secret` (dan `base_url` = URL file hub ini) |
+| `MKHSISTEM_BRIDGE_SECRET` | file hub ↔ MK Connect | Vercel MK Connect → env `FILEHUB_BRIDGE_SECRET` |
+
+Opsional: `MKHSISTEM_APP_URL` (default `https://mkh.haluoleo.id`) dan
+`VILLA_API_URL` (default villa-api di project Supabase svcmybsziaelwwdrnzcv).
+Semua endpoint jembatan **fail-closed** — selama env var-nya belum disetel,
+jembatan menolak semua permintaan, bukan terbuka.
+
 ## Audio branding
 
 7 cue di `public/audio/*.mp3` sudah tersedia. Kalau perlu regenerate/tambah cue baru, jalankan di mesin dengan akses internet normal (bukan sandbox terbatas):
