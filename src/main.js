@@ -1,7 +1,7 @@
 import "./style.css";
 import { isSTTSupported, startListening, speak, stopSpeaking, prefetchSpeech } from "./voice.js";
 import { getCacheStats, refreshCacheStats } from "./tts-cache.js";
-import { getResponse, getMorningDigestIfDue, isCompanyGate } from "./brain.js";
+import { getResponse, getMorningDigestIfDue } from "./brain.js";
 import { isWakeWordSupported, resume as resumeWakeWord, startWakeWord, suspend as suspendWakeWord } from "./wake-word.js";
 import { bootReportText, buildBootReport, FIXED_BOOT_PHRASES } from "./boot-report.js";
 import { fetchGroupSnapshot } from "./holding.js";
@@ -287,8 +287,8 @@ async function activate() {
   log("sys", `${ASSISTANT_NAME} diaktifkan.`);
 
   // Tidak lagi memaksa login MK Connect saat aktivasi -- FRIDAY jalan lokal dulu.
-  // Login baru diminta saat pengguna memakai gerbang "cek perusahaan"
-  // (lihat handleFinalTranscript).
+  // Login baru diminta reaktif, begitu sebuah pertanyaan benar-benar butuh
+  // otak AI dan belum ada sesi (lihat handleFinalTranscript).
 
   if (!booted) {
     booted = true;
@@ -306,7 +306,7 @@ async function ensureMkhsistemSession() {
   } catch (err) {
     console.error("Gagal memeriksa sesi MK Connect:", err);
   }
-  log("sys", "Perlu login ke MK Connect untuk mengakses data perusahaan.");
+  log("sys", "Perlu login ke MK Connect untuk mengakses otak AI.");
   return showLoginOverlay();
 }
 
@@ -561,17 +561,25 @@ async function handleFinalTranscript(text) {
   setState("processing", "MEMPROSES...");
   AudioManager.playThinking();
 
-  // Gerbang "cek perusahaan" butuh sesi MK Connect. Minta login hanya di sini,
-  // bukan saat aktivasi -- pemakaian lokal biasa tidak perlu login sama sekali.
-  if (isMkhsistemConfigured() && isCompanyGate(text)) {
-    await ensureMkhsistemSession();
+  const t0 = performance.now();
+  let reply = await getResponse(text);
+  if (!active) return; // dinonaktifkan selagi menunggu jawaban
+
+  // getResponse menandai needsLogin bila pertanyaan ini butuh otak AI (baik
+  // lewat gerbang "cek perusahaan" maupun pertanyaan umum yang jatuh ke AI
+  // karena di luar pengetahuan lokal) dan belum ada sesi MK Connect. Minta
+  // login di sini, lalu coba ulang pertanyaan yang sama persis -- bukan
+  // menyerah dengan pesan "perlu login" saja.
+  if (reply?.needsLogin && isMkhsistemConfigured()) {
+    const loggedIn = await ensureMkhsistemSession();
     if (!active) return; // dinonaktifkan selagi form login terbuka
+    if (loggedIn) {
+      reply = await getResponse(text);
+      if (!active) return;
+    }
   }
 
-  const t0 = performance.now();
-  const reply = await getResponse(text);
   lastLatencyMs = Math.round(performance.now() - t0);
-  if (!active) return; // dinonaktifkan selagi menunggu jawaban
   respond(reply);
 }
 
