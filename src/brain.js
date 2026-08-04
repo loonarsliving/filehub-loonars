@@ -1,9 +1,14 @@
 // Logika respons FRIDAY. Secara default FRIDAY menjawab MURNI dari kemampuan &
-// pengetahuan lokal (cepat, tanpa panggilan AI). Ia hanya menghubungi MK Connect
-// (otak AI/Gemini di server Mkhsistem) bila ucapan memuat kata pembuka
-// "cek perusahaan" -- itulah "pintu" ke MK Connect. Tanpa kata pembuka itu,
-// pertanyaan yang tak dikenali dijawab dengan fallback lokal, bukan diteruskan
-// ke AI.
+// pengetahuan lokal (cepat, tanpa panggilan AI). Begitu sebuah pertanyaan tidak
+// dikenali secara lokal, FRIDAY otomatis membuka AI (otak Gemini di server
+// Mkhsistem) -- tidak perlu kata pembuka apa pun untuk itu.
+//
+// Akses ke DATA perusahaan (absensi, memo, karyawan, dst, lewat tool-calling
+// MK Connect) adalah hal terpisah dan lebih sensitif: itu baru terbuka setelah
+// ucapan memuat kata pembuka "cek perusahaan" (dsb.) SEKALI dalam sesi ini --
+// setelah itu, gerbangnya tetap terbuka untuk sisa sesi, tidak perlu diulang
+// tiap giliran. Sebelum gerbang itu dibuka, pertanyaan yang jatuh ke AI tetap
+// dijawab (pengetahuan umum), tapi TANPA akses ke tool data MK Connect.
 
 import { ASSISTANT_NAME, HONORIFIC, MKHSISTEM_VOICE_ASSISTANT_URL } from "./config.js";
 import { findLocalAnswer } from "./knowledge.js";
@@ -15,8 +20,8 @@ import { buildExecutiveContext, fetchGroupSnapshot, formatGroupSummary } from ".
 import { instructionFor } from "./friday-persona.js";
 
 // Kata pembuka gerbang MK Connect. Hanya bila salah satunya muncul, FRIDAY
-// masuk ke MK Connect / AI. Sisa ucapan setelah kata pembuka dipakai sebagai
-// pertanyaan sesungguhnya.
+// membuka akses TOOL data perusahaan. Sisa ucapan setelah kata pembuka dipakai
+// sebagai pertanyaan sesungguhnya.
 const COMPANY_GATE = [
   "cek perusahaan",
   "check perusahaan",
@@ -91,6 +96,12 @@ const DIGEST_KEYWORDS = [
 const MAX_HISTORY_TURNS = 12; // pasangan user+assistant, dipangkas dari yang terlama
 let conversationHistory = [];
 
+// Sekali "cek perusahaan" (dsb.) terucap, gerbang tool data MK Connect tetap
+// terbuka untuk SISA SESI ini (sampai reset/reload) -- pertanyaan berikutnya
+// yang jatuh ke AI otomatis ikut dengan akses data perusahaan, tidak perlu
+// mengulang kata pembuka.
+let companyAccessUnlocked = false;
+
 // Jawaban terakhir, supaya "ulangi" bisa memutarnya kembali. Karena teksnya
 // sama persis, audionya diambil dari cache -- nol panggilan ElevenLabs.
 let lastAnswer = null;
@@ -139,15 +150,18 @@ export function resetConversation() {
   conversationHistory = [];
   lastAnswer = null;
   groupSnapshotCache = null;
+  companyAccessUnlocked = false;
 }
 
 /**
- * Mengembalikan { text, announceOnline }. announceOnline menandai
- * main.js untuk memutar chime "online" bersamaan dengan ucapan ini.
+ * Mengembalikan { text, announceOnline, needsLogin }. announceOnline menandai
+ * main.js untuk memutar chime "online" bersamaan dengan ucapan ini. needsLogin
+ * menandai main.js untuk menampilkan form login MK Connect lalu, bila
+ * berhasil, memanggil getResponse(userText) sekali lagi.
  */
 export async function getResponse(userText) {
   const reply = await computeResponse(userText);
-  if (reply?.text) lastAnswer = reply.text;
+  if (reply?.text && !reply.needsLogin) lastAnswer = reply.text;
   return reply;
 }
 
@@ -165,10 +179,7 @@ async function computeResponse(userText) {
     return { text: `Belum ada yang bisa aku ulangi, ${HONORIFIC}.` };
   }
 
-  // GERBANG MK CONNECT: hanya bila ucapan memuat kata pembuka "cek perusahaan"
-  // (dsb.) FRIDAY masuk ke MK Connect / AI. Pertanyaan sesungguhnya adalah sisa
-  // ucapan setelah kata pembuka dibuang.
-  // Gerbang holding diperiksa LEBIH DULU daripada gerbang perusahaan: ucapan
+  // GERBANG HOLDING diperiksa LEBIH DULU daripada gerbang perusahaan: ucapan
   // seperti "cek holding" tidak boleh tertangkap sebagai pertanyaan MK Connect
   // biasa, sementara sebaliknya tidak mungkin terjadi.
   const holdingGate = matchGate(userText, HOLDING_GATE);
@@ -176,9 +187,16 @@ async function computeResponse(userText) {
     return await askHolding(holdingGate.query);
   }
 
+  // GERBANG MK CONNECT: kata pembuka "cek perusahaan" (dsb.) membuka akses
+  // TOOL data perusahaan untuk SISA SESI, bukan cuma giliran ini. Pertanyaan
+  // sesungguhnya adalah sisa ucapan setelah kata pembuka dibuang.
   const gate = matchCompanyGate(userText);
   if (gate) {
-    return await askMkConnect(gate.query);
+    companyAccessUnlocked = true;
+    if (!gate.query) {
+      return { text: `Pintu MK Connect terbuka, ${HONORIFIC}. Apa yang ingin kamu cek?` };
+    }
+    return await askAssistant(gate.query, { companyAccess: true });
   }
 
   // ---- MULAI DI SINI: MURNI LOKAL, TIDAK PERNAH MEMANGGIL AI ----
@@ -222,17 +240,18 @@ async function computeResponse(userText) {
     return { text: loonars };
   }
 
-  // Fallback lokal -- TIDAK memanggil AI. Arahkan ke gerbang perusahaan bila
-  // pertanyaannya memang soal data MK Connect.
-  return {
-    text: `Maaf, ${HONORIFIC}, itu di luar pengetahuan lokalku. Kalau ini soal data perusahaan, awali dengan "cek perusahaan".`,
-  };
+  // ---- TIDAK ADA JAWABAN LOKAL -- OTOMATIS BUKA AI ----
+  // Kalau gerbang MK Connect sudah pernah dibuka di sesi ini, pertanyaan ini
+  // ikut lewat dengan akses tool data perusahaan; kalau belum pernah dibuka,
+  // tetap dijawab AI (pengetahuan umum, mis. "rute terbaik ke Surabaya"),
+  // tapi TANPA akses tool data MK Connect.
+  return await askAssistant(userText, { companyAccess: companyAccessUnlocked });
 }
 
 /**
- * Cari kata pembuka gerbang perusahaan pada ucapan. Mengembalikan { query }
- * berisi sisa ucahan setelah kata pembuka dibuang (bisa string kosong bila
- * pengguna hanya bilang "cek perusahaan"), atau null bila tak ada kata pembuka.
+ * Cari kata pembuka gerbang pada ucapan. Mengembalikan { query } berisi sisa
+ * ucapan setelah kata pembuka dibuang (bisa string kosong bila pengguna hanya
+ * mengucapkan kata pembukanya saja), atau null bila tak ada kata pembuka.
  */
 function matchGate(userText, phrases) {
   const lower = userText.toLowerCase();
@@ -263,14 +282,18 @@ export function isHoldingGate(userText) {
   return matchGate(userText, HOLDING_GATE) !== null;
 }
 
+/** True bila gerbang MK Connect sudah pernah dibuka di sesi berjalan ini. */
+export function isCompanyAccessUnlocked() {
+  return companyAccessUnlocked;
+}
+
 /**
- * Jalur MK Connect / AI. Hanya dipanggil setelah gerbang "cek perusahaan"
- * terpicu. `query` adalah pertanyaan sesungguhnya (tanpa kata pembuka).
+ * Jalur AI (otak Gemini di server Mkhsistem). Dipanggil baik untuk
+ * pertanyaan umum di luar pengetahuan lokal (companyAccess: false, tanpa
+ * tool data MK Connect) maupun untuk pertanyaan data perusahaan setelah
+ * gerbang "cek perusahaan" terbuka (companyAccess: true).
  */
-async function askMkConnect(query) {
-  if (!query) {
-    return { text: `Pintu MK Connect terbuka, ${HONORIFIC}. Apa yang ingin kamu cek?` };
-  }
+async function askAssistant(query, { companyAccess }) {
   if (!MKHSISTEM_VOICE_ASSISTANT_URL) {
     return { text: `Aku belum disambungkan ke MK Connect, ${HONORIFIC}. Set dulu VITE_MKHSISTEM_VOICE_ASSISTANT_URL.` };
   }
@@ -282,14 +305,19 @@ async function askMkConnect(query) {
     console.error("Gagal mengambil sesi MK Connect:", err);
   }
   if (!token) {
-    return { text: `Aku belum login ke MK Connect, ${HONORIFIC}. Aktifkan ulang untuk login.` };
+    return {
+      text: `Aku perlu masuk ke MK Connect dulu untuk menjawab itu, ${HONORIFIC}.`,
+      needsLogin: true,
+    };
   }
 
-  const asksDigest = DIGEST_KEYWORDS.some((k) => query.toLowerCase().includes(k));
-  if (asksDigest) {
-    const digestAnswer = await getDigestAnswer(token);
-    if (digestAnswer) return { text: digestAnswer };
-    // Tidak ada digest tersimpan -- lanjut ke Gemini supaya tetap ada jawaban.
+  if (companyAccess) {
+    const asksDigest = DIGEST_KEYWORDS.some((k) => query.toLowerCase().includes(k));
+    if (asksDigest) {
+      const digestAnswer = await getDigestAnswer(token);
+      if (digestAnswer) return { text: digestAnswer };
+      // Tidak ada digest tersimpan -- lanjut ke Gemini supaya tetap ada jawaban.
+    }
   }
 
   try {
@@ -299,9 +327,13 @@ async function askMkConnect(query) {
       // Persona FRIDAY dikirim bersama tiap pertanyaan. System prompt di server
       // MK Connect masih memperkenalkan diri sebagai asisten lain, jadi tanpa ini
       // identitas dan cara berpikir FRIDAY tidak pernah ikut ke penalarannya.
+      // companyAccess memberi tahu server boleh tidaknya memakai tool data MK
+      // Connect untuk jawaban ini -- pertanyaan umum di luar gerbang "cek
+      // perusahaan" tidak pernah membawa akses tool, hanya pengetahuan umum.
       body: JSON.stringify({
         message: `${instructionFor(query)}\n\n---\nPertanyaan: ${query}`,
         history: conversationHistory,
+        companyAccess: Boolean(companyAccess),
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -366,6 +398,7 @@ async function askHolding(query) {
       body: JSON.stringify({
         message: `${instructionFor(query)}\n\n---\n${buildExecutiveContext(snapshot)}\n\n---\nPertanyaan pimpinan: ${query}`,
         history: conversationHistory,
+        companyAccess: true,
       }),
     });
     const data = await res.json().catch(() => ({}));
