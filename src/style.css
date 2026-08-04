@@ -168,86 +168,9 @@ body.active .telemetry { opacity: 0.92; }
   cursor: pointer;
 }
 
-.ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid var(--accent-dim);
-}
-.ring-outer {
-  inset: 0;
-  border-style: dashed;
-  animation: spin 18s linear infinite;
-}
-.ring-mid {
-  inset: 30px;
-  border-color: var(--accent);
-  opacity: 0.5;
-  animation: spin 12s linear infinite reverse;
-}
-.ring-inner {
-  inset: 60px;
-  border-style: dotted;
-  animation: spin 8s linear infinite;
-}
-
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
-/* Radar sweep -- kilasan konik yang berputar di belakang core. */
-.sweep {
-  position: absolute;
-  inset: 34px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 298deg,
-    rgba(255, 176, 31, 0.28) 350deg,
-    rgba(255, 203, 92, 0.42) 360deg
-  );
-  animation: spin 4.5s linear infinite;
-  mix-blend-mode: screen;
-  opacity: 0.55;
-  pointer-events: none;
-}
-.core-wrap.listening .sweep { animation-duration: 2.4s; opacity: 0.8; }
-.core-wrap.processing .sweep { animation-duration: 1.1s; opacity: 0.9; }
-.core-wrap.speaking .sweep { animation-duration: 3s; opacity: 0.7; }
-
-/* Reactor -- enam segmen bercahaya mengelilingi inti (arc-reactor look). */
-.reactor {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  pointer-events: none;
-}
-.reactor span {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 5px;
-  height: 18px;
-  margin: -9px -2.5px;
-  border-radius: 3px;
-  background: var(--accent-glow);
-  box-shadow: 0 0 8px var(--accent-glow);
-  opacity: 0.55;
-  animation: reactorPulse 2.6s ease-in-out infinite;
-}
-.reactor span:nth-child(1) { transform: rotate(0deg) translateY(-42px); }
-.reactor span:nth-child(2) { transform: rotate(60deg) translateY(-42px); animation-delay: 0.2s; }
-.reactor span:nth-child(3) { transform: rotate(120deg) translateY(-42px); animation-delay: 0.4s; }
-.reactor span:nth-child(4) { transform: rotate(180deg) translateY(-42px); animation-delay: 0.6s; }
-.reactor span:nth-child(5) { transform: rotate(240deg) translateY(-42px); animation-delay: 0.8s; }
-.reactor span:nth-child(6) { transform: rotate(300deg) translateY(-42px); animation-delay: 1.0s; }
-@keyframes reactorPulse {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.85; }
-}
-.core-wrap.listening .reactor span,
-.core-wrap.speaking .reactor span { opacity: 0.9; box-shadow: 0 0 14px var(--accent-glow); }
-.core-wrap.processing .reactor span { animation-duration: 0.9s; }
 
 #wave {
   position: absolute;
@@ -259,38 +182,26 @@ body.active .telemetry { opacity: 0.92; }
 
 .core-glow {
   position: absolute;
-  width: 140px;
-  height: 140px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   background: radial-gradient(circle, var(--accent-glow) 0%, var(--accent) 40%, transparent 70%);
-  filter: blur(6px);
-  opacity: 0.55;
+  filter: blur(10px);
+  opacity: 0.5;
+  mix-blend-mode: screen;
+  pointer-events: none;
   animation: pulse 2.6s ease-in-out infinite;
   transition: opacity 0.3s, transform 0.3s;
 }
 
-.core-eye {
-  position: absolute;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 20px 6px var(--accent-glow), 0 0 60px 20px var(--accent);
-  transition: box-shadow 0.2s, transform 0.2s;
-}
-
 @keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 0.45; }
-  50% { transform: scale(1.12); opacity: 0.7; }
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.15); opacity: 0.65; }
 }
 
-.core-wrap.listening .core-glow { opacity: 0.9; }
-.core-wrap.listening .core-eye { transform: scale(1.15); }
-.core-wrap.processing .ring-mid { animation-duration: 2s; }
+.core-wrap.listening .core-glow { opacity: 0.85; animation-duration: 1.6s; }
 .core-wrap.processing .core-glow { animation-duration: 0.6s; }
-.core-wrap.speaking .core-eye {
-  box-shadow: 0 0 30px 10px var(--accent-glow), 0 0 90px 30px var(--accent);
-}
+.core-wrap.speaking .core-glow { opacity: 0.9; }
 
 .status-line {
   font-size: 13px;

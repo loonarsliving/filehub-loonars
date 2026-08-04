@@ -69,6 +69,9 @@ let activatedAt = null; // untuk uptime telemetri
 let lastLatencyMs = null; // waktu jawaban terakhir (skill lokal ~0ms, Gemini lebih lama)
 let coreTemp = 36.6; // suhu inti (estetika HUD, random walk)
 let wakeLock = null; // WakeLockSentinel -- menahan layar tetap menyala saat aktif
+let waveGen = 0; // token generasi -- membatalkan loop animasi lama saat state berganti
+let idleParticles = null; // titik-titik bola partikel core (dibuat sekali, dipakai ulang)
+let idleAngle = 0; // sudut rotasi bola partikel saat ini
 
 setState("idle", idleStatusText());
 armWakeWord();
@@ -669,13 +672,17 @@ function stopMonitorLoop() {
 // --- waveform visualization ---
 
 function stopWaveAnim() {
+  waveGen++; // membatalkan loop rAF manapun yang masih berjalan dari state sebelumnya
   if (rafId) cancelAnimationFrame(rafId);
   rafId = null;
 }
 
 function drawListeningWave() {
+  stopWaveAnim();
+  const myGen = waveGen;
   const data = new Uint8Array(analyser.frequencyBinCount);
   const loop = () => {
+    if (myGen !== waveGen) return;
     analyser.getByteFrequencyData(data);
     renderBars(data, "#ffb01f");
     rafId = requestAnimationFrame(loop);
@@ -684,9 +691,12 @@ function drawListeningWave() {
 }
 
 function drawSpeakingWave() {
+  stopWaveAnim();
+  const myGen = waveGen;
   let t = 0;
   const bars = 48;
   const loop = () => {
+    if (myGen !== waveGen) return;
     t += 0.12;
     const data = new Uint8Array(bars);
     for (let i = 0; i < bars; i++) {
@@ -698,8 +708,82 @@ function drawSpeakingWave() {
   loop();
 }
 
+/** Buat titik-titik bola partikel sekali saja (posisi sferis acak, dipakai ulang tiap render). */
+function generateIdleParticles(count = 130) {
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      theta: Math.random() * Math.PI * 2,
+      phi: Math.acos(2 * Math.random() - 1),
+      r: 55 + Math.random() * 50,
+    });
+  }
+  return particles;
+}
+
+/** Core siaga: bola partikel bercahaya berputar pelan, titik-titik terhubung garis tipis. */
 function drawIdleWave() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stopWaveAnim();
+  const myGen = waveGen;
+  if (!idleParticles) idleParticles = generateIdleParticles();
+  const loop = () => {
+    if (myGen !== waveGen) return;
+    idleAngle += 0.0025;
+    renderParticleSphere(idleParticles, idleAngle);
+    rafId = requestAnimationFrame(loop);
+  };
+  loop();
+}
+
+function renderParticleSphere(particles, angle) {
+  const w = canvas.width;
+  const h = canvas.height;
+  const cx = w / 2;
+  const cy = h / 2;
+  const focal = 260;
+  const linkDist = 26;
+
+  const projected = particles.map((p) => {
+    const theta = p.theta + angle;
+    const x = p.r * Math.sin(p.phi) * Math.cos(theta);
+    const y = p.r * Math.cos(p.phi);
+    const z = p.r * Math.sin(p.phi) * Math.sin(theta);
+    const scale = focal / (focal + z);
+    return { x: cx + x * scale, y: cy + y * scale, scale, z };
+  });
+  projected.sort((a, b) => a.z - b.z); // painter's algorithm: titik jauh digambar dulu
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.shadowBlur = 0;
+
+  ctx.lineWidth = 0.6;
+  for (let i = 0; i < projected.length; i++) {
+    for (let j = i + 1; j < projected.length; j++) {
+      const dx = projected[i].x - projected[j].x;
+      const dy = projected[i].y - projected[j].y;
+      const distSq = dx * dx + dy * dy;
+      if (distSq < linkDist * linkDist) {
+        const dist = Math.sqrt(distSq);
+        const alpha = (1 - dist / linkDist) * 0.35 * Math.min(projected[i].scale, projected[j].scale);
+        ctx.strokeStyle = `rgba(255, 176, 31, ${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(projected[i].x, projected[i].y);
+        ctx.lineTo(projected[j].x, projected[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  for (const p of projected) {
+    const radius = Math.max(0.6, 1.1 * p.scale);
+    const alpha = Math.min(1, 0.4 + 0.6 * p.scale);
+    ctx.shadowColor = "#ffcb5c";
+    ctx.shadowBlur = 4 * p.scale;
+    ctx.fillStyle = `rgba(255, 203, 92, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 function renderBars(data, color) {
